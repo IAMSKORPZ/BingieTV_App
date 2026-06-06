@@ -24,6 +24,7 @@ import '../m3u/m3u_data_loader_screen.dart';
 import '../playlist_screen.dart';
 import '../update/update_screen.dart';
 import '../xtream-codes/xtream_code_data_loader_screen.dart';
+import 'appearance_screen.dart';
 import 'category_settings_section.dart';
 import 'provider_list_screen.dart';
 import 'remote_config_screen.dart';
@@ -188,6 +189,22 @@ class _GeneralSettingsWidgetState extends State<GeneralSettingsWidget> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const UpdateScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.palette_outlined),
+            title: const Text('Appearance'),
+            subtitle: const Text('Themes and visual style'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AppearanceScreen(),
                 ),
               );
             },

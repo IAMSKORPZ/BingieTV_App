@@ -8,6 +8,9 @@ import 'package:another_iptv_player/models/watch_history.dart';
 import 'package:another_iptv_player/repositories/iptv_repository.dart';
 import 'package:another_iptv_player/services/app_state.dart';
 import 'package:another_iptv_player/services/watch_history_service.dart';
+import 'package:another_iptv_player/shared/widgets/glass_panel.dart';
+import 'package:another_iptv_player/shared/widgets/gradient_button.dart';
+import 'package:another_iptv_player/shared/widgets/poster_card.dart';
 import 'package:another_iptv_player/utils/get_playlist_type.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -70,14 +73,16 @@ class _MovieScreenState extends State<MovieScreen> {
           if (movies != null && mounted) {
             setState(() {
               _categoryMovies = movies
-                  .map((x) => ContentItem(
-                        x.streamId,
-                        x.name,
-                        x.streamIcon,
-                        ContentType.vod,
-                        vodStream: x,
-                        containerExtension: x.containerExtension,
-                      ))
+                  .map(
+                    (x) => ContentItem(
+                      x.streamId,
+                      x.name,
+                      x.streamIcon,
+                      ContentType.vod,
+                      vodStream: x,
+                      containerExtension: x.containerExtension,
+                    ),
+                  )
                   .toList();
             });
           }
@@ -94,13 +99,15 @@ class _MovieScreenState extends State<MovieScreen> {
           if (items != null && mounted) {
             setState(() {
               _categoryMovies = items
-                  .map((x) => ContentItem(
-                        x.id,
-                        x.name ?? 'NO NAME',
-                        x.tvgLogo ?? '',
-                        ContentType.vod,
-                        m3uItem: x,
-                      ))
+                  .map(
+                    (x) => ContentItem(
+                      x.id,
+                      x.name ?? 'NO NAME',
+                      x.tvgLogo ?? '',
+                      ContentType.vod,
+                      m3uItem: x,
+                    ),
+                  )
                   .toList();
             });
           }
@@ -133,8 +140,10 @@ class _MovieScreenState extends State<MovieScreen> {
           ? widget.contentItem.id
           : widget.contentItem.m3uItem?.id ?? widget.contentItem.id;
 
-      final history =
-          await _watchHistoryService.getWatchHistory(playlist.id, streamId);
+      final history = await _watchHistoryService.getWatchHistory(
+        playlist.id,
+        streamId,
+      );
 
       if (!mounted) return;
       setState(() {
@@ -281,10 +290,8 @@ class _MovieScreenState extends State<MovieScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // 1. BACKDROP LAYER
           _buildBackdrop(),
 
-          // 2. CONTENT LAYER
           LayoutBuilder(
             builder: (context, constraints) {
               final isDesktop = constraints.maxWidth > 700;
@@ -293,34 +300,19 @@ class _MovieScreenState extends State<MovieScreen> {
 
               return SingleChildScrollView(
                 padding: EdgeInsets.only(
-                  top: isDesktop ? topPadding : topPadding + 100,
-                  bottom: 100,
+                  top: isDesktop ? topPadding : topPadding + 40,
+                  bottom: 40,
                   left: 16,
                   right: 16,
                 ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1000),
-                    child: isDesktop
-                        ? _buildDesktopLayout(context)
-                        : _buildMobileLayout(context),
+                    constraints: const BoxConstraints(maxWidth: 1180),
+                    child: _buildModernLayout(context, isDesktop: isDesktop),
                   ),
                 ),
               );
             },
-          ),
-
-          // 3. PLAY BUTTON (Fixed at bottom)
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 16 + MediaQuery.of(context).padding.bottom,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: _buildPlayButton(context),
-              ),
-            ),
           ),
         ],
       ),
@@ -339,7 +331,6 @@ class _MovieScreenState extends State<MovieScreen> {
           fit: BoxFit.cover,
           errorWidget: (_, __, ___) => Container(color: Colors.black),
         ),
-        // Blur if using poster or just to dim backdrop
         BackdropFilter(
           filter: ImageFilter.blur(
             sigmaX: _backdropUrl != null ? 5 : 15,
@@ -347,7 +338,6 @@ class _MovieScreenState extends State<MovieScreen> {
           ),
           child: Container(color: Colors.black.withValues(alpha: 0.5)),
         ),
-        // Gradient overlay
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -356,7 +346,9 @@ class _MovieScreenState extends State<MovieScreen> {
               colors: [
                 Colors.transparent,
                 Colors.black.withValues(alpha: 0.2),
-                Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.8),
+                Theme.of(
+                  context,
+                ).scaffoldBackgroundColor.withValues(alpha: 0.8),
                 Theme.of(context).scaffoldBackgroundColor,
               ],
               stops: const [0.0, 0.4, 0.8, 1.0],
@@ -364,6 +356,195 @@ class _MovieScreenState extends State<MovieScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildModernLayout(BuildContext context, {required bool isDesktop}) {
+    final details = _buildMovieInfo(context, centered: !isDesktop);
+    final actions = _buildActionPanel(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GlassPanel(
+          padding: const EdgeInsets.all(16),
+          child: isDesktop
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildPoster(height: 390),
+                    const SizedBox(width: 28),
+                    Expanded(child: details),
+                    const SizedBox(width: 20),
+                    SizedBox(width: 230, child: actions),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildPoster(height: 320),
+                    const SizedBox(height: 20),
+                    details,
+                    const SizedBox(height: 20),
+                    actions,
+                  ],
+                ),
+        ),
+        const SizedBox(height: 22),
+        _buildRecommendedCarousel(context),
+      ],
+    );
+  }
+
+  Widget _buildMovieInfo(BuildContext context, {required bool centered}) {
+    final rating = _buildRatingSection(context);
+    final chips = _buildInfoChips(context);
+    final description = _buildDescriptionSection(context);
+    final extra = _buildExtraDetails(context);
+
+    return Column(
+      crossAxisAlignment: centered
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
+      children: [
+        _buildTitle(
+          context,
+          textAlign: centered ? TextAlign.center : TextAlign.start,
+        ),
+        const SizedBox(height: 12),
+        if (rating != null) ...[rating, const SizedBox(height: 12)],
+        if (chips != null) ...[chips, const SizedBox(height: 18)],
+        if (description != null) ...[description, const SizedBox(height: 18)],
+        if (extra != null) extra,
+      ],
+    );
+  }
+
+  Widget _buildActionPanel(BuildContext context) {
+    final trailerButton = _buildTrailerButton(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GradientButton(
+          onPressed: _openPlayer,
+          icon: Icons.play_arrow_rounded,
+          child: Text(context.loc.start_watching),
+        ),
+        const SizedBox(height: 12),
+        if (trailerButton != null) ...[
+          trailerButton,
+          const SizedBox(height: 12),
+        ],
+        OutlinedButton.icon(
+          onPressed: _copyShareText,
+          icon: const Icon(Icons.share),
+          label: const Text('Share'),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: null,
+          icon: const Icon(Icons.download),
+          label: const Text('Download'),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: null,
+          icon: const Icon(Icons.favorite_border),
+          label: const Text('Favourite'),
+        ),
+        if (!_isLoadingHistory) ...[
+          const SizedBox(height: 18),
+          _buildProgressSummary(context),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildProgressSummary(BuildContext context) {
+    final progress = _progress;
+    if (progress == null || progress <= 0.01 || _watchHistory == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LinearProgressIndicator(
+          value: progress,
+          minHeight: 4,
+          backgroundColor: Colors.white24,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            Theme.of(context).colorScheme.primary,
+          ),
+          borderRadius: BorderRadius.circular(2),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '${_formatDuration(_watchHistory!.watchDuration!)} / '
+          '${_formatDuration(_watchHistory!.totalDuration!)}',
+          textAlign: TextAlign.center,
+          style: Theme.of(
+            context,
+          ).textTheme.labelMedium?.copyWith(color: Colors.white70),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecommendedCarousel(BuildContext context) {
+    final items = _categoryMovies
+        .where((item) => item.id != widget.contentItem.id)
+        .take(12)
+        .toList();
+    if (items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return GlassPanel(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'You May Also Like',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 220,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return SizedBox(
+                  width: 126,
+                  child: PosterCard(
+                    title: item.name,
+                    imageUrl: item.coverPath ?? item.imagePath,
+                    subtitle: item.vodStream?.genre,
+                    rating: item.vodStream?.rating.isNotEmpty == true
+                        ? item.vodStream!.rating
+                        : null,
+                    onTap: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (_) => MovieScreen(contentItem: item),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -481,16 +662,16 @@ class _MovieScreenState extends State<MovieScreen> {
       widget.contentItem.name,
       textAlign: textAlign,
       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            shadows: [
-              Shadow(
-                blurRadius: 10,
-                color: Colors.black.withValues(alpha: 0.5),
-                offset: const Offset(0, 2),
-              ),
-            ],
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+        shadows: [
+          Shadow(
+            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.5),
+            offset: const Offset(0, 2),
           ),
+        ],
+      ),
     );
   }
 
@@ -521,18 +702,14 @@ class _MovieScreenState extends State<MovieScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          Icons.star_rounded,
-          color: Colors.amber.shade500,
-          size: 28,
-        ),
+        Icon(Icons.star_rounded, color: Colors.amber.shade500, size: 28),
         const SizedBox(width: 8),
         Text(
           label,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: Colors.white, // Ensure visibility on backdrop
-              ),
+            fontWeight: FontWeight.w700,
+            color: Colors.white, // Ensure visibility on backdrop
+          ),
         ),
       ],
     );
@@ -553,41 +730,31 @@ class _MovieScreenState extends State<MovieScreen> {
     }
 
     // Tür/Genre
-    final genre = widget.contentItem.vodStream?.genre ??
+    final genre =
+        widget.contentItem.vodStream?.genre ??
         (_vodInfo != null ? _vodInfo!['genre'] : null);
     if (genre is String && genre.trim().isNotEmpty) {
-      chips.add(
-        _InfoChip(
-          icon: Icons.local_movies,
-          label: genre.trim(),
-        ),
-      );
+      chips.add(_InfoChip(icon: Icons.local_movies, label: genre.trim()));
     }
 
     // Format
-    final format = (widget.contentItem.containerExtension ??
-            widget.contentItem.vodStream?.containerExtension)
-        ?.trim();
+    final format =
+        (widget.contentItem.containerExtension ??
+                widget.contentItem.vodStream?.containerExtension)
+            ?.trim();
     if (format != null && format.isNotEmpty) {
-      chips.add(
-        _InfoChip(
-          icon: Icons.sd_card,
-          label: format.toUpperCase(),
-        ),
-      );
+      chips.add(_InfoChip(icon: Icons.sd_card, label: format.toUpperCase()));
     }
 
     // Yayın Yılı / Released
     if (_vodInfo != null) {
-      final releaseDate = _vodInfo!['releaseDate'] ??
+      final releaseDate =
+          _vodInfo!['releaseDate'] ??
           _vodInfo!['release_date'] ??
           _vodInfo!['year'];
       if (releaseDate is String && releaseDate.trim().isNotEmpty) {
         chips.add(
-          _InfoChip(
-            icon: Icons.calendar_today,
-            label: releaseDate.trim(),
-          ),
+          _InfoChip(icon: Icons.calendar_today, label: releaseDate.trim()),
         );
       }
     }
@@ -652,11 +819,7 @@ class _MovieScreenState extends State<MovieScreen> {
     final cast = _castInfo;
     if (cast != null && cast.isNotEmpty) {
       entries.add(
-        _DetailEntry(
-          icon: Icons.people,
-          title: context.loc.cast,
-          value: cast,
-        ),
+        _DetailEntry(icon: Icons.people, title: context.loc.cast, value: cast),
       );
     }
 
@@ -683,20 +846,19 @@ class _MovieScreenState extends State<MovieScreen> {
         Text(
           context.loc.info,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: Colors.white70,
-              ),
+            fontWeight: FontWeight.w700,
+            color: Colors.white70,
+          ),
         ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 12,
           runSpacing: 12,
           children: entries
-              .map((e) => _DetailCard(
-                    icon: e.icon,
-                    title: e.title,
-                    value: e.value,
-                  ))
+              .map(
+                (e) =>
+                    _DetailCard(icon: e.icon, title: e.title, value: e.value),
+              )
               .toList(),
         ),
       ],
@@ -723,7 +885,8 @@ class _MovieScreenState extends State<MovieScreen> {
   Widget _buildPlayButton(BuildContext context) {
     final theme = Theme.of(context);
     final progress = _progress;
-    final hasProgress = !_isLoadingHistory &&
+    final hasProgress =
+        !_isLoadingHistory &&
         progress != null &&
         progress > 0.01 &&
         progress < 0.98 &&
@@ -754,9 +917,7 @@ class _MovieScreenState extends State<MovieScreen> {
           '${_formatDuration(_watchHistory!.watchDuration!)} / '
           '${_formatDuration(_watchHistory!.totalDuration!)}',
           textAlign: TextAlign.center,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: Colors.white70,
-          ),
+          style: theme.textTheme.labelMedium?.copyWith(color: Colors.white70),
         ),
       );
       children.add(const SizedBox(height: 12));
@@ -831,16 +992,21 @@ class _MovieScreenState extends State<MovieScreen> {
     }
 
     final uri = Uri.parse(urlString);
-    final launched = await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
 
     if (!launched && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.loc.error_occurred_title)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.loc.error_occurred_title)));
     }
+  }
+
+  Future<void> _copyShareText() async {
+    await Clipboard.setData(ClipboardData(text: widget.contentItem.name));
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Copied')));
   }
 
   void _openPlayer() {
@@ -848,10 +1014,9 @@ class _MovieScreenState extends State<MovieScreen> {
       MaterialPageRoute(
         builder: (_) => _MoviePlayerPage(
           contentItem: widget.contentItem,
-          queue:
-              _categoryMovies.isNotEmpty
-                  ? _categoryMovies
-                  : [widget.contentItem],
+          queue: _categoryMovies.isNotEmpty
+              ? _categoryMovies
+              : [widget.contentItem],
         ),
       ),
     );
@@ -863,11 +1028,7 @@ class _DetailEntry {
   final String title;
   final String value;
 
-  _DetailEntry({
-    required this.icon,
-    required this.title,
-    required this.value,
-  });
+  _DetailEntry({required this.icon, required this.title, required this.value});
 }
 
 class _InfoChip extends StatelessWidget {
@@ -888,11 +1049,7 @@ class _InfoChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 16,
-            color: Colors.white70,
-          ),
+          Icon(icon, size: 16, color: Colors.white70),
           const SizedBox(width: 8),
           Text(
             label,
@@ -937,10 +1094,7 @@ class _DetailCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  color: Colors.white54,
-                  fontSize: 11,
-                ),
+                style: const TextStyle(color: Colors.white54, fontSize: 11),
               ),
               const SizedBox(height: 2),
               Text(

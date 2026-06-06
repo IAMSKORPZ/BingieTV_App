@@ -5,6 +5,7 @@ import '../../controllers/playlist_controller.dart';
 import '../../models/playlist_model.dart';
 import '../../widgets/playlist_card.dart';
 import '../../widgets/playlist_states.dart';
+import '../shared/widgets/app_shell.dart';
 import 'playlist_type_screen.dart';
 
 class PlaylistScreen extends StatefulWidget {
@@ -31,8 +32,9 @@ class _PlaylistScreenBody extends StatelessWidget {
       _initializePlaylistsIfNeeded(context);
     });
 
-    return Scaffold(
-      appBar: _buildAppBar(context),
+    return AppShell(
+      title: context.loc.my_playlists,
+      onRefresh: () => context.read<PlaylistController>().loadPlaylists(context),
       body: Consumer<PlaylistController>(
         builder: (context, controller, child) =>
             _buildBodyFromState(context, controller),
@@ -48,15 +50,6 @@ class _PlaylistScreenBody extends StatelessWidget {
         controller.error == null) {
       controller.loadPlaylists(context);
     }
-  }
-
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Text(
-        context.loc.my_playlists,
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
   }
 
   Widget _buildBodyFromState(

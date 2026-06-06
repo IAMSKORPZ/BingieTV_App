@@ -6,6 +6,8 @@ import 'package:another_iptv_player/models/playlist_content_model.dart';
 import 'package:another_iptv_player/services/app_state.dart';
 import 'package:another_iptv_player/repositories/iptv_repository.dart';
 import 'package:another_iptv_player/l10n/localization_extension.dart';
+import 'package:another_iptv_player/shared/widgets/glass_panel.dart';
+import 'package:another_iptv_player/shared/widgets/gradient_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:another_iptv_player/services/watch_history_service.dart';
 import '../../../controllers/favorites_controller.dart';
@@ -138,7 +140,9 @@ class _SeriesScreenState extends State<SeriesScreen> {
   }
 
   Future<void> _toggleFavorite() async {
-    final result = await _favoritesController.toggleFavorite(widget.contentItem);
+    final result = await _favoritesController.toggleFavorite(
+      widget.contentItem,
+    );
     if (mounted) {
       setState(() {
         _isFavorite = result;
@@ -147,7 +151,9 @@ class _SeriesScreenState extends State<SeriesScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            result ? context.loc.added_to_favorites : context.loc.removed_from_favorites,
+            result
+                ? context.loc.added_to_favorites
+                : context.loc.removed_from_favorites,
           ),
         ),
       );
@@ -184,126 +190,18 @@ class _SeriesScreenState extends State<SeriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            SliverAppBar(
-              expandedHeight: 400.0,
-              floating: false,
-              pinned: false,
-              snap: false,
-              backgroundColor: Colors.transparent,
-              foregroundColor: Colors.white,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Stack(
-                  children: [
-                    Hero(
-                      tag: widget.contentItem.id,
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: double.infinity,
-                        child: _buildCoverImage(),
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          stops: const [0.0, 0.7, 1.0],
-                          colors: [
-                            Colors.black.withValues(alpha: 0.1),
-                            Colors.black.withValues(alpha: 0.3),
-                            Colors.black.withValues(alpha: 0.8),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 20,
-                      left: 20,
-                      right: 20,
-                      child: Material(
-                        color: Colors.transparent,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    seriesInfo?.name ?? widget.contentItem.name,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      shadows: [
-                                        Shadow(
-                                          offset: Offset(0, 1),
-                                          blurRadius: 3,
-                                          color: Colors.black54,
-                                        ),
-                                      ],
-                                      decoration: TextDecoration.none,
-                                    ),
-                                  ),
-                                ),
-                                // Favori butonu
-                                IconButton(
-                                  onPressed: _toggleFavorite,
-                                  icon: Icon(
-                                    _isFavorite ? Icons.favorite : Icons.favorite_border,
-                                    color: _isFavorite ? Colors.red : Colors.white,
-                                    size: 28,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (seriesInfo?.genre != null ||
-                                widget.contentItem.seriesStream?.genre !=
-                                    null) ...[
-                              const SizedBox(height: 8),
-                              Text(
-                                seriesInfo?.genre ??
-                                    widget.contentItem.seriesStream?.genre ??
-                                    '',
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  fontSize: 14,
-                                  shadows: const [
-                                    Shadow(
-                                      offset: Offset(0, 1),
-                                      blurRadius: 3,
-                                      color: Colors.black54,
-                                    ),
-                                  ],
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ];
-        },
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.8),
-                Theme.of(context).scaffoldBackgroundColor,
-              ],
-            ),
-          ),
-          child: _buildBody(),
-        ),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.white,
+      ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          _buildBackdrop(),
+          SafeArea(child: _buildBody()),
+        ],
       ),
     );
   }
@@ -344,33 +242,241 @@ class _SeriesScreenState extends State<SeriesScreen> {
       );
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Rating Bölümü
-          _buildRatingSection(),
-          const SizedBox(height: 20),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= 820;
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1180),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  GlassPanel(
+                    padding: const EdgeInsets.all(16),
+                    child: wide
+                        ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildPoster(),
+                              const SizedBox(width: 28),
+                              Expanded(child: _buildSeriesHeroInfo()),
+                              const SizedBox(width: 20),
+                              SizedBox(
+                                width: 230,
+                                child: _buildSeriesActions(),
+                              ),
+                            ],
+                          )
+                        : Column(
+                            children: [
+                              _buildPoster(),
+                              const SizedBox(height: 20),
+                              _buildSeriesHeroInfo(centered: true),
+                              const SizedBox(height: 20),
+                              _buildSeriesActions(),
+                            ],
+                          ),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildSeriesTabs(),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
-          // Continue Watching button (only when we have last opened episode)
-          if (_lastOpenedEpisode != null) ...[
-            _buildContinueWatchingButton(),
-            const SizedBox(height: 20),
-          ],
+  Widget _buildBackdrop() {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _buildCoverImage(),
+        Container(color: Colors.black.withValues(alpha: 0.58)),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                Theme.of(context).scaffoldBackgroundColor,
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
-
-          // Sezonlar Bölümü
-          _buildSeasonsSection(),
-          const SizedBox(height: 24),
-
-          // Dizi Bilgileri
-          _buildSeriesDetails(),
-
-          const SizedBox(height: 40),
-        ],
+  Widget _buildPoster() {
+    final imageUrl =
+        seriesInfo?.cover ?? widget.contentItem.seriesStream?.cover;
+    return SizedBox(
+      width: 230,
+      height: 345,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: imageUrl == null || imageUrl.isEmpty
+            ? _buildPlaceholder()
+            : Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _buildPlaceholder(),
+              ),
       ),
     );
+  }
+
+  Widget _buildSeriesHeroInfo({bool centered = false}) {
+    final title = seriesInfo?.name ?? widget.contentItem.name;
+    final plot = seriesInfo?.plot ?? widget.contentItem.seriesStream?.plot;
+    final genre = seriesInfo?.genre ?? widget.contentItem.seriesStream?.genre;
+
+    return Column(
+      crossAxisAlignment: centered
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          textAlign: centered ? TextAlign.center : TextAlign.start,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 10),
+        _buildRatingSection(),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: centered ? WrapAlignment.center : WrapAlignment.start,
+          children: [
+            _InfoPill(Icons.layers, '${seasons.length} Seasons'),
+            if (episodes.isNotEmpty)
+              _InfoPill(Icons.playlist_play, '${episodes.length} Episodes'),
+            if (genre != null && genre.isNotEmpty)
+              _InfoPill(Icons.local_movies, genre),
+          ],
+        ),
+        if (plot != null && plot.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Text(
+            plot,
+            maxLines: 5,
+            overflow: TextOverflow.ellipsis,
+            textAlign: centered ? TextAlign.center : TextAlign.start,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.white, height: 1.5),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSeriesActions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GradientButton(
+          onPressed: _lastOpenedEpisode != null
+              ? () => _openEpisodeFromSeries(_lastOpenedEpisode!)
+              : _openLatestEpisode,
+          icon: Icons.play_arrow_rounded,
+          child: Text(
+            _lastOpenedEpisode != null
+                ? context.loc.continue_watching
+                : 'Play Latest Episode',
+          ),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: seasons.isEmpty ? null : _showSeasonPicker,
+          icon: const Icon(Icons.view_list),
+          label: const Text('Select Season'),
+        ),
+        const SizedBox(height: 12),
+        _buildTrailerCard(),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: _toggleFavorite,
+          icon: Icon(_isFavorite ? Icons.favorite : Icons.favorite_border),
+          label: const Text('Favourite'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSeriesTabs() {
+    return GlassPanel(
+      padding: EdgeInsets.zero,
+      child: DefaultTabController(
+        length: 3,
+        child: Column(
+          children: [
+            const TabBar(
+              tabs: [
+                Tab(text: 'Episodes'),
+                Tab(text: 'Cast'),
+                Tab(text: 'Similar Shows'),
+              ],
+            ),
+            SizedBox(
+              height: 360,
+              child: TabBarView(
+                children: [
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: _buildSeasonsSection(),
+                  ),
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: _buildCastGrid(),
+                  ),
+                  Center(child: Text(context.loc.not_found_in_category)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCastGrid() {
+    final cast = seriesInfo?.cast ?? widget.contentItem.seriesStream?.cast;
+    final names = cast
+        ?.split(',')
+        .map((name) => name.trim())
+        .where((name) => name.isNotEmpty)
+        .take(12)
+        .toList();
+    if (names == null || names.isEmpty) {
+      return Center(child: Text(context.loc.not_found_in_category));
+    }
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: names
+          .map(
+            (name) => GlassPanel(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Text(name),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  void _openLatestEpisode() {
+    if (episodes.isEmpty) return;
+    _openEpisodeFromSeries(episodes.last);
   }
 
   /// Builds the "Continue: S x Episode y" pill button shown on the series page.
@@ -405,7 +511,7 @@ class _SeriesScreenState extends State<SeriesScreen> {
                     color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
-                  )
+                  ),
                 ],
         ),
         child: Row(
@@ -438,13 +544,11 @@ class _SeriesScreenState extends State<SeriesScreen> {
     );
   }
 
-
-
   Widget _buildRatingSection() {
     final rating = seriesInfo?.rating5based ?? 0;
     final ratingText =
         widget.contentItem.seriesStream?.rating5based?.toStringAsFixed(1) ??
-            '0.0';
+        '0.0';
 
     return Row(
       children: [
@@ -503,7 +607,10 @@ class _SeriesScreenState extends State<SeriesScreen> {
             decoration: BoxDecoration(
               color: Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1),
+              border: Border.all(
+                color: Colors.grey.withValues(alpha: 0.2),
+                width: 1,
+              ),
             ),
             child: Row(
               children: [
@@ -565,7 +672,9 @@ class _SeriesScreenState extends State<SeriesScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                        color: Theme.of(
+                          context,
+                        ).primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
@@ -604,6 +713,87 @@ class _SeriesScreenState extends State<SeriesScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showSeasonPicker() {
+    final validSeasons = seasons.where((season) {
+      return episodes.any((episode) => episode.season == season.seasonNumber);
+    }).toList();
+    if (validSeasons.isEmpty) return;
+
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(18),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: GlassPanel(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.layers,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 30,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          context.loc.season,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    height: 320,
+                    child: ListView.separated(
+                      itemCount: validSeasons.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final season = validSeasons[index];
+                        final count = episodes
+                            .where((e) => e.season == season.seasonNumber)
+                            .length;
+                        return _SeasonPickerRow(
+                          title: season.name,
+                          subtitle: context.loc.episode_count(count.toString()),
+                          selected: index == 0,
+                          onTap: () {
+                            Navigator.pop(context);
+                            _showSeasonEpisodes(season);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                    label: const Text('Close'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -652,7 +842,7 @@ class _SeriesScreenState extends State<SeriesScreen> {
     // Bölüm Süresi
     final episodeRunTime =
         seriesInfo?.episodeRunTime ??
-            widget.contentItem.seriesStream?.episodeRunTime;
+        widget.contentItem.seriesStream?.episodeRunTime;
     if (episodeRunTime != null && episodeRunTime.isNotEmpty) {
       details.add({
         'icon': Icons.access_time,
@@ -673,8 +863,8 @@ class _SeriesScreenState extends State<SeriesScreen> {
     // Dizi ID
     final seriesIdValue =
         seriesInfo?.seriesId ??
-            widget.contentItem.seriesStream?.seriesId.toString() ??
-            widget.contentItem.id.toString();
+        widget.contentItem.seriesStream?.seriesId.toString() ??
+        widget.contentItem.id.toString();
     details.add({
       'icon': Icons.tag,
       'title': context.loc.series_id,
@@ -686,20 +876,22 @@ class _SeriesScreenState extends State<SeriesScreen> {
       children: [
         _buildTrailerCard(),
         const SizedBox(height: 12),
-        ...details.map((detail) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _buildDetailCard(
-            icon: detail['icon'],
-            title: detail['title'],
-            value: detail['value'],
+        ...details.map(
+          (detail) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildDetailCard(
+              icon: detail['icon'],
+              title: detail['title'],
+              value: detail['value'],
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
 
   void _showSeasonEpisodes(SeasonsData season) async {
-        // FIX: Calculate the real count by filtering the full episodes list
+    // FIX: Calculate the real count by filtering the full episodes list
     // matching the current season number.
     final int realEpisodeCount = episodes
         .where((e) => e.season == season.seasonNumber)
@@ -859,14 +1051,27 @@ class _SeriesScreenState extends State<SeriesScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child:
-                episode.movieImage != null && episode.movieImage!.isNotEmpty
+                    episode.movieImage != null && episode.movieImage!.isNotEmpty
                     ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    episode.movieImage!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Center(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          episode.movieImage!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Text(
+                                '${episode.episodeNum}',
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    : Center(
                         child: Text(
                           '${episode.episodeNum}',
                           style: TextStyle(
@@ -875,20 +1080,7 @@ class _SeriesScreenState extends State<SeriesScreen> {
                             fontSize: 16,
                           ),
                         ),
-                      );
-                    },
-                  ),
-                )
-                    : Center(
-                  child: Text(
-                    '${episode.episodeNum}',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
+                      ),
               ),
               const SizedBox(width: 12),
 
@@ -921,7 +1113,7 @@ class _SeriesScreenState extends State<SeriesScreen> {
                               color: Colors.green,
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child:  Text(
+                            child: Text(
                               context.loc.new_ep,
                               style: TextStyle(
                                 color: Colors.white,
@@ -1010,10 +1202,10 @@ class _SeriesScreenState extends State<SeriesScreen> {
 
     final hasBackdrop =
         (apiBackdrop?.isNotEmpty == true) ||
-            (widget.contentItem.seriesStream?.backdropPath?.isNotEmpty == true);
+        (widget.contentItem.seriesStream?.backdropPath?.isNotEmpty == true);
     final hasCover =
         (apiCover?.isNotEmpty == true) ||
-            (widget.contentItem.seriesStream?.cover?.isNotEmpty == true);
+        (widget.contentItem.seriesStream?.cover?.isNotEmpty == true);
 
     if (hasBackdrop || hasCover) {
       String? imageUrl;
@@ -1047,7 +1239,7 @@ class _SeriesScreenState extends State<SeriesScreen> {
                     CircularProgressIndicator(
                       value: loadingProgress.expectedTotalBytes != null
                           ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
+                                loadingProgress.expectedTotalBytes!
                           : null,
                       color: Colors.grey.shade400,
                     ),
@@ -1179,7 +1371,9 @@ class _SeriesScreenState extends State<SeriesScreen> {
         } else {
           final trailerText = context.loc.trailer;
           final languageCode = Localizations.localeOf(context).languageCode;
-          final query = Uri.encodeQueryComponent("${widget.contentItem.name} $trailerText $languageCode");
+          final query = Uri.encodeQueryComponent(
+            "${widget.contentItem.name} $trailerText $languageCode",
+          );
           urlString = "https://www.youtube.com/results?search_query=$query";
         }
 
@@ -1197,7 +1391,10 @@ class _SeriesScreenState extends State<SeriesScreen> {
         decoration: BoxDecoration(
           color: Colors.grey.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1),
+          border: Border.all(
+            color: Colors.grey.withValues(alpha: 0.2),
+            width: 1,
+          ),
         ),
         child: Row(
           children: [
@@ -1207,19 +1404,113 @@ class _SeriesScreenState extends State<SeriesScreen> {
                 color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.ondemand_video, size: 20, color: Colors.red),
+              child: const Icon(
+                Icons.ondemand_video,
+                size: 20,
+                color: Colors.red,
+              ),
             ),
             const SizedBox(width: 16),
             Text(
               context.loc.trailer,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
             const Spacer(),
             const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _InfoPill(this.icon, this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        border: Border.all(color: Colors.white24),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: Colors.white70),
+            const SizedBox(width: 6),
+            Text(label, style: const TextStyle(color: Colors.white)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SeasonPickerRow extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SeasonPickerRow({
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: selected
+              ? LinearGradient(
+                  colors: [Theme.of(context).colorScheme.primary, Colors.cyan],
+                )
+              : null,
+          color: selected ? null : Colors.white.withValues(alpha: 0.06),
+          border: Border.all(color: Colors.white24),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
+              if (selected)
+                const Icon(Icons.check_circle, color: Colors.white)
+              else
+                const Icon(Icons.chevron_right, color: Colors.white70),
+            ],
+          ),
         ),
       ),
     );

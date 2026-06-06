@@ -14,6 +14,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'controllers/locale_provider.dart';
 import 'controllers/theme_provider.dart';
+import 'core/theme/theme_manager.dart';
 import 'l10n/app_localizations.dart';
 import 'package:media_kit/media_kit.dart';
 import 'l10n/supported_languages.dart';
@@ -59,7 +60,9 @@ class MyApp extends StatelessWidget {
       ],
       title: brandingController.branding.appName,
       theme: brandingController.applyRemoteTheme(AppThemes.lightTheme),
-      darkTheme: brandingController.applyRemoteTheme(AppThemes.darkTheme),
+      darkTheme: brandingController.applyRemoteTheme(
+        ThemeManager.buildTheme(themeProvider.palette),
+      ),
       themeMode: themeProvider.themeMode,
       builder: (context, child) => FocusTraversalGroup(
         policy: ReadingOrderTraversalPolicy(),

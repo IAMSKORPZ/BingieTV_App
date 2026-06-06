@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:another_iptv_player/models/playlist_content_model.dart';
+import 'package:another_iptv_player/models/content_type.dart';
+import 'package:another_iptv_player/shared/widgets/poster_card.dart';
 import 'package:another_iptv_player/utils/responsive_helper.dart';
 
 import '../content_card.dart';
@@ -42,13 +44,42 @@ class ContentGrid extends StatelessWidget {
           if (index >= items.length) {
             return const Center(child: CircularProgressIndicator());
           }
+          final item = items[index];
+          if (item.contentType == ContentType.vod ||
+              item.contentType == ContentType.series) {
+            final isSeries = item.contentType == ContentType.series;
+            return PosterCard(
+              title: item.name,
+              imageUrl: item.imagePath,
+              rating: item.vodStream?.rating.isNotEmpty == true
+                  ? item.vodStream!.rating
+                  : item.seriesStream?.rating,
+              subtitle: isSeries
+                  ? _seriesSubtitle(item)
+                  : item.vodStream?.genre,
+              metaBadge: isSeries ? 'Series' : null,
+              onTap: () => onItemTap(item),
+            );
+          }
           return ContentCard(
-            content: items[index],
+            content: item,
             width: 150,
-            onTap: () => onItemTap(items[index]),
+            onTap: () => onItemTap(item),
           );
         },
       ),
     );
+  }
+
+  String? _seriesSubtitle(ContentItem item) {
+    final releaseDate = item.seriesStream?.releaseDate;
+    final genre = item.seriesStream?.genre;
+    if (releaseDate != null && releaseDate.trim().isNotEmpty) {
+      return releaseDate.trim();
+    }
+    if (genre != null && genre.trim().isNotEmpty) {
+      return genre.trim();
+    }
+    return null;
   }
 }

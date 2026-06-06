@@ -56,3 +56,72 @@ class CategoryAppBar extends StatelessWidget {
     );
   }
 }
+
+class CategoryHeader extends StatelessWidget {
+  final String title;
+  final bool isSearching;
+  final TextEditingController searchController;
+  final VoidCallback onSearchStart;
+  final VoidCallback onSearchStop;
+  final ValueChanged<String> onSearchChanged;
+  final VoidCallback? onSortPressed;
+
+  const CategoryHeader({
+    super.key,
+    required this.title,
+    required this.isSearching,
+    required this.searchController,
+    required this.onSearchStart,
+    required this.onSearchStop,
+    required this.onSearchChanged,
+    this.onSortPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.maybePop(context),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: isSearching
+                ? TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: context.loc.search,
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    autofocus: true,
+                    onChanged: onSearchChanged,
+                  )
+                : Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+          ),
+          const SizedBox(width: 8),
+          if (onSortPressed != null)
+            OutlinedButton.icon(
+              onPressed: onSortPressed,
+              icon: const Icon(Icons.sort),
+              label: const Text('Sort'),
+            ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: Icon(isSearching ? Icons.clear : Icons.search),
+            onPressed: isSearching ? onSearchStop : onSearchStart,
+          ),
+        ],
+      ),
+    );
+  }
+}

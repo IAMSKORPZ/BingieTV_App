@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:another_iptv_player/models/category_view_model.dart';
 import 'package:another_iptv_player/utils/navigate_by_content_type.dart';
+import 'package:another_iptv_player/shared/widgets/glass_panel.dart';
+import 'package:another_iptv_player/shared/widgets/sidebar_item.dart';
 import '../controllers/category_detail_controller.dart';
 import '../widgets/category_detail/category_app_bar.dart';
 import '../widgets/category_detail/content_states.dart';
@@ -43,22 +45,24 @@ class _CategoryDetailViewState extends State<_CategoryDetailView> {
     return Consumer<CategoryDetailController>(
       builder: (context, controller, child) {
         return Scaffold(
-          body: NestedScrollView(
-            headerSliverBuilder: (context, innerBoxIsScrolled) => [
-              CategoryAppBar(
-                title: controller.category.category.categoryName,
-                isSearching: controller.isSearching,
-                searchController: _searchController,
-                onSearchStart: controller.startSearch,
-                onSearchStop: () {
-                  controller.stopSearch();
-                  _searchController.clear();
-                },
-                onSearchChanged: controller.searchContent,
-                onSortPressed: () => _showSortOptions(controller),
-              ),
-            ],
-            body: _buildBody(controller),
+          body: SafeArea(
+            child: Column(
+              children: [
+                CategoryHeader(
+                  title: controller.category.category.categoryName,
+                  isSearching: controller.isSearching,
+                  searchController: _searchController,
+                  onSearchStart: controller.startSearch,
+                  onSearchStop: () {
+                    controller.stopSearch();
+                    _searchController.clear();
+                  },
+                  onSearchChanged: controller.searchContent,
+                  onSortPressed: () => _showSortOptions(controller),
+                ),
+                Expanded(child: _buildBody(controller)),
+              ],
+            ),
           ),
         );
       },
@@ -74,22 +78,77 @@ class _CategoryDetailViewState extends State<_CategoryDetailView> {
       );
     }
     if (controller.isEmpty) return const EmptyState();
-    return Column(
-      children: [
-        if (controller.genres.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-            child: _buildGenreSelector(controller),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= 900;
+        if (wide) {
+          return Row(
+            children: [
+              SizedBox(
+                width: 240,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
+                  child: _buildSidebar(controller),
+                ),
+              ),
+              Expanded(
+                child: ContentGrid(
+                  items: controller.displayItems,
+                  onItemTap: (item) => navigateByContentType(context, item),
+                  onLoadMore: controller.loadNextPage,
+                  isLoadingMore: controller.isLoadingMore,
+                ),
+              ),
+            ],
+          );
+        }
+        return Column(
+          children: [
+            if (controller.genres.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 4.0,
+                ),
+                child: _buildGenreSelector(controller),
+              ),
+            Expanded(
+              child: ContentGrid(
+                items: controller.displayItems,
+                onItemTap: (item) => navigateByContentType(context, item),
+                onLoadMore: controller.loadNextPage,
+                isLoadingMore: controller.isLoadingMore,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSidebar(CategoryDetailController controller) {
+    final genres = controller.genres;
+    return GlassPanel(
+      padding: const EdgeInsets.all(10),
+      child: ListView(
+        children: [
+          SidebarItem(
+            icon: Icons.grid_view,
+            label: context.loc.all,
+            selected: controller.selectedGenre == null,
+            onTap: () => controller.filterByGenre(null),
           ),
-        Expanded(
-          child: ContentGrid(
-            items: controller.displayItems,
-            onItemTap: (item) => navigateByContentType(context, item),
-            onLoadMore: controller.loadNextPage,
-            isLoadingMore: controller.isLoadingMore,
+          const SizedBox(height: 8),
+          ...genres.map(
+            (genre) => SidebarItem(
+              icon: Icons.label_outline,
+              label: _capitalizeGenre(genre),
+              selected: controller.selectedGenre == genre,
+              onTap: () => controller.filterByGenre(genre),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -104,7 +163,7 @@ class _CategoryDetailViewState extends State<_CategoryDetailView> {
             onSelected: (_) => controller.filterByGenre(null),
           ),
           ...controller.genres.map(
-                (g) => Padding(
+            (g) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: ChoiceChip(
                 label: Text(_capitalizeGenre(g)),
@@ -168,11 +227,11 @@ class _CategoryDetailViewState extends State<_CategoryDetailView> {
     return genre
         .split(' ')
         .map((word) {
-      if (word.isEmpty) return word;
-      final first = word.characters.first.toUpperCase();
-      final rest = word.characters.skip(1).join();
-      return '$first$rest';
-    })
+          if (word.isEmpty) return word;
+          final first = word.characters.first.toUpperCase();
+          final rest = word.characters.skip(1).join();
+          return '$first$rest';
+        })
         .join(' ');
   }
 }

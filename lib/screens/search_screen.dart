@@ -4,9 +4,8 @@ import 'package:another_iptv_player/l10n/localization_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:another_iptv_player/models/content_type.dart';
 import 'package:another_iptv_player/models/playlist_content_model.dart';
-import 'package:another_iptv_player/repositories/iptv_repository.dart';
+import 'package:another_iptv_player/repositories/search_repository.dart';
 import 'package:another_iptv_player/services/app_state.dart';
-import 'package:another_iptv_player/services/performance_service.dart';
 import 'package:another_iptv_player/utils/navigate_by_content_type.dart';
 import 'package:another_iptv_player/utils/responsive_helper.dart';
 import '../../widgets/content_card.dart';
@@ -28,7 +27,7 @@ class SearchScreenState extends State<SearchScreen> {
   TextEditingController searchController = TextEditingController();
   FocusNode searchFocusNode = FocusNode();
   List<ContentItem> contentItems = [];
-  IptvRepository repository = AppState.xtreamCodeRepository!;
+  final SearchRepository repository = SearchRepository();
   Timer? _debounce;
   int _searchToken = 0;
   final Map<String, List<ContentItem>> _resultCache = {};
@@ -126,66 +125,13 @@ class SearchScreenState extends State<SearchScreen> {
     });
 
     try {
-      final searchResults = await PerformanceService.track(
-        'search',
-        () async {
-          List<ContentItem> results = [];
-
-          switch (widget.contentType) {
-            case ContentType.liveStream:
-              var liveStreams = await repository.searchLiveStreams(
-                value,
-                limit: 50,
-              );
-              results = liveStreams
-                  .map(
-                    (x) => ContentItem(
-                      x.streamId,
-                      x.name,
-                      x.streamIcon,
-                      ContentType.liveStream,
-                      liveStream: x,
-                    ),
-                  )
-                  .toList();
-              break;
-
-            case ContentType.vod:
-              var vodStreams = await repository.searchMovies(value, limit: 50);
-              results = vodStreams
-                  .map(
-                    (x) => ContentItem(
-                      x.streamId,
-                      x.name,
-                      x.streamIcon,
-                      ContentType.vod,
-                      containerExtension: x.containerExtension,
-                      vodStream: x,
-                    ),
-                  )
-                  .toList();
-              break;
-
-            case ContentType.series:
-              var series = await repository.searchSeries(value, limit: 50);
-              results = series
-                  .map(
-                    (x) => ContentItem(
-                      x.seriesId,
-                      x.name,
-                      x.cover ?? '',
-                      ContentType.series,
-                      seriesStream: x,
-                    ),
-                  )
-                  .toList();
-              break;
-          }
-
-          return results;
-        },
-        metadata: {'queryLength': normalized.length},
+      final page = await repository.search(
+        AppState.currentPlaylist!.id,
+        value,
+        contentType: widget.contentType,
+        limit: 50,
       );
+      final searchResults = page.items;
 
       if (token != _searchToken || !mounted) return;
       _resultCache[cacheKey] = searchResults;

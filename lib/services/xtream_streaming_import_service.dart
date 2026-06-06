@@ -6,8 +6,11 @@ import 'package:another_iptv_player/models/import_progress_model.dart';
 import 'package:another_iptv_player/models/live_stream.dart';
 import 'package:another_iptv_player/models/series.dart';
 import 'package:another_iptv_player/models/vod_streams.dart';
+import 'package:another_iptv_player/models/import_session_model.dart';
+import 'package:another_iptv_player/services/import_recovery_service.dart';
 import 'package:another_iptv_player/services/streaming_json_array_decoder.dart';
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 
 class XtreamStreamingImportService {
   static const int defaultBatchSize = 500;
@@ -16,12 +19,16 @@ class XtreamStreamingImportService {
   final http.Client client;
   final int batchSize;
   final StreamingJsonArrayDecoder _decoder = StreamingJsonArrayDecoder();
+  final ImportRecoveryService recoveryService;
+  final Uuid _uuid = const Uuid();
 
   XtreamStreamingImportService({
     required this.database,
     http.Client? client,
     this.batchSize = defaultBatchSize,
-  }) : client = client ?? http.Client();
+    ImportRecoveryService? recoveryService,
+  })  : client = client ?? http.Client(),
+        recoveryService = recoveryService ?? ImportRecoveryService();
 
   Future<ImportProgressModel> importLiveStreams({
     required ApiConfig config,
@@ -93,6 +100,14 @@ class XtreamStreamingImportService {
     ImportCancellationToken? cancellationToken,
   }) async {
     final startedAt = DateTime.now();
+    final session = ImportSessionModel(
+      id: _uuid.v4(),
+      providerId: playlistId,
+      type: 'xtream:$action',
+      status: ImportSessionStatus.running,
+      startedAt: startedAt,
+    );
+    await recoveryService.saveSession(session);
     final params = Map<String, String>.from(config.baseParams)
       ..['action'] = action
       ..['_t'] = DateTime.now().millisecondsSinceEpoch.toString();
@@ -102,6 +117,10 @@ class XtreamStreamingImportService {
       ..headers['Content-Type'] = 'application/json';
     final response = await client.send(request).timeout(const Duration(minutes: 2));
     if (response.statusCode < 200 || response.statusCode >= 300) {
+      await recoveryService.markFailed(
+        session.id,
+        'HTTP ${response.statusCode}: Xtream import failed',
+      );
       throw Exception('HTTP ${response.statusCode}: Xtream import failed');
     }
 
@@ -129,8 +148,13 @@ class XtreamStreamingImportService {
       }
 
       if (batch.isNotEmpty) await writeJson(batch);
-    } catch (_) {
+    } catch (e) {
       await clearExisting();
+      if (e is ImportCancelledException) {
+        await recoveryService.markCancelled(session.id);
+      } else {
+        await recoveryService.markFailed(session.id, e.toString());
+      }
       rethrow;
     }
     final done = ImportProgressModel(
@@ -138,6 +162,7 @@ class XtreamStreamingImportService {
       processedItems: processed,
       startedAt: startedAt,
     );
+    await recoveryService.markCompleted(session.id);
     onProgress?.call(done);
     return done;
   }

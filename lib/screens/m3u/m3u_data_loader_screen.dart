@@ -536,4 +536,3 @@ class M3uDataLoaderScreenState extends State<M3uDataLoaderScreen>
   //   }
   // }
 }
-import 'package:another_iptv_player/database/database.dart';

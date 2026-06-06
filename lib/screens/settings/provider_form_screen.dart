@@ -1,5 +1,6 @@
 import 'package:another_iptv_player/controllers/provider_controller.dart';
 import 'package:another_iptv_player/models/provider_model.dart';
+import 'package:another_iptv_player/services/secure_storage_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,11 @@ class _ProviderFormScreenState extends State<ProviderFormScreen> {
   final _playlistUrlController = TextEditingController();
   final _localFilePathController = TextEditingController();
   final _epgUrlController = TextEditingController();
+  final _portalUrlController = TextEditingController();
+  final _macAddressController = TextEditingController();
+  final _deviceIdController = TextEditingController();
+  final _serialNumberController = TextEditingController();
+  final _userAgentController = TextEditingController();
 
   late IptvProviderType _type;
 
@@ -39,6 +45,15 @@ class _ProviderFormScreenState extends State<ProviderFormScreen> {
     _playlistUrlController.text = provider?.playlistUrl ?? '';
     _localFilePathController.text = provider?.localFilePath ?? '';
     _epgUrlController.text = provider?.epgUrl ?? '';
+    _portalUrlController.text =
+        provider?.providerConfig['portalUrl'] as String? ?? '';
+    _deviceIdController.text =
+        provider?.providerConfig['deviceId'] as String? ?? '';
+    _serialNumberController.text =
+        provider?.providerConfig['serialNumber'] as String? ?? '';
+    _userAgentController.text =
+        provider?.providerConfig['userAgentOverride'] as String? ?? '';
+    _loadStalkerMac();
   }
 
   @override
@@ -50,7 +65,23 @@ class _ProviderFormScreenState extends State<ProviderFormScreen> {
     _playlistUrlController.dispose();
     _localFilePathController.dispose();
     _epgUrlController.dispose();
+    _portalUrlController.dispose();
+    _macAddressController.dispose();
+    _deviceIdController.dispose();
+    _serialNumberController.dispose();
+    _userAgentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadStalkerMac() async {
+    final provider = widget.provider;
+    if (provider == null || provider.type != IptvProviderType.stalker) return;
+    _macAddressController.text =
+        await SecureStorageService.instance.readProviderSecret(
+              provider.id,
+              'stalker_mac',
+            ) ??
+            '';
   }
 
   @override
@@ -184,6 +215,41 @@ class _ProviderFormScreenState extends State<ProviderFormScreen> {
             validator: _required,
           ),
         ];
+      case IptvProviderType.stalker:
+        return [
+          _field(
+            controller: _portalUrlController,
+            label: 'Portal URL',
+            icon: Icons.link,
+            keyboardType: TextInputType.url,
+            validator: _requiredUrl,
+          ),
+          const SizedBox(height: 12),
+          _field(
+            controller: _macAddressController,
+            label: 'MAC Address',
+            icon: Icons.security,
+            validator: _required,
+          ),
+          const SizedBox(height: 12),
+          _field(
+            controller: _deviceIdController,
+            label: 'Device ID',
+            icon: Icons.devices,
+          ),
+          const SizedBox(height: 12),
+          _field(
+            controller: _serialNumberController,
+            label: 'Serial Number',
+            icon: Icons.confirmation_number_outlined,
+          ),
+          const SizedBox(height: 12),
+          _field(
+            controller: _userAgentController,
+            label: 'User Agent Override',
+            icon: Icons.http,
+          ),
+        ];
     }
   }
 
@@ -265,9 +331,26 @@ class _ProviderFormScreenState extends State<ProviderFormScreen> {
           : _localFilePathController.text.trim(),
       epgUrl:
           _epgUrlController.text.trim().isEmpty ? null : _epgUrlController.text.trim(),
+      providerConfig: {
+        if (_portalUrlController.text.trim().isNotEmpty)
+          'portalUrl': _portalUrlController.text.trim(),
+        if (_deviceIdController.text.trim().isNotEmpty)
+          'deviceId': _deviceIdController.text.trim(),
+        if (_serialNumberController.text.trim().isNotEmpty)
+          'serialNumber': _serialNumberController.text.trim(),
+        if (_userAgentController.text.trim().isNotEmpty)
+          'userAgentOverride': _userAgentController.text.trim(),
+      },
     );
 
     final ok = await controller.saveProvider(provider, isEdit: _isEdit);
+    if (ok && _type == IptvProviderType.stalker) {
+      await SecureStorageService.instance.saveProviderSecret(
+        provider.id,
+        'stalker_mac',
+        _macAddressController.text,
+      );
+    }
     if (ok && context.mounted) Navigator.pop(context, true);
   }
 

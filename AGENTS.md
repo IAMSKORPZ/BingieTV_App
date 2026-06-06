@@ -1,5 +1,8 @@
 # AGENTS.md - Flutter IPTV Player Project Guide
 
+## Project Bible
+- Follow `docs/PROJECT_BIBLE.md` for BingieTV global rules and phase requirements.
+
 ## Build & Development Commands
 - `flutter pub get` - Install dependencies
 - `flutter run` - Run app in debug mode

@@ -50,7 +50,6 @@ class WatchHistoryController extends ChangeNotifier {
       _seriesHistory.isEmpty;
 
   Future<void> loadWatchHistory() async {
-    print('WatchHistoryController: loadWatchHistory başladı');
     _setLoading(true);
     _clearError();
 
@@ -63,14 +62,12 @@ class WatchHistoryController extends ChangeNotifier {
     notifyListeners();
 
     if (AppState.currentPlaylist == null) {
-      print('WatchHistoryController: Aktif playlist bulunamadı');
       _setError('Aktif playlist bulunamadı');
       _setLoading(false);
       return;
     }
 
     final playlistId = AppState.currentPlaylist!.id;
-    print('WatchHistoryController: Playlist ID: $playlistId');
 
     try {
       final futures = await Future.wait([
@@ -168,32 +165,36 @@ class WatchHistoryController extends ChangeNotifier {
         AppState.currentPlaylist!.id,
       );
 
-      navigateByContentType(
-        context,
-        ContentItem(
-          history.streamId,
-          history.title,
-          history.imagePath ?? '',
-          history.contentType,
-          liveStream: liveStream,
-        ),
-      );
+      if (context.mounted) {
+        navigateByContentType(
+          context,
+          ContentItem(
+            history.streamId,
+            history.title,
+            history.imagePath ?? '',
+            history.contentType,
+            liveStream: liveStream,
+          ),
+        );
+      }
     } else if (isM3u) {
       final liveStream = await _database.getM3uItemsByIdAndPlaylist(
         AppState.currentPlaylist!.id,
         history.streamId,
       );
 
-      navigateByContentType(
-        context,
-        ContentItem(
-          liveStream!.url,
-          history.title,
-          history.imagePath ?? '',
-          history.contentType,
-          m3uItem: liveStream!,
-        ),
-      );
+      if (context.mounted && liveStream != null) {
+        navigateByContentType(
+          context,
+          ContentItem(
+            liveStream.url,
+            history.title,
+            history.imagePath ?? '',
+            history.contentType,
+            m3uItem: liveStream,
+          ),
+        );
+      }
     }
   }
 
@@ -204,33 +205,37 @@ class WatchHistoryController extends ChangeNotifier {
         AppState.currentPlaylist!.id,
       );
 
-      navigateByContentType(
-        context,
-        ContentItem(
-          history.streamId,
-          history.title,
-          history.imagePath ?? '',
-          history.contentType,
-          containerExtension: movie!.containerExtension,
-          vodStream: movie,
-        ),
-      );
+      if (context.mounted && movie != null) {
+        navigateByContentType(
+          context,
+          ContentItem(
+            history.streamId,
+            history.title,
+            history.imagePath ?? '',
+            history.contentType,
+            containerExtension: movie.containerExtension,
+            vodStream: movie,
+          ),
+        );
+      }
     } else if (isM3u) {
       var movie = await _database.getM3uItemsByIdAndPlaylist(
         AppState.currentPlaylist!.id,
         history.streamId,
       );
 
-      navigateByContentType(
-        context,
-        ContentItem(
-          movie!.url,
-          history.title,
-          history.imagePath ?? '',
-          history.contentType,
-          m3uItem: movie,
-        ),
-      );
+      if (context.mounted && movie != null) {
+        navigateByContentType(
+          context,
+          ContentItem(
+            movie.url,
+            history.title,
+            history.imagePath ?? '',
+            history.contentType,
+            m3uItem: movie,
+          ),
+        );
+      }
     }
   }
 
@@ -241,49 +246,55 @@ class WatchHistoryController extends ChangeNotifier {
         AppState.currentPlaylist!.id,
       );
 
+      if (episode == null) return;
+
       final seriesResponse = await AppState.xtreamCodeRepository!.getSeriesInfo(
-        episode!.seriesId,
+        episode.seriesId,
       );
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EpisodeScreen(
-            seriesInfo: seriesResponse!.seriesInfo,
-            seasons: seriesResponse.seasons,
-            episodes: seriesResponse.episodes,
-            contentItem: ContentItem(
-              episode.episodeId.toString(),
-              history.title,
-              history.imagePath ?? "",
-              ContentType.series,
-              containerExtension: episode.containerExtension,
-              season: episode.season,
+      if (context.mounted && seriesResponse != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EpisodeScreen(
+              seriesInfo: seriesResponse.seriesInfo,
+              seasons: seriesResponse.seasons,
+              episodes: seriesResponse.episodes,
+              contentItem: ContentItem(
+                episode.episodeId.toString(),
+                history.title,
+                history.imagePath ?? "",
+                ContentType.series,
+                containerExtension: episode.containerExtension,
+                season: episode.season,
+              ),
+              watchHistory: history,
             ),
-            watchHistory: history,
           ),
-        ),
-      );
+        );
+      }
     } else if (isM3u) {
       var m3uItem = await _database.getM3uItemsByIdAndPlaylist(
         AppState.currentPlaylist!.id,
         history.streamId,
       );
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => M3uPlayerScreen(
-            contentItem: ContentItem(
-              m3uItem!.id,
-              m3uItem.name ?? '',
-              m3uItem.tvgLogo ?? '',
-              m3uItem.contentType,
-              m3uItem: m3uItem,
+      if (context.mounted && m3uItem != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => M3uPlayerScreen(
+              contentItem: ContentItem(
+                m3uItem.id,
+                m3uItem.name ?? '',
+                m3uItem.tvgLogo ?? '',
+                m3uItem.contentType,
+                m3uItem: m3uItem,
+              ),
             ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 }

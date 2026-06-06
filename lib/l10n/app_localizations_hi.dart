@@ -76,6 +76,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get try_again => 'फिर से कोशिश करें';
 
   @override
+  String get home => 'होम';
+
+  @override
   String get history => 'इतिहास';
 
   @override

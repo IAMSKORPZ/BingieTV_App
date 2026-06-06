@@ -63,55 +63,46 @@ class _VideoWidgetState extends State<VideoWidget> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    final topButtons = [
+      const BackButtonWidget(),
+      const Expanded(child: VideoTitleWidget()),
+      const VideoInfoWidget(),
+      VideoChannelSelectorWidget(
+        queue: PlayerState.queue,
+        currentIndex: PlayerState.currentIndex,
+      ),
+      const VideoFavoriteWidget(),
+      const VideoSettingsWidget(),
+    ];
+
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
         return _withTvRemoteShortcuts(
           MaterialVideoControlsTheme(
-            normal: MaterialVideoControlsThemeData().copyWith(
+            normal: MaterialVideoControlsThemeData(
               brightnessGesture: _brightnessGesture,
               volumeGesture: _volumeGesture,
               seekGesture: _seekGesture,
               speedUpOnLongPress: _speedUpOnLongPress,
               seekOnDoubleTap: _seekOnDoubleTap,
-              topButtonBar: [
-                BackButtonWidget(),
-                Expanded(child: VideoTitleWidget()),
-                VideoInfoWidget(),
-                VideoChannelSelectorWidget(
-                  queue: PlayerState.queue,
-                  currentIndex: PlayerState.currentIndex,
-                ),
-                VideoFavoriteWidget(),
-                VideoSettingsWidget(),
-              ],
-              bottomButtonBar: const [MaterialPositionIndicator()],
+              topButtonBar: topButtons,
+              bottomButtonBar: const [],
             ),
-            fullscreen: MaterialVideoControlsThemeData().copyWith(
+            fullscreen: MaterialVideoControlsThemeData(
               brightnessGesture: _brightnessGesture,
               volumeGesture: _volumeGesture,
               seekGesture: _seekGesture,
               speedUpOnLongPress: _speedUpOnLongPress,
               seekOnDoubleTap: _seekOnDoubleTap,
-              topButtonBar: [
-                BackButtonWidget(),
-                Expanded(child: VideoTitleWidget()),
-                VideoInfoWidget(),
-                VideoChannelSelectorWidget(
-                  queue: PlayerState.queue,
-                  currentIndex: PlayerState.currentIndex,
-                ),
-                VideoFavoriteWidget(),
-                VideoSettingsWidget(),
-              ],
+              topButtonBar: topButtons,
+              bottomButtonBar: const [],
               seekBarMargin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
             ),
-            child: Scaffold(
-              body: Video(
+            child: Material(
+              color: Colors.black,
+              child: Video(
                 controller: widget.controller,
-                resumeUponEnteringForegroundMode: true,
-                pauseUponEnteringBackgroundMode: !PlayerState.backgroundPlay,
-                subtitleViewConfiguration: widget.subtitleViewConfiguration,
               ),
             ),
           ),
@@ -121,42 +112,20 @@ class _VideoWidgetState extends State<VideoWidget> {
       case TargetPlatform.linux:
         return _withTvRemoteShortcuts(
           MaterialDesktopVideoControlsTheme(
-            normal: MaterialDesktopVideoControlsThemeData().copyWith(
+            normal: MaterialDesktopVideoControlsThemeData(
               modifyVolumeOnScroll: false,
               toggleFullscreenOnDoublePress: true,
-              topButtonBar: [
-                BackButtonWidget(),
-                Expanded(child: VideoTitleWidget()),
-                VideoInfoWidget(),
-                VideoChannelSelectorWidget(
-                  queue: PlayerState.queue,
-                  currentIndex: PlayerState.currentIndex,
-                ),
-                VideoFavoriteWidget(),
-                VideoSettingsWidget(),
-              ],
+              topButtonBar: topButtons,
             ),
-            fullscreen: MaterialDesktopVideoControlsThemeData().copyWith(
+            fullscreen: MaterialDesktopVideoControlsThemeData(
               modifyVolumeOnScroll: false,
               toggleFullscreenOnDoublePress: true,
-              topButtonBar: [
-                BackButtonWidget(),
-                Expanded(child: VideoTitleWidget()),
-                VideoInfoWidget(),
-                VideoChannelSelectorWidget(
-                  queue: PlayerState.queue,
-                  currentIndex: PlayerState.currentIndex,
-                ),
-                VideoFavoriteWidget(),
-                VideoSettingsWidget(),
-              ],
+              topButtonBar: topButtons,
             ),
-            child: Scaffold(
-              body: Video(
+            child: Material(
+              color: Colors.black,
+              child: Video(
                 controller: widget.controller,
-                resumeUponEnteringForegroundMode: true,
-                pauseUponEnteringBackgroundMode: !PlayerState.backgroundPlay,
-                subtitleViewConfiguration: widget.subtitleViewConfiguration,
               ),
             ),
           ),

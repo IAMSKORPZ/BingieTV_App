@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:another_iptv_player/models/benchmark_result_model.dart';
 import 'package:another_iptv_player/services/performance_service.dart';
+import 'package:path_provider/path_provider.dart';
 
 class BenchmarkService {
   final List<BenchmarkResultModel> _results = [];
@@ -45,6 +47,12 @@ class BenchmarkService {
   String exportJson() {
     return const JsonEncoder.withIndent('  ')
         .convert(_results.map((result) => result.toJson()).toList());
+  }
+
+  Future<File> exportJsonFile({String fileName = 'bingietv_benchmarks.json'}) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}${Platform.pathSeparator}$fileName');
+    return file.writeAsString(exportJson());
   }
 
   void clear() {

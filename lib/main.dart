@@ -15,11 +15,13 @@ import 'package:provider/provider.dart';
 import 'controllers/locale_provider.dart';
 import 'controllers/theme_provider.dart';
 import 'l10n/app_localizations.dart';
+import 'package:media_kit/media_kit.dart';
 import 'l10n/supported_languages.dart';
 import 'utils/app_themes.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
   await PerformanceService.track('startup_setup', setupServiceLocator);
   unawaited(CachePolicyService().cleanupTemporaryCache());
   runApp(

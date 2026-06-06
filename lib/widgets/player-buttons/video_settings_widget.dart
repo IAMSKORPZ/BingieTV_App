@@ -168,7 +168,7 @@ class _VideoSettingsOverlayState extends State<_VideoSettingsOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = Colors.black.withOpacity(0.95);
+    final backgroundColor = Colors.black.withValues(alpha: 0.95);
 
     return Positioned.fill(
       child: Align(
@@ -183,7 +183,7 @@ class _VideoSettingsOverlayState extends State<_VideoSettingsOverlay> {
               color: backgroundColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   spreadRadius: 2,
                 ),
@@ -197,7 +197,7 @@ class _VideoSettingsOverlayState extends State<_VideoSettingsOverlay> {
   }
 
   Widget _buildMainSettings(BuildContext context) {
-    final cardColor = Colors.black.withOpacity(0.8);
+    final cardColor = Colors.black.withValues(alpha: 0.8);
     const textColor = Colors.white;
     final dividerColor = Colors.grey[800]!;
 
@@ -309,7 +309,7 @@ class _VideoSettingsOverlayState extends State<_VideoSettingsOverlay> {
     const secondaryTextColor = Colors.grey;
     final dividerColor = Colors.grey[800]!;
     const primaryColor = Colors.blue;
-    final cardBackground = Colors.white.withOpacity(0.05);
+    final cardBackground = Colors.white.withValues(alpha: 0.05);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -374,8 +374,8 @@ class _VideoSettingsOverlayState extends State<_VideoSettingsOverlay> {
     const textColor = Colors.white;
     final dividerColor = Colors.grey[800]!;
     const primaryColor = Colors.blue;
-    final primaryContainer = Colors.blue.withOpacity(0.2);
-    final unselectedBackground = Colors.white.withOpacity(0.03);
+    final primaryContainer = Colors.blue.withValues(alpha: 0.2);
+    final unselectedBackground = Colors.white.withValues(alpha: 0.03);
 
     return InkWell(
       onTap: onTap,
@@ -383,7 +383,7 @@ class _VideoSettingsOverlayState extends State<_VideoSettingsOverlay> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? primaryContainer.withOpacity(0.3)
+              ? primaryContainer.withValues(alpha: 0.3)
               : unselectedBackground,
           borderRadius: BorderRadius.circular(6),
           border: isSelected

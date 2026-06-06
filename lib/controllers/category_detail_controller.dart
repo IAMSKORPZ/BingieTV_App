@@ -151,7 +151,7 @@ class CategoryDetailController extends ChangeNotifier {
     } else {
       _filteredItems = _contentItems
           .where((item) =>
-          (item.name ?? '').toLowerCase().contains(query.trim().toLowerCase()))
+          item.name.toLowerCase().contains(query.trim().toLowerCase()))
           .toList();
     }
     notifyListeners();
@@ -162,15 +162,15 @@ class CategoryDetailController extends ChangeNotifier {
 
     switch (order) {
       case "ascending":
-        list.sort((a, b) => (a.name ?? '').compareTo(b.name ?? ''));
+        list.sort((a, b) => a.name.compareTo(b.name));
         break;
       case "descending":
-        list.sort((a, b) => (b.name ?? '').compareTo(a.name ?? ''));
+        list.sort((a, b) => b.name.compareTo(a.name));
         break;
       case "release_date":
         list.sort((a, b) {
-          final dateA;
-          final dateB;
+          final Comparable dateA;
+          final Comparable dateB;
           if (a.contentType.name == "series") {
             dateA = DateTime.tryParse(a.seriesStream?.releaseDate ?? '') ?? DateTime(1970);
             dateB = DateTime.tryParse(b.seriesStream?.releaseDate ?? '') ?? DateTime(1970);
@@ -183,8 +183,8 @@ class CategoryDetailController extends ChangeNotifier {
         break;
       case "rating":
         list.sort((a, b) {
-          final ratingA;
-          final ratingB;
+          final double ratingA;
+          final double ratingB;
           if (a.contentType.name == "series") {
             ratingA = double.tryParse(a.seriesStream?.rating ?? '0') ?? 0.0;
             ratingB = double.tryParse(b.seriesStream?.rating ?? '0') ?? 0.0;

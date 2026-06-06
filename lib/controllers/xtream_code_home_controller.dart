@@ -1,9 +1,9 @@
-import 'package:another_iptv_player/l10n/localization_extension.dart';
+import 'package:another_iptv_player/models/api_response.dart';
 import 'package:flutter/material.dart';
+import 'package:another_iptv_player/l10n/localization_extension.dart';
 import 'package:another_iptv_player/models/category_view_model.dart';
 import 'package:another_iptv_player/models/content_type.dart';
 import 'package:another_iptv_player/models/playlist_content_model.dart';
-import 'package:another_iptv_player/models/view_state.dart';
 import 'package:another_iptv_player/repositories/iptv_repository.dart';
 import 'package:another_iptv_player/services/app_state.dart';
 import '../repositories/user_preferences.dart';
@@ -12,9 +12,8 @@ import '../screens/xtream-codes/xtream_code_data_loader_screen.dart';
 class XtreamCodeHomeController extends ChangeNotifier {
   late PageController _pageController;
   final IptvRepository _repository = AppState.xtreamCodeRepository!;
-  String? _errorMessage;
-  ViewState _viewState = ViewState.idle;
 
+  ApiResponse? _userInfo;
   int _currentIndex = 0;
   final bool _isLoading = false;
 
@@ -27,6 +26,7 @@ class XtreamCodeHomeController extends ChangeNotifier {
   final Set<String> _hiddenSeriesCategoryIds = {};
 
   // Getters publics
+  ApiResponse? get userInfo => _userInfo;
   Set<String> get hiddenMovieCategoryIds => _hiddenMovieCategoryIds;
   Set<String> get hiddenSeriesCategoryIds => _hiddenSeriesCategoryIds;
 
@@ -103,30 +103,25 @@ class XtreamCodeHomeController extends ChangeNotifier {
   String getPageTitle(BuildContext context) {
     switch (currentIndex) {
       case 0:
-        return context.loc.history;
+        return context.loc.home;
       case 1:
-        return context.loc.live_streams;
+        return context.loc.history;
       case 2:
-        return context.loc.movies;
+        return context.loc.live_streams;
       case 3:
-        return context.loc.series_plural;
+        return context.loc.movies;
       case 4:
+        return context.loc.series_plural;
+      case 5:
         return context.loc.settings;
       default:
         return 'BingieTV';
     }
   }
 
-  void _setViewState(ViewState state) {
-    _viewState = state;
-    if (state != ViewState.error) {
-      _errorMessage = null;
-    }
-    notifyListeners();
-  }
-
   Future<void> _loadCategories(bool all) async {
     try {
+      _userInfo = await _repository.getPlayerInfo();
       var liveCategories = await _repository.getLiveCategories();
       if (liveCategories != null && liveCategories.isNotEmpty) {
         for (var liveCategory in liveCategories) {
@@ -243,9 +238,11 @@ class XtreamCodeHomeController extends ChangeNotifier {
       notifyListeners();
     } catch (e, st) {
       debugPrint(st.toString());
-      _errorMessage = 'Kategoriler yüklenemedi: $e';
-      _setViewState(ViewState.error);
     }
+  }
+
+  void refresh() {
+    notifyListeners();
   }
 
   refreshAllData(BuildContext context) {

@@ -141,7 +141,7 @@ class WatchHistoryCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            _getContentTypeColor(history.contentType).withOpacity(0.8),
+            _getContentTypeColor(history.contentType).withValues(alpha: 0.8),
             _getContentTypeColor(history.contentType),
           ],
         ),

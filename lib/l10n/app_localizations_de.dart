@@ -77,6 +77,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get try_again => 'Erneut Versuchen';
 
   @override
+  String get home => 'Startseite';
+
+  @override
   String get history => 'Verlauf';
 
   @override

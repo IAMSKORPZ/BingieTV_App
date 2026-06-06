@@ -4,7 +4,6 @@ import 'package:another_iptv_player/models/category_view_model.dart';
 import 'package:another_iptv_player/models/content_type.dart';
 import 'package:another_iptv_player/models/m3u_item.dart';
 import 'package:another_iptv_player/models/playlist_content_model.dart';
-import 'package:another_iptv_player/models/view_state.dart';
 import 'package:another_iptv_player/repositories/m3u_repository.dart';
 import 'package:another_iptv_player/services/app_state.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +11,6 @@ import 'package:flutter/material.dart';
 class M3UHomeController extends ChangeNotifier {
   late PageController _pageController;
   final M3uRepository _repository = AppState.m3uRepository!;
-  String? _errorMessage;
-  ViewState _viewState = ViewState.idle;
 
   int _currentIndex = 0;
   bool _isLoading = true;
@@ -96,14 +93,6 @@ class M3UHomeController extends ChangeNotifier {
     }
   }
 
-  void _setViewState(ViewState state) {
-    _viewState = state;
-    if (state != ViewState.error) {
-      _errorMessage = null;
-    }
-    notifyListeners();
-  }
-
   Future<void> _loadM3uItems() async {
     try {
       _isLoading = true;
@@ -115,9 +104,8 @@ class M3UHomeController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'M3U items cannot loaded: $e';
-      _setViewState(ViewState.error);
       _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -191,9 +179,8 @@ class M3UHomeController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Kategoriler yüklenemedi: $e';
-      _setViewState(ViewState.error);
       _isLoading = false;
+      notifyListeners();
     }
   }
 }

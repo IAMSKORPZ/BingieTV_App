@@ -57,8 +57,7 @@ class _VideoChannelSelectorWidgetState
 
     _globalContext = context;
 
-    if (_globalToggleSubscription == null) {
-      _globalToggleSubscription = EventBus()
+    _globalToggleSubscription ??= EventBus()
           .on<bool>('toggle_channel_list')
           .listen((bool show) {
             if (show) {
@@ -69,7 +68,6 @@ class _VideoChannelSelectorWidgetState
               _hideChannelSelector();
             }
           });
-    }
   }
 
   @override
@@ -219,8 +217,8 @@ class _VideoChannelSelectorWidgetState
       return const SizedBox.shrink();
     }
 
-    final backgroundColor = Colors.black.withOpacity(0.95);
-    final cardColor = Colors.black.withOpacity(0.8);
+    final backgroundColor = Colors.black.withValues(alpha: 0.95);
+    final cardColor = Colors.black.withValues(alpha: 0.8);
     const textColor = Colors.white;
     const secondaryTextColor = Colors.grey;
     final dividerColor = Colors.grey[800]!;
@@ -271,9 +269,7 @@ class _VideoChannelSelectorWidgetState
           selectedIndex = foundIndex;
         }
       }
-      if (selectedIndex == null) {
-        selectedIndex = widget.currentIndex ?? 0;
-      }
+      selectedIndex ??= widget.currentIndex ?? 0;
     }
 
     return Positioned.fill(
@@ -289,7 +285,7 @@ class _VideoChannelSelectorWidgetState
               color: backgroundColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   spreadRadius: 2,
                 ),
@@ -409,9 +405,9 @@ class _VideoChannelSelectorWidgetState
     const textColor = Colors.white;
     const secondaryTextColor = Colors.grey;
     final dividerColor = Colors.grey[800]!;
-    final cardBackground = Colors.white.withOpacity(0.05);
+    final cardBackground = Colors.white.withValues(alpha: 0.05);
     const primaryColor = Colors.blue;
-    final primaryContainer = Colors.blue.withOpacity(0.2);
+    final primaryContainer = Colors.blue.withValues(alpha: 0.2);
 
     final allItems = widget.queue ?? [];
     final currentContent = PlayerState.currentContent;
@@ -446,7 +442,7 @@ class _VideoChannelSelectorWidgetState
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? primaryContainer.withOpacity(0.3)
+                    ? primaryContainer.withValues(alpha: 0.3)
                     : cardBackground,
                 borderRadius: BorderRadius.circular(8),
                 border: isSelected
@@ -509,9 +505,9 @@ class _VideoChannelSelectorWidgetState
     const textColor = Colors.white;
     const secondaryTextColor = Colors.grey;
     final dividerColor = Colors.grey[800]!;
-    final cardBackground = Colors.white.withOpacity(0.05);
+    final cardBackground = Colors.white.withValues(alpha: 0.05);
     const primaryColor = Colors.blue;
-    final primaryContainer = Colors.blue.withOpacity(0.2);
+    final primaryContainer = Colors.blue.withValues(alpha: 0.2);
 
     final categories = PlaylistContentState.liveCategories;
     final currentContent = PlayerState.currentContent;
@@ -552,7 +548,7 @@ class _VideoChannelSelectorWidgetState
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? primaryContainer.withOpacity(0.3)
+                    ? primaryContainer.withValues(alpha: 0.3)
                     : cardBackground,
                 borderRadius: BorderRadius.circular(8),
                 border: isSelected
@@ -621,8 +617,8 @@ class _VideoChannelSelectorWidgetState
     const secondaryTextColor = Colors.grey;
     final dividerColor = Colors.grey[800]!;
     const primaryColor = Colors.blue;
-    final primaryContainer = Colors.blue.withOpacity(0.2);
-    final cardBackground = Colors.white.withOpacity(0.05);
+    final primaryContainer = Colors.blue.withValues(alpha: 0.2);
+    final cardBackground = Colors.white.withValues(alpha: 0.05);
     final errorBackground = Colors.grey[800]!;
     const errorIconColor = Colors.grey;
 
@@ -667,7 +663,7 @@ class _VideoChannelSelectorWidgetState
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: isSelected
-                ? primaryContainer.withOpacity(0.3)
+                ? primaryContainer.withValues(alpha: 0.3)
                 : cardBackground,
             borderRadius: BorderRadius.circular(8),
             border: isSelected

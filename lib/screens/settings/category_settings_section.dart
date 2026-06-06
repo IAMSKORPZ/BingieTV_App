@@ -1,10 +1,6 @@
 import 'package:another_iptv_player/repositories/user_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:another_iptv_player/l10n/localization_extension.dart';
-import '../../widgets/color_picker_tile_widget.dart';
-import '../../widgets/dropdown_tile_widget.dart';
-import '../../widgets/slider_tile_widget.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/xtream_code_home_controller.dart';
 
@@ -44,7 +40,7 @@ class _CategorySettingsScreenState extends State<CategorySettingsScreen> {
       }
     });
     await UserPreferences.setHiddenCategories(_hiddenCategories.toList());
-    widget.controller.notifyListeners();
+    widget.controller.refresh();
   }
 
   Future<void> _setAllCategoriesVisible(Iterable<String> ids, bool visible) async {
@@ -57,24 +53,18 @@ class _CategorySettingsScreenState extends State<CategorySettingsScreen> {
       }
     });
     await UserPreferences.setHiddenCategories(_hiddenCategories.toList());
-    widget.controller.notifyListeners();
-  }
-
-  void _closeScreen(BuildContext context) {
-    if (_hasChanges) {
-      widget.controller.notifyListeners();
-    }
-    Navigator.pop(context, _hasChanges);
+    widget.controller.refresh();
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: widget.controller,
-      child: WillPopScope(
-        onWillPop: () async {
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
           Navigator.pop(context, _hasChanges);
-          return false;
         },
         child: Scaffold(
           appBar: AppBar(

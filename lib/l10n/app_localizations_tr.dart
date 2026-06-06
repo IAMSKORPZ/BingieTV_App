@@ -76,6 +76,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get try_again => 'Tekrar Dene';
 
   @override
+  String get home => 'Ana Sayfa';
+
+  @override
   String get history => 'Geçmiş';
 
   @override

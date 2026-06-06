@@ -13,8 +13,7 @@ import 'package:another_iptv_player/utils/type_convertions.dart';
 import '../models/import_progress_model.dart';
 import '../models/category_type.dart';
 import '../services/xtream_streaming_import_service.dart';
-import '../services/service_locator.dart';
-import 'package:another_iptv_player/services/event_bus.dart';
+import 'package:another_iptv_player/services/service_locator.dart';
 
 class IptvRepository {
   final ApiConfig _config;
@@ -164,9 +163,9 @@ class IptvRepository {
         return liveStreams;
       }
     } catch (e) {
-      print('Live Channels Error: $e');
       return null;
     }
+    return null;
   }
 
   Future<List<LiveStream>?> getLiveChannelsByCategoryId({
@@ -187,9 +186,9 @@ class IptvRepository {
         return liveStreams;
       }
     } catch (e) {
-      print('Live Channels Error: $e');
       return null;
     }
+    return null;
   }
 
   Future<LiveStream?> findLiveStreamById(String streamId) async {
@@ -270,9 +269,9 @@ class IptvRepository {
         }
       }
     } catch (e) {
-      print('Movies Error: $e');
       return null;
     }
+    return null;
   }
 
   Future<List<SeriesStream>?> getSeriesFromApi({
@@ -340,10 +339,10 @@ class IptvRepository {
          }
        }
      } catch (e) {
-       print('Series Error: $e');
-       return null;
-     }
-   }
+      return null;
+    }
+    return null;
+  }
 
    /// Fetch VOD movie info from API
    Future<Map<String, dynamic>?> getVodInfo(String vodId) async {

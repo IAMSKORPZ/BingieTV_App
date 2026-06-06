@@ -118,7 +118,7 @@ class ContentCard extends StatelessWidget {
                         horizontal: 6,
                         vertical: 4,
                       ),
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                       child: Text(
                         content.name,
                         style: const TextStyle(
@@ -161,7 +161,7 @@ class ContentCard extends StatelessWidget {
   Widget _buildTitleCard(BuildContext context) {
     return Container(
       color: isSelected
-          ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
+          ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
           : Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Center(
         child: Padding(
@@ -209,20 +209,20 @@ class ContentCard extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                colorScheme.secondaryContainer.withOpacity(0.93),
-                colorScheme.secondary.withOpacity(0.8),
+                colorScheme.secondaryContainer.withValues(alpha: 0.93),
+                colorScheme.secondary.withValues(alpha: 0.8),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: colorScheme.onSecondaryContainer.withOpacity(0.16),
+              color: colorScheme.onSecondaryContainer.withValues(alpha: 0.16),
               width: 0.8,
             ),
             boxShadow: [
               BoxShadow(
-                color: colorScheme.shadow.withOpacity(0.22),
+                color: colorScheme.shadow.withValues(alpha: 0.22),
                 offset: const Offset(0, 1),
                 blurRadius: 4,
               ),
@@ -234,7 +234,7 @@ class ContentCard extends StatelessWidget {
               Icon(
                 Icons.star_rounded,
                 size: 14,
-                color: colorScheme.onSecondaryContainer.withOpacity(0.9),
+                color: colorScheme.onSecondaryContainer.withValues(alpha: 0.9),
               ),
               const SizedBox(width: 3),
               Text(

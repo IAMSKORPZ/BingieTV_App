@@ -246,6 +246,12 @@ abstract class AppLocalizations {
   /// **'Try Again'**
   String get try_again;
 
+  /// No description provided for @home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home;
+
   /// No description provided for @history.
   ///
   /// In en, this message translates to:

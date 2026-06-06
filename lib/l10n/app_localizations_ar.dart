@@ -76,6 +76,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get try_again => 'حاول مرة أخرى';
 
   @override
+  String get home => 'الصفحة الرئيسية';
+
+  @override
   String get history => 'السجل';
 
   @override

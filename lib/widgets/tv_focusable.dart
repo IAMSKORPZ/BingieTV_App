@@ -29,44 +29,47 @@ class _TvFocusableState extends State<TvFocusable> {
 
     return Padding(
       padding: widget.margin,
-      child: FocusableActionDetector(
-        autofocus: widget.autofocus,
-        mouseCursor: widget.onPressed == null
-            ? MouseCursor.defer
-            : SystemMouseCursors.click,
-        onShowFocusHighlight: (focused) => setState(() => _focused = focused),
-        actions: {
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (_) {
-              widget.onPressed?.call();
-              return null;
-            },
-          ),
-        },
-        child: AnimatedScale(
-          scale: _focused ? 1.045 : 1,
-          duration: const Duration(milliseconds: 120),
-          curve: Curves.easeOut,
-          child: AnimatedContainer(
+      child: GestureDetector(
+        onTap: widget.onPressed,
+        child: FocusableActionDetector(
+          autofocus: widget.autofocus,
+          mouseCursor: widget.onPressed == null
+              ? MouseCursor.defer
+              : SystemMouseCursors.click,
+          onShowFocusHighlight: (focused) => setState(() => _focused = focused),
+          actions: {
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (_) {
+                widget.onPressed?.call();
+                return null;
+              },
+            ),
+          },
+          child: AnimatedScale(
+            scale: _focused ? 1.045 : 1,
             duration: const Duration(milliseconds: 120),
             curve: Curves.easeOut,
-            decoration: BoxDecoration(
-              borderRadius: widget.borderRadius,
-              border: Border.all(
-                color: _focused ? colorScheme.primary : Colors.transparent,
-                width: 2,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 120),
+              curve: Curves.easeOut,
+              decoration: BoxDecoration(
+                borderRadius: widget.borderRadius,
+                border: Border.all(
+                  color: _focused ? colorScheme.primary : Colors.transparent,
+                  width: 2,
+                ),
+                boxShadow: _focused
+                    ? [
+                        BoxShadow(
+                          color: colorScheme.primary.withValues(alpha: 0.35),
+                          blurRadius: 14,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : null,
               ),
-              boxShadow: _focused
-                  ? [
-                      BoxShadow(
-                        color: colorScheme.primary.withOpacity(0.35),
-                        blurRadius: 14,
-                        spreadRadius: 1,
-                      ),
-                    ]
-                  : null,
+              child: widget.child,
             ),
-            child: widget.child,
           ),
         ),
       ),

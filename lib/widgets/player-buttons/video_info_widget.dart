@@ -36,8 +36,7 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
 
     _globalContext = context;
 
-    if (_globalToggleSubscription == null) {
-      _globalToggleSubscription = EventBus()
+    _globalToggleSubscription ??= EventBus()
           .on<bool>('toggle_video_info')
           .listen((bool show) {
             if (show) {
@@ -48,7 +47,6 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
               _hideVideoInfo();
             }
           });
-    }
   }
 
   @override
@@ -131,20 +129,20 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
 
     return Positioned.fill(
       child: Container(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withValues(alpha: 0.3),
         child: Align(
           alignment: Alignment.centerRight,
           child: Material(
-            color: Colors.black.withOpacity(0.95),
+            color: Colors.black.withValues(alpha: 0.95),
             elevation: 8,
             child: Container(
               width: panelWidth,
               height: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.95),
+                color: Colors.black.withValues(alpha: 0.95),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     blurRadius: 10,
                     spreadRadius: 2,
                   ),
@@ -155,7 +153,7 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.8),
+                      color: Colors.black.withValues(alpha: 0.8),
                       border: Border(
                         bottom: BorderSide(color: Colors.grey[800]!, width: 1),
                       ),

@@ -1,3 +1,4 @@
+import 'package:another_iptv_player/screens/xtream-codes/xtream_code_dashboard.dart';
 import 'package:another_iptv_player/l10n/localization_extension.dart';
 import 'package:another_iptv_player/screens/search_screen.dart';
 import 'package:flutter/material.dart';
@@ -114,7 +115,9 @@ class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
   ) {
     return Scaffold(
       body: _buildPageView(controller),
-      bottomNavigationBar: _buildBottomNavigationBar(context, controller),
+      bottomNavigationBar: controller.currentIndex == 0
+          ? null
+          : _buildBottomNavigationBar(context, controller),
     );
   }
 
@@ -126,7 +129,8 @@ class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
     return Scaffold(
       body: Row(
         children: [
-          _buildDesktopNavigationBar(context, controller, constraints),
+          if (controller.currentIndex != 0)
+            _buildDesktopNavigationBar(context, controller, constraints),
           Expanded(child: _buildPageView(controller)),
         ],
       ),
@@ -134,14 +138,21 @@ class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
   }
 
   Widget _buildPageView(XtreamCodeHomeController controller) {
-    return IndexedStack(
-      index: controller.currentIndex,
+    return PageView(
+      controller: controller.pageController,
+      onPageChanged: controller.onPageChanged,
+      physics: const NeverScrollableScrollPhysics(),
       children: _buildPages(controller),
     );
   }
 
   List<Widget> _buildPages(XtreamCodeHomeController controller) {
     return [
+      XtreamCodeDashboard(
+        playlist: widget.playlist,
+        controller: controller,
+        onSearchTap: () => _navigateToSearch(context, ContentType.liveStream), // Default to live
+      ),
       WatchHistoryScreen(
         key: ValueKey('watch_history_${controller.currentIndex}'),
         playlistId: widget.playlist.id,
@@ -363,7 +374,7 @@ class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
             color: isSelected
                 ? Theme.of(context).colorScheme.primaryContainer
                 : (_hoveredIndex == item.index
-                      ? Colors.grey.withOpacity(0.2)
+                      ? Colors.grey.withValues(alpha: 0.2)
                       : Colors.transparent),
           ),
           child: Column(
@@ -429,22 +440,23 @@ class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
 
   List<NavigationItem> _getNavigationItems(BuildContext context) {
     return [
-      NavigationItem(icon: Icons.history, label: context.loc.history, index: 0),
-      NavigationItem(icon: Icons.live_tv, label: context.loc.live, index: 1),
+      NavigationItem(icon: Icons.home, label: context.loc.home, index: 0),
+      NavigationItem(icon: Icons.history, label: context.loc.history, index: 1),
+      NavigationItem(icon: Icons.live_tv, label: context.loc.live, index: 2),
       NavigationItem(
         icon: Icons.movie_outlined,
         label: context.loc.movie,
-        index: 2,
+        index: 3,
       ),
       NavigationItem(
         icon: Icons.tv,
         label: context.loc.series_plural,
-        index: 3,
+        index: 4,
       ),
       NavigationItem(
         icon: Icons.settings,
         label: context.loc.settings,
-        index: 4,
+        index: 5,
       ),
     ];
   }

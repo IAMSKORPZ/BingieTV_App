@@ -77,6 +77,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get try_again => 'Réessayer';
 
   @override
+  String get home => 'Accueil';
+
+  @override
   String get history => 'Historique';
 
   @override

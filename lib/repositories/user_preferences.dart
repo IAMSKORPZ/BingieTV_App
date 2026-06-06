@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -140,7 +139,7 @@ class UserPreferences {
 
   static Future<void> setSubtitleTextColor(Color textColor) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_keySubtitleTextColor, textColor.value);
+    await prefs.setInt(_keySubtitleTextColor, textColor.toARGB32());
   }
 
   static Future<Color> getSubtitleBackgroundColor() async {
@@ -151,7 +150,7 @@ class UserPreferences {
 
   static Future<void> setSubtitleBackgroundColor(Color backgroundColor) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_keySubtitleBackgroundColor, backgroundColor.value);
+    await prefs.setInt(_keySubtitleBackgroundColor, backgroundColor.toARGB32());
   }
 
   static Future<FontWeight> getSubtitleFontWeight() async {

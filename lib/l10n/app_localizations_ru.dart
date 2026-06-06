@@ -76,6 +76,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get try_again => 'Попробовать снова';
 
   @override
+  String get home => 'Главная';
+
+  @override
   String get history => 'История';
 
   @override

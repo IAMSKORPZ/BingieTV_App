@@ -141,7 +141,7 @@ class _ProviderFormScreenState extends State<ProviderFormScreen> {
 
   Widget _buildTypeSelector() {
     return DropdownButtonFormField<IptvProviderType>(
-      value: _type,
+      initialValue: _type,
       decoration: const InputDecoration(
         labelText: 'Provider Type',
         prefixIcon: Icon(Icons.hub_outlined),

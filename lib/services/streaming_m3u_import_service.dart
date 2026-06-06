@@ -14,6 +14,7 @@ import 'package:another_iptv_player/models/m3u_item.dart';
 import 'package:another_iptv_player/models/m3u_series.dart';
 import 'package:another_iptv_player/services/import_recovery_service.dart';
 import 'package:another_iptv_player/services/m3u_parser.dart';
+import 'package:another_iptv_player/repositories/search_repository.dart';
 import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
 
@@ -24,12 +25,15 @@ class StreamingM3uImportService {
   final int batchSize;
   final Uuid _uuid = Uuid();
   final ImportRecoveryService recoveryService;
+  final SearchRepository searchRepository;
 
   StreamingM3uImportService({
     required this.database,
     this.batchSize = defaultBatchSize,
     ImportRecoveryService? recoveryService,
-  }) : recoveryService = recoveryService ?? ImportRecoveryService();
+    SearchRepository? searchRepository,
+  })  : recoveryService = recoveryService ?? ImportRecoveryService(),
+        searchRepository = searchRepository ?? SearchRepository(database: database);
 
   Future<ImportProgressModel> importFile({
     required String playlistId,
@@ -194,6 +198,7 @@ class StreamingM3uImportService {
       startedAt: startedAt,
     );
     await recoveryService.markCompleted(session.id);
+    await searchRepository.rebuildProviderIndex(playlistId);
     onProgress?.call(done);
     return done;
   }

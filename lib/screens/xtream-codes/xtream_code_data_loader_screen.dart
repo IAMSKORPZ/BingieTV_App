@@ -13,9 +13,9 @@ import '../playlist_screen.dart';
 
 class XtreamCodeDataLoaderScreen extends StatefulWidget {
   final Playlist playlist;
-  bool refreshAll = false;
+  final bool refreshAll;
 
-  XtreamCodeDataLoaderScreen({
+  const XtreamCodeDataLoaderScreen({
     super.key,
     required this.playlist,
     this.refreshAll = false,
@@ -197,7 +197,7 @@ class XtreamCodeDataLoaderScreenState extends State<XtreamCodeDataLoaderScreen>
                                       BoxShadow(
                                         color: Color(
                                           0xFF00d4ff,
-                                        ).withOpacity(0.3),
+                                        ).withValues(alpha: 0.3),
                                         blurRadius: 20,
                                         spreadRadius: 5,
                                       ),
@@ -227,7 +227,7 @@ class XtreamCodeDataLoaderScreenState extends State<XtreamCodeDataLoaderScreen>
                             context.loc.slogan,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.white.withValues(alpha: 0.7),
                               letterSpacing: 1,
                             ),
                           ),
@@ -261,8 +261,8 @@ class XtreamCodeDataLoaderScreenState extends State<XtreamCodeDataLoaderScreen>
                                             shape: BoxShape.circle,
                                             border: Border.all(
                                               color: Color(0xFF00d4ff)
-                                                  .withOpacity(
-                                                    (1 - _waveAnimation.value) *
+                                                  .withValues(
+                                                    alpha: (1 - _waveAnimation.value) *
                                                         (0.3 - i * 0.1),
                                                   ),
                                               width: 2,
@@ -312,7 +312,7 @@ class XtreamCodeDataLoaderScreenState extends State<XtreamCodeDataLoaderScreen>
                               '${controller.importProgress!.processedItems} items',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.white.withOpacity(0.7),
+                                color: Colors.white.withValues(alpha: 0.7),
                               ),
                             ),
                           ],
@@ -336,7 +336,7 @@ class XtreamCodeDataLoaderScreenState extends State<XtreamCodeDataLoaderScreen>
                                   borderRadius: BorderRadius.circular(4),
                                   color: isActive
                                       ? Color(0xFF00d4ff)
-                                      : Colors.white.withOpacity(0.3),
+                                      : Colors.white.withValues(alpha: 0.3),
                                 ),
                               );
                             }).toList(),
@@ -357,7 +357,7 @@ class XtreamCodeDataLoaderScreenState extends State<XtreamCodeDataLoaderScreen>
                                     height: 6,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(3),
-                                      color: Colors.white.withOpacity(0.1),
+                                      color: Colors.white.withValues(alpha: 0.1),
                                     ),
                                     child: FractionallySizedBox(
                                       alignment: Alignment.centerLeft,
@@ -397,10 +397,10 @@ class XtreamCodeDataLoaderScreenState extends State<XtreamCodeDataLoaderScreen>
                             Container(
                               padding: EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
+                                color: Colors.red.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: Colors.red.withOpacity(0.3),
+                                  color: Colors.red.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Column(
@@ -427,7 +427,7 @@ class XtreamCodeDataLoaderScreenState extends State<XtreamCodeDataLoaderScreen>
                                     ),
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.white.withOpacity(0.8),
+                                      color: Colors.white.withValues(alpha: 0.8),
                                     ),
                                     textAlign: TextAlign.center,
                                   ),

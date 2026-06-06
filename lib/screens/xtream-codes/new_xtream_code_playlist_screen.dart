@@ -123,7 +123,7 @@ class NewXtreamCodePlaylistScreenState
           context.loc.xtream_code_description,
           style: TextStyle(
             fontSize: 16,
-            color: colorScheme.onSurface.withOpacity(0.7),
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
       ],
@@ -289,7 +289,7 @@ class NewXtreamCodePlaylistScreenState
             suffixIcon: IconButton(
               icon: Icon(
                 _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                color: colorScheme.onSurface.withOpacity(0.6),
+                color: colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               onPressed: () {
                 setState(() {
@@ -335,7 +335,7 @@ class NewXtreamCodePlaylistScreenState
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
-          disabledBackgroundColor: colorScheme.onSurface.withOpacity(0.12),
+          disabledBackgroundColor: colorScheme.onSurface.withValues(alpha: 0.12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

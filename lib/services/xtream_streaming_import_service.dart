@@ -8,6 +8,7 @@ import 'package:another_iptv_player/models/series.dart';
 import 'package:another_iptv_player/models/vod_streams.dart';
 import 'package:another_iptv_player/models/import_session_model.dart';
 import 'package:another_iptv_player/services/import_recovery_service.dart';
+import 'package:another_iptv_player/repositories/search_repository.dart';
 import 'package:another_iptv_player/services/streaming_json_array_decoder.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
@@ -20,6 +21,7 @@ class XtreamStreamingImportService {
   final int batchSize;
   final StreamingJsonArrayDecoder _decoder = StreamingJsonArrayDecoder();
   final ImportRecoveryService recoveryService;
+  final SearchRepository searchRepository;
   final Uuid _uuid = const Uuid();
 
   XtreamStreamingImportService({
@@ -27,8 +29,10 @@ class XtreamStreamingImportService {
     http.Client? client,
     this.batchSize = defaultBatchSize,
     ImportRecoveryService? recoveryService,
+    SearchRepository? searchRepository,
   })  : client = client ?? http.Client(),
-        recoveryService = recoveryService ?? ImportRecoveryService();
+        recoveryService = recoveryService ?? ImportRecoveryService(),
+        searchRepository = searchRepository ?? SearchRepository(database: database);
 
   Future<ImportProgressModel> importLiveStreams({
     required ApiConfig config,
@@ -163,6 +167,7 @@ class XtreamStreamingImportService {
       startedAt: startedAt,
     );
     await recoveryService.markCompleted(session.id);
+    await searchRepository.rebuildProviderIndex(playlistId);
     onProgress?.call(done);
     return done;
   }

@@ -11,7 +11,6 @@ import 'package:another_iptv_player/widgets/video_widget.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart' hide PlayerState;
 import 'package:media_kit_video/media_kit_video.dart';
 import '../../models/content_type.dart';
@@ -192,7 +191,7 @@ class _PlayerWidgetState extends State<PlayerWidget>
             title: item.name,
             artist: _getContentTypeDisplayName(),
             album: AppState.currentPlaylist?.name ?? '',
-            artUri: item.imagePath != null ? Uri.parse(item.imagePath!) : null,
+            artUri: Uri.parse(item.imagePath),
             playable: true,
             extras: {
               'url': item.url,
@@ -217,9 +216,7 @@ class _PlayerWidgetState extends State<PlayerWidget>
                 title: item.name,
                 artist: _getContentTypeDisplayName(),
                 album: AppState.currentPlaylist?.name ?? '',
-                artUri: item.imagePath != null
-                    ? Uri.parse(item.imagePath!)
-                    : null,
+                artUri: Uri.parse(item.imagePath),
                 playable: true,
                 extras: {'url': item.url, 'startPosition': 0},
               ),
@@ -252,9 +249,7 @@ class _PlayerWidgetState extends State<PlayerWidget>
         id: contentItem.id.toString(),
         title: contentItem.name,
         artist: _getContentTypeDisplayName(),
-        artUri: contentItem.imagePath != null
-            ? Uri.parse(contentItem.imagePath!)
-            : null,
+        artUri: Uri.parse(contentItem.imagePath),
         extras: {
           'url': contentItem.url,
           'startPosition': watchHistory?.watchDuration?.inMilliseconds ?? 0,
@@ -573,7 +568,7 @@ class _PlayerWidgetState extends State<PlayerWidget>
           });
         },
         child: Container(
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
           child: Align(
             alignment: Alignment.centerRight,
             child: GestureDetector(
@@ -582,10 +577,10 @@ class _PlayerWidgetState extends State<PlayerWidget>
                 width: panelWidth,
                 height: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.95),
+                  color: Colors.black.withValues(alpha: 0.95),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withValues(alpha: 0.5),
                       blurRadius: 10,
                       spreadRadius: 2,
                     ),
@@ -597,7 +592,7 @@ class _PlayerWidgetState extends State<PlayerWidget>
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.8),
+                        color: Colors.black.withValues(alpha: 0.8),
                         border: Border(
                           bottom: BorderSide(
                             color: Colors.grey[800]!,
@@ -686,8 +681,8 @@ class _PlayerWidgetState extends State<PlayerWidget>
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: isSelected
-              ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
-              : Colors.white.withOpacity(0.05),
+              ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(8),
           border: isSelected
               ? Border.all(

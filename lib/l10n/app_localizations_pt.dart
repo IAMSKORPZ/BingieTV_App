@@ -77,6 +77,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get try_again => 'Tentar Novamente';
 
   @override
+  String get home => 'Início';
+
+  @override
   String get history => 'Histórico';
 
   @override

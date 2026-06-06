@@ -75,6 +75,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get try_again => '重试';
 
   @override
+  String get home => '首页';
+
+  @override
   String get history => '历史记录';
 
   @override

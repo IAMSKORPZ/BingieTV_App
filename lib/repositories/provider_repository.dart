@@ -3,10 +3,13 @@ import 'dart:io';
 
 import 'package:another_iptv_player/models/api_configuration_model.dart';
 import 'package:another_iptv_player/models/provider_model.dart';
+import 'package:another_iptv_player/models/stalker_provider_config.dart';
 import 'package:another_iptv_player/repositories/iptv_repository.dart';
 import 'package:another_iptv_player/repositories/user_preferences.dart';
 import 'package:another_iptv_player/services/app_state.dart';
 import 'package:another_iptv_player/services/playlist_service.dart';
+import 'package:another_iptv_player/services/secure_storage_service.dart';
+import 'package:another_iptv_player/services/stalker_auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class ProviderRepository {
@@ -198,6 +201,28 @@ class SharedPreferencesProviderRepository implements ProviderRepository {
             ),
           );
         }
+      } else if (provider.type == IptvProviderType.stalker) {
+        _validateUrl(
+          provider.providerConfig['portalUrl'] as String?,
+          'Portal URL',
+        );
+        final mac = await SecureStorageService.instance.readProviderSecret(
+          provider.id,
+          'stalker_mac',
+        );
+        if (mac == null || mac.trim().isEmpty) {
+          return updateProvider(
+            provider.copyWith(
+              status: ProviderStatus.authFailed,
+              lastFailureReason: 'MAC address is required.',
+            ),
+          );
+        }
+        await StalkerAuthService().authenticate(
+          providerId: provider.id,
+          config: StalkerProviderConfig.fromJson(provider.providerConfig),
+          macAddress: mac,
+        );
       }
 
       return updateProvider(
@@ -222,17 +247,30 @@ class SharedPreferencesProviderRepository implements ProviderRepository {
     final encoded = prefs.getString(_providersKey);
     if (encoded == null || encoded.isEmpty) return [];
     final decoded = jsonDecode(encoded) as List<dynamic>;
-    return decoded
+    final providers = decoded
         .map((item) => IptvProvider.fromJson(item as Map<String, dynamic>))
         .toList();
+    return Future.wait(providers.map(_hydrateSecret));
   }
 
   Future<void> _saveAll(List<IptvProvider> providers) async {
+    for (final provider in providers) {
+      await SecureStorageService.instance.saveProviderPassword(
+        provider.id,
+        provider.password,
+      );
+    }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
       _providersKey,
       jsonEncode(providers.map((provider) => provider.toJson()).toList()),
     );
+  }
+
+  Future<IptvProvider> _hydrateSecret(IptvProvider provider) async {
+    final password =
+        await SecureStorageService.instance.readProviderPassword(provider.id);
+    return password == null ? provider : provider.copyWith(password: password);
   }
 
   List<IptvProvider> _normalizeDefaults(List<IptvProvider> providers) {
@@ -281,7 +319,13 @@ class SharedPreferencesProviderRepository implements ProviderRepository {
           throw ProviderValidationException('M3U file is not readable.');
         }
         break;
-      }
+      case IptvProviderType.stalker:
+        _validateUrl(
+          provider.providerConfig['portalUrl'] as String?,
+          'Portal URL',
+        );
+        break;
+    }
   }
 
   void _validateUrl(String? value, String label) {

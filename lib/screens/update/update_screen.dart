@@ -108,7 +108,7 @@ class UpdateScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text('Version: ${result.updateInfo.latestVersion}'),
             if (release?.publishedAt != null)
-              Text('Published: ${_format(release.publishedAt)}'),
+              Text('Published: ${_format(release!.publishedAt)}'),
             if (result.forceRequired)
               const Padding(
                 padding: EdgeInsets.only(top: 8),

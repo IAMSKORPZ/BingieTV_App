@@ -9,8 +9,10 @@ import 'package:another_iptv_player/models/category_type.dart';
 import 'package:another_iptv_player/models/category_with_content_type.dart';
 import 'package:another_iptv_player/models/content_type.dart';
 import 'package:another_iptv_player/models/import_progress_model.dart';
+import 'package:another_iptv_player/models/import_session_model.dart';
 import 'package:another_iptv_player/models/m3u_item.dart';
 import 'package:another_iptv_player/models/m3u_series.dart';
+import 'package:another_iptv_player/services/import_recovery_service.dart';
 import 'package:another_iptv_player/services/m3u_parser.dart';
 import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
@@ -21,11 +23,13 @@ class StreamingM3uImportService {
   final AppDatabase database;
   final int batchSize;
   final Uuid _uuid = Uuid();
+  final ImportRecoveryService recoveryService;
 
   StreamingM3uImportService({
     required this.database,
     this.batchSize = defaultBatchSize,
-  });
+    ImportRecoveryService? recoveryService,
+  }) : recoveryService = recoveryService ?? ImportRecoveryService();
 
   Future<ImportProgressModel> importFile({
     required String playlistId,
@@ -84,6 +88,14 @@ class StreamingM3uImportService {
     ImportCancellationToken? cancellationToken,
   }) async {
     final startedAt = DateTime.now();
+    final session = ImportSessionModel(
+      id: _uuid.v4(),
+      providerId: playlistId,
+      type: 'm3u',
+      status: ImportSessionStatus.running,
+      startedAt: startedAt,
+    );
+    await recoveryService.saveSession(session);
     var processed = 0;
     final categories = <CategoryWithContentType, String>{};
     final batch = <M3uItem>[];
@@ -164,9 +176,14 @@ class StreamingM3uImportService {
       await flush();
       await _writeCategories(playlistId, categories);
       await _writeSeries(playlistId, seriesItems);
-    } catch (_) {
+    } catch (e) {
       await database.deleteAllM3uItems(playlistId);
       await database.deleteAllCategoriesByPlaylist(playlistId);
+      if (e is ImportCancelledException) {
+        await recoveryService.markCancelled(session.id);
+      } else {
+        await recoveryService.markFailed(session.id, e.toString());
+      }
       rethrow;
     }
 
@@ -176,6 +193,7 @@ class StreamingM3uImportService {
       totalItems: totalItems,
       startedAt: startedAt,
     );
+    await recoveryService.markCompleted(session.id);
     onProgress?.call(done);
     return done;
   }

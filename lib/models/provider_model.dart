@@ -1,6 +1,6 @@
 import 'package:another_iptv_player/models/playlist_model.dart';
 
-enum IptvProviderType { xtreamCodes, m3uUrl, m3uFile }
+enum IptvProviderType { xtreamCodes, m3uUrl, m3uFile, stalker }
 
 enum ProviderStatus { online, offline, authFailed, unknown }
 
@@ -22,6 +22,7 @@ class IptvProvider {
   final String? playlistUrl;
   final String? localFilePath;
   final String? epgUrl;
+  final Map<String, dynamic> providerConfig;
 
   const IptvProvider({
     required this.id,
@@ -41,6 +42,7 @@ class IptvProvider {
     this.playlistUrl,
     this.localFilePath,
     this.epgUrl,
+    this.providerConfig = const {},
   });
 
   IptvProvider copyWith({
@@ -59,6 +61,7 @@ class IptvProvider {
     String? playlistUrl,
     String? localFilePath,
     String? epgUrl,
+    Map<String, dynamic>? providerConfig,
     bool clearLastFailureReason = false,
   }) {
     return IptvProvider(
@@ -80,6 +83,7 @@ class IptvProvider {
       playlistUrl: playlistUrl ?? this.playlistUrl,
       localFilePath: localFilePath ?? this.localFilePath,
       epgUrl: epgUrl ?? this.epgUrl,
+      providerConfig: providerConfig ?? this.providerConfig,
     );
   }
 
@@ -92,7 +96,9 @@ class IptvProvider {
           : PlaylistType.m3u,
       url: type == IptvProviderType.xtreamCodes
           ? serverUrl
-          : (playlistUrl ?? localFilePath),
+          : (type == IptvProviderType.stalker
+              ? providerConfig['portalUrl'] as String?
+              : (playlistUrl ?? localFilePath)),
       username: username,
       password: password,
       createdAt: createdAt,
@@ -138,10 +144,10 @@ class IptvProvider {
       'lastFailureReason': lastFailureReason,
       'serverUrl': serverUrl,
       'username': username,
-      'password': password,
       'playlistUrl': playlistUrl,
       'localFilePath': localFilePath,
       'epgUrl': epgUrl,
+      'providerConfig': providerConfig,
     };
   }
 
@@ -172,6 +178,9 @@ class IptvProvider {
       playlistUrl: json['playlistUrl'] as String?,
       localFilePath: json['localFilePath'] as String?,
       epgUrl: json['epgUrl'] as String?,
+      providerConfig: json['providerConfig'] is Map<String, dynamic>
+          ? Map<String, dynamic>.from(json['providerConfig'] as Map)
+          : const {},
     );
   }
 }
@@ -185,6 +194,8 @@ extension IptvProviderLabels on IptvProviderType {
         return 'M3U URL';
       case IptvProviderType.m3uFile:
         return 'M3U File';
+      case IptvProviderType.stalker:
+        return 'Stalker Portal';
     }
   }
 }

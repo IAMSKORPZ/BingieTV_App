@@ -16,7 +16,7 @@ class GitHubRemoteConfigProvider implements RemoteConfigProvider {
   GitHubRemoteConfigProvider({
     String configUrl = const String.fromEnvironment(
       'BINGIETV_REMOTE_CONFIG_URL',
-      defaultValue: 'https://raw.githubusercontent.com/bsogulcan/another-iptv-player/main/remote_config.json',
+      defaultValue: 'https://raw.githubusercontent.com/IAMSKORPZ/BingieTV_App/main/remote_config.json',
     ),
     http.Client? client,
   })  : configUri = configUrl.trim().isEmpty ? null : Uri.tryParse(configUrl),

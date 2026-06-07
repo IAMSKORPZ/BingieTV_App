@@ -1,4 +1,4 @@
-import 'package:another_iptv_player/controllers/branding_controller.dart';
+import 'package:another_iptv_player/services/config_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,7 +7,7 @@ class MaintenanceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maintenance = context.watch<BrandingController>().maintenance;
+    final maintenance = context.watch<ConfigService>().config.maintenance;
 
     return Scaffold(
       body: Container(
@@ -33,7 +33,7 @@ class MaintenanceScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              maintenance.title,
+              maintenance.title.toUpperCase(),
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -49,9 +49,9 @@ class MaintenanceScreen extends StatelessWidget {
             ),
             const SizedBox(height: 48),
             ElevatedButton.icon(
-              onPressed: () => context.read<BrandingController>().load(forceRefresh: true),
+              onPressed: () => context.read<ConfigService>().refresh(),
               icon: const Icon(Icons.refresh),
-              label: const Text('Check Again'),
+              label: const Text('Retry Connection'),
             ),
           ],
         ),

@@ -290,5 +290,6 @@
   "series_content_type": "Сериал",
   "last_update": "Последнее Обновление",
   "minutes": "мин",
-  "duration_label": "Продолжительность"
+  "duration_label": "Продолжительность",
+  "announcements": "Объявления"
 }

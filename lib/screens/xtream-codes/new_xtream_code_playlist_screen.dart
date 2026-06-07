@@ -2,7 +2,7 @@ import 'package:another_iptv_player/l10n/localization_extension.dart';
 import 'package:another_iptv_player/screens/xtream-codes/xtream_code_data_loader_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../controllers/branding_controller.dart';
+import '../../../../services/config_service.dart';
 import '../../../../controllers/playlist_controller.dart';
 import '../../../../models/api_configuration_model.dart';
 import '../../../../models/playlist_model.dart';
@@ -60,16 +60,17 @@ class NewXtreamCodePlaylistScreenState
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final branding = context.watch<BrandingController>().branding;
+    final config = context.watch<ConfigService>().config;
+    final loginBg = config.backgrounds.login;
 
     return Scaffold(
-      appBar: AppBar(title: Text('XStream Playlist')),
+      appBar: AppBar(title: Text('${config.branding.appName} Login')),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: branding.loginBackgroundUrl != null
-                ? NetworkImage(branding.loginBackgroundUrl!)
-                : const AssetImage('assets/tv_banner.png') as ImageProvider,
+            image: loginBg.isNotEmpty
+                ? NetworkImage(loginBg)
+                : const AssetImage('assets/images/background.png') as ImageProvider,
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
               Colors.black.withValues(alpha: 0.6),
@@ -80,14 +81,14 @@ class NewXtreamCodePlaylistScreenState
         child: Consumer<PlaylistController>(
           builder: (context, controller, child) {
             return SingleChildScrollView(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildHeader(colorScheme),
-                    SizedBox(height: 32),
+                    _buildHeader(colorScheme, config.branding.appName),
+                    const SizedBox(height: 32),
                     _buildPlaylistNameField(colorScheme),
                     SizedBox(height: 20),
                     _buildUrlField(colorScheme),
@@ -113,7 +114,7 @@ class NewXtreamCodePlaylistScreenState
     );
   }
 
-  Widget _buildHeader(ColorScheme colorScheme) {
+  Widget _buildHeader(ColorScheme colorScheme, String appName) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -126,9 +127,9 @@ class NewXtreamCodePlaylistScreenState
           ),
           child: Icon(Icons.stream, size: 30, color: colorScheme.onPrimary),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Text(
-          'XStream Code Playlist',
+          '$appName Setup',
           style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.bold,

@@ -1,10 +1,10 @@
 import 'package:another_iptv_player/models/api_configuration_model.dart';
 import 'package:another_iptv_player/repositories/iptv_repository.dart';
 import 'package:another_iptv_player/services/app_state.dart';
+import 'package:another_iptv_player/services/config_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../controllers/branding_controller.dart';
 import '../../controllers/xtream_code_home_controller.dart';
 import '../../models/playlist_model.dart';
 import '../../models/content_type.dart';
@@ -18,6 +18,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../movies/xtream_movies_screen.dart';
 import '../series/xtream_series_screen.dart';
+import '../live_stream/xtream_live_screen.dart';
 import '../settings/announcement_center_screen.dart';
 
 class XtreamCodeHomeScreen extends StatefulWidget {
@@ -66,25 +67,25 @@ class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
   }
 
   void _showAboutDialog() {
-    final branding = context.read<BrandingController>().branding;
+    final config = context.read<ConfigService>().config;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF101827),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('About ${branding.appName}', style: const TextStyle(color: Colors.white)),
+        title: Text('About ${config.branding.appName}', style: const TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('BingieTV is a premium IPTV player.', style: TextStyle(color: Colors.white70)),
+            Text('${config.branding.appName} is a premium IPTV player.', style: const TextStyle(color: Colors.white70)),
             const SizedBox(height: 12),
-            if (branding.websiteUrl != null)
-              _AboutLink(label: 'Website', url: branding.websiteUrl!),
-            if (branding.discordUrl != null)
-              _AboutLink(label: 'Discord', url: branding.discordUrl!),
-            if (branding.supportUrl != null)
-              _AboutLink(label: 'Support', url: branding.supportUrl!),
+            if (config.about.website.isNotEmpty)
+              _AboutLink(label: 'Website', url: config.about.website),
+            if (config.about.discord.isNotEmpty)
+              _AboutLink(label: 'Discord', url: config.about.discord),
+            if (config.about.support.isNotEmpty)
+              _AboutLink(label: 'Support', url: config.about.support),
             const SizedBox(height: 12),
             Text('Version: $_version', style: const TextStyle(color: Colors.white54, fontSize: 12)),
           ],
@@ -145,9 +146,9 @@ class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
                 version: _version,
               ),
               WatchHistoryScreen(playlistId: widget.playlist.id),
-              const XtreamLiveScreen(),
-              const XtreamMoviesScreen(),
-              const XtreamSeriesScreen(),
+              XtreamLiveScreen(),
+              XtreamMoviesScreen(),
+              XtreamSeriesScreen(),
               XtreamCodePlaylistSettingsScreen(playlist: widget.playlist),
             ],
           );

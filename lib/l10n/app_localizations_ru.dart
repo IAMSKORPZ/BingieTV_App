@@ -849,5 +849,5 @@ class AppLocalizationsRu extends AppLocalizations {
   String get duration_label => 'Продолжительность';
 
   @override
-  String get announcements => 'Announcements';
+  String get announcements => 'Объявления';
 }

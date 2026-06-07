@@ -856,5 +856,5 @@ class AppLocalizationsFr extends AppLocalizations {
   String get duration_label => 'Durée';
 
   @override
-  String get announcements => 'Announcements';
+  String get announcements => 'Annonces';
 }

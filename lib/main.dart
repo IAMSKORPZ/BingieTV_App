@@ -13,6 +13,7 @@ import 'controllers/update_controller.dart';
 import 'screens/app_initializer_screen.dart';
 import 'services/cache_policy_service.dart';
 import 'services/performance_service.dart';
+import 'services/config_service.dart';
 import 'widgets/maintenance_banner.dart';
 import 'widgets/update_startup_check.dart';
 import 'l10n/app_localizations.dart';
@@ -44,6 +45,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => PlaylistController()),
         ChangeNotifierProvider(create: (_) => ThemeManager()),
         ChangeNotifierProvider(create: (_) => BrandingController()..load()),
+        ChangeNotifierProvider(create: (_) => ConfigService()..initialize()),
         ChangeNotifierProvider(create: (_) => UpdateController()..loadState()),
       ],
       child: const MyApp(),
@@ -58,7 +60,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context);
     final themeManager = Provider.of<ThemeManager>(context);
-    final brandingController = Provider.of<BrandingController>(context);
+    final config = context.watch<ConfigService>().config;
 
     return MaterialApp(
       locale: localeProvider.locale,
@@ -70,7 +72,7 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      title: brandingController.branding.appName,
+      title: config.branding.appName,
       theme: themeManager.currentThemeData,
       themeMode: ThemeMode.dark,
       builder: (context, child) => FocusTraversalGroup(

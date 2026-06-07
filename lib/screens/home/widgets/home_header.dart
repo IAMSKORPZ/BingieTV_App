@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../../../controllers/branding_controller.dart';
-import '../home_theme.dart';
+import '../../../services/config_service.dart';
 
 class HomeHeader extends StatelessWidget {
   final VoidCallback onSearch;
@@ -20,7 +19,7 @@ class HomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final branding = context.watch<BrandingController>().branding;
+    final config = context.watch<ConfigService>().config;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -33,7 +32,7 @@ class HomeHeader extends StatelessWidget {
             if (!isSmall) ...[
               const SizedBox(width: 6),
               Text(
-                branding.appName.toUpperCase(),
+                config.branding.appName.toUpperCase(),
                 style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.1),
               ),
             ],

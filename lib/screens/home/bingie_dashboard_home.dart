@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../../controllers/branding_controller.dart';
+import '../../services/config_service.dart';
 import 'widgets/home_tile.dart';
 import 'widgets/home_header.dart';
 import 'widgets/home_footer.dart';
@@ -44,7 +44,7 @@ class BingieDashboardHome extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final branding = context.watch<BrandingController>().branding;
+        final config = context.watch<ConfigService>().config;
         final double width = constraints.maxWidth;
         final double height = constraints.maxHeight;
         
@@ -54,15 +54,17 @@ class BingieDashboardHome extends StatelessWidget {
         final double verticalPadding = height * 0.02; 
         final double gap = width * 0.015;
 
+        final homeBg = config.backgrounds.home;
+
         return Container(
           width: width,
           height: height,
           decoration: BoxDecoration(
             color: HomeTheme.background,
             image: DecorationImage(
-              image: branding.homeBackgroundUrl != null
-                  ? NetworkImage(branding.homeBackgroundUrl!)
-                  : const AssetImage('assets/tv_banner.png') as ImageProvider,
+              image: (homeBg.isNotEmpty)
+                  ? NetworkImage(homeBg)
+                  : const AssetImage('assets/images/background.png') as ImageProvider,
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
                 Colors.black.withValues(alpha: 0.5),
@@ -148,8 +150,12 @@ class BingieDashboardHome extends StatelessWidget {
                               children: [
                                 Expanded(
                                   child: HomeTile(
-                                    title: 'NEWS',
-                                    subtitle: 'Service alerts',
+                                    title: config.announcement.enabled && config.announcement.title.isNotEmpty 
+                                        ? config.announcement.title.toUpperCase() 
+                                        : 'NEWS',
+                                    subtitle: config.announcement.enabled && config.announcement.message.isNotEmpty 
+                                        ? config.announcement.message 
+                                        : 'Service alerts',
                                     icon: Icons.campaign_outlined,
                                     colors: HomeTheme.darkTileColors,
                                     iconColor: HomeTheme.iconAnnouncements,

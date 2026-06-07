@@ -4,7 +4,7 @@ import 'package:another_iptv_player/screens/playlist_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../../controllers/branding_controller.dart';
+import '../../services/config_service.dart';
 import '../../repositories/user_preferences.dart';
 import '../../services/app_state.dart';
 import '../../services/playlist_service.dart';
@@ -53,9 +53,9 @@ class _AppInitializerScreenState extends State<AppInitializerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final branding = context.watch<BrandingController>();
+    final configService = context.watch<ConfigService>();
     
-    if (_isLoading || branding.isLoading) {
+    if (_isLoading || configService.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 

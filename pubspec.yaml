@@ -60,9 +60,7 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    - assets/logo.png
-    - assets/logo_alternative.png
-    - assets/tv_banner.png
+    - assets/images/
 
 flutter_icons:
   android: true

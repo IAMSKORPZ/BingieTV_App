@@ -18,28 +18,58 @@ class HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
 
-    return Row(
-      children: [
-        const Icon(Icons.play_arrow_rounded, color: Color(0xFF3B82F6), size: 24),
-        const SizedBox(width: 6),
-        const Text(
-          'BINGIE',
-          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.1),
-        ),
-        const Text(
-          'TV',
-          style: TextStyle(color: Color(0xFF60A5FA), fontSize: 20, fontWeight: FontWeight.w900),
-        ),
-        const Spacer(),
-        Text(
-          DateFormat('hh:mm a').format(now),
-          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        const Spacer(),
-        HeaderButton(icon: Icons.search, label: 'Search', onTap: onSearch),
-        HeaderButton(icon: Icons.person_outline, label: 'Profile', onTap: onProfile),
-        HeaderButton(icon: Icons.info_outline, label: 'About', onTap: onAbout),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isSmall = constraints.maxWidth < 600;
+        
+        return Row(
+          children: [
+            // Left: Logo
+            const Icon(Icons.play_arrow_rounded, color: Color(0xFF3B82F6), size: 24),
+            if (!isSmall) ...[
+              const SizedBox(width: 6),
+              const Text(
+                'BINGIE',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.1),
+              ),
+              const Text(
+                'TV',
+                style: TextStyle(color: Color(0xFF60A5FA), fontSize: 18, fontWeight: FontWeight.w900),
+              ),
+            ],
+            const Spacer(),
+            // Center: Time
+            Text(
+              DateFormat('hh:mm a').format(now),
+              style: TextStyle(
+                color: Colors.white, 
+                fontSize: isSmall ? 14 : 16, 
+                fontWeight: FontWeight.w600
+              ),
+            ),
+            const Spacer(),
+            // Right: Actions
+            HeaderButton(
+              icon: Icons.search, 
+              label: 'Search', 
+              onTap: onSearch,
+              hideLabel: isSmall,
+            ),
+            HeaderButton(
+              icon: Icons.person_outline, 
+              label: 'Profile', 
+              onTap: onProfile,
+              hideLabel: isSmall,
+            ),
+            HeaderButton(
+              icon: Icons.info_outline, 
+              label: 'About', 
+              onTap: onAbout,
+              hideLabel: isSmall,
+            ),
+          ],
+        );
+      }
     );
   }
 }
@@ -48,12 +78,14 @@ class HeaderButton extends StatefulWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool hideLabel;
 
   const HeaderButton({
     super.key,
     required this.icon,
     required this.label,
     required this.onTap,
+    this.hideLabel = false,
   });
 
   @override
@@ -66,7 +98,7 @@ class _HeaderButtonState extends State<HeaderButton> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 10),
+      padding: const EdgeInsets.only(left: 8),
       child: FocusableActionDetector(
         onFocusChange: (val) => setState(() => _isFocused = val),
         shortcuts: const {
@@ -86,7 +118,10 @@ class _HeaderButtonState extends State<HeaderButton> {
           borderRadius: BorderRadius.circular(12),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: EdgeInsets.symmetric(
+              horizontal: widget.hideLabel ? 10 : 14, 
+              vertical: 8
+            ),
             decoration: BoxDecoration(
               color: _isFocused ? Colors.white : Colors.white.withOpacity(0.06),
               borderRadius: BorderRadius.circular(12),
@@ -100,15 +135,17 @@ class _HeaderButtonState extends State<HeaderButton> {
                   color: _isFocused ? Colors.black : Colors.white, 
                   size: 18
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  widget.label, 
-                  style: TextStyle(
-                    color: _isFocused ? Colors.black : Colors.white, 
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  )
-                ),
+                if (!widget.hideLabel) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.label, 
+                    style: TextStyle(
+                      color: _isFocused ? Colors.black : Colors.white, 
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    )
+                  ),
+                ],
               ],
             ),
           ),

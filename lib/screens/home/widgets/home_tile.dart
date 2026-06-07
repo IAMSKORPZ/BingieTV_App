@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../home_theme.dart';
 
 class HomeTile extends StatefulWidget {
   final String title;
@@ -28,10 +29,10 @@ class HomeTile extends StatefulWidget {
 }
 
 class _HomeTileState extends State<HomeTile> {
-  bool focused = false;
-  bool hovered = false;
+  bool _isFocused = false;
+  bool _isHovered = false;
 
-  bool get active => focused || hovered;
+  bool get _isActive => _isFocused || _isHovered;
 
   @override
   Widget build(BuildContext context) {
@@ -39,19 +40,19 @@ class _HomeTileState extends State<HomeTile> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double tileWidth = constraints.maxWidth;
         final double tileHeight = constraints.maxHeight;
         
-        // Scale content based on tile size
-        final double iconSize = widget.large ? (tileHeight * 0.35) : (tileHeight * 0.3);
-        final double titleSize = widget.large ? (tileHeight * 0.12) : (tileHeight * 0.15);
-        final double subtitleSize = titleSize * 0.6;
-        final double spacing = tileHeight * 0.05;
+        // Scale content based on tile size to prevent "zoomed-in" look
+        final double iconSize = widget.large ? (tileHeight * 0.28) : (tileHeight * 0.26);
+        final double titleSize = widget.large ? (tileHeight * 0.11) : (tileHeight * 0.12);
+        final double subtitleSize = titleSize * 0.5;
+        final double spacing = tileHeight * 0.04;
+        final double padding = tileHeight * 0.08;
 
         return FocusableActionDetector(
           autofocus: widget.autofocus,
-          onFocusChange: (value) => setState(() => focused = value),
-          onShowHoverHighlight: (value) => setState(() => hovered = value),
+          onFocusChange: (value) => setState(() => _isFocused = value),
+          onShowHoverHighlight: (value) => setState(() => _isHovered = value),
           shortcuts: const {
             SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
             SingleActivator(LogicalKeyboardKey.select): ActivateIntent(),
@@ -65,41 +66,42 @@ class _HomeTileState extends State<HomeTile> {
             ),
           },
           child: AnimatedScale(
-            scale: active ? 1.03 : 1.0,
+            scale: _isActive ? 1.03 : 1.0,
             duration: const Duration(milliseconds: 140),
+            curve: Curves.easeOutCubic,
             child: InkWell(
               onTap: widget.onTap,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(HomeTheme.borderRadius),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 140),
-                padding: EdgeInsets.all(tileHeight * 0.1),
+                padding: EdgeInsets.all(padding),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(HomeTheme.borderRadius),
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: widget.colors,
                   ),
                   border: Border.all(
-                    color: active ? Colors.white : Colors.white.withOpacity(0.12),
-                    width: active ? 3 : 1.2,
+                    color: _isActive ? Colors.white : Colors.white.withValues(alpha: 0.12),
+                    width: _isActive ? 3.5 : 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: active ? widget.colors.first.withOpacity(0.5) : Colors.black.withOpacity(0.2),
-                      blurRadius: active ? 20 : 10,
-                      spreadRadius: active ? 1 : 0,
+                      color: _isActive 
+                          ? widget.colors.first.withValues(alpha: 0.6) 
+                          : Colors.black.withValues(alpha: 0.2),
+                      blurRadius: _isActive ? 35 : 15,
+                      spreadRadius: _isActive ? 2 : 0,
                     ),
                   ],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(
-                      widget.icon, 
-                      color: mainColor, 
-                      size: iconSize.clamp(20, 80)
-                    ),
+                    // Only one icon per tile, no faded background icon
+                    Icon(widget.icon, color: mainColor, size: iconSize),
                     SizedBox(height: spacing),
                     FittedBox(
                       fit: BoxFit.scaleDown,
@@ -108,22 +110,23 @@ class _HomeTileState extends State<HomeTile> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: titleSize.clamp(14, 38),
+                          fontSize: titleSize,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.5,
                         ),
                       ),
                     ),
-                    if (tileHeight > 60) ...[
-                      SizedBox(height: spacing * 0.5),
+                    if (tileHeight > 100) ...[
+                      const SizedBox(height: 4),
                       Text(
                         widget.subtitle,
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: subtitleSize.clamp(10, 16),
+                          color: Colors.white.withValues(alpha: 0.75),
+                          fontSize: subtitleSize,
+                          fontWeight: FontWeight.w500,
                           height: 1.2,
                         ),
                       ),

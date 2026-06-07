@@ -104,27 +104,28 @@ class _AppShellState extends State<AppShell> {
                     ),
                   ),
                 Expanded(
-                  child: SafeArea(
-                    child: Column(
-                      children: [
-                        if (widget.currentIndex != 0)
-                          UniversalTopBar(
+                  child: Column(
+                    children: [
+                      if (widget.currentIndex != 0)
+                        SafeArea(
+                          bottom: false,
+                          child: UniversalTopBar(
                             title: widget.title,
                             onSearchTap: widget.onSearchTap,
                             onProfileTap: widget.onProfileTap,
                             onRefreshTap: widget.onRefreshTap ?? widget.onRefresh,
                             onSettingsTap: widget.onSettingsTap,
                           ),
-                        Expanded(
-                          child: widget.pages != null
-                              ? IndexedStack(
-                                  index: widget.currentIndex,
-                                  children: widget.pages!,
-                                )
-                              : (widget.body ?? const SizedBox.shrink()),
                         ),
-                      ],
-                    ),
+                      Expanded(
+                        child: widget.pages != null
+                            ? IndexedStack(
+                                index: widget.currentIndex,
+                                children: widget.pages!,
+                              )
+                            : (widget.body ?? const SizedBox.shrink()),
+                      ),
+                    ],
                   ),
                 ),
               ],

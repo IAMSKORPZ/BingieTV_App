@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import '../home_theme.dart';
 
 class HomeHeader extends StatelessWidget {
   final VoidCallback onSearch;
@@ -38,14 +39,33 @@ class HomeHeader extends StatelessWidget {
               ),
             ],
             const Spacer(),
-            // Center: Time
-            Text(
-              DateFormat('hh:mm a').format(now),
-              style: TextStyle(
-                color: Colors.white, 
-                fontSize: isSmall ? 14 : 16, 
-                fontWeight: FontWeight.w600
-              ),
+            // Center: Time & Date (Fixed formatting)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  DateFormat('hh:mm a').format(now),
+                  style: TextStyle(
+                    color: Colors.white, 
+                    fontSize: isSmall ? 14 : 16, 
+                    fontWeight: FontWeight.w600
+                  ),
+                ),
+                if (!isSmall) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Text('|', style: TextStyle(color: Colors.white24, fontSize: 16)),
+                  ),
+                  Text(
+                    DateFormat('MMM d, yyyy').format(now),
+                    style: const TextStyle(
+                      color: Colors.white70, 
+                      fontSize: 14, 
+                      fontWeight: FontWeight.w500
+                    ),
+                  ),
+                ],
+              ],
             ),
             const Spacer(),
             // Right: Actions
@@ -123,9 +143,9 @@ class _HeaderButtonState extends State<HeaderButton> {
               vertical: 8
             ),
             decoration: BoxDecoration(
-              color: _isFocused ? Colors.white : Colors.white.withOpacity(0.06),
+              color: _isFocused ? Colors.white : Colors.white.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _isFocused ? Colors.white : Colors.white.withOpacity(0.12)),
+              border: Border.all(color: _isFocused ? Colors.white : Colors.white.withValues(alpha: 0.12)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

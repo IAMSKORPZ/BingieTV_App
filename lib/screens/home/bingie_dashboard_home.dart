@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'widgets/home_tile.dart';
 import 'widgets/home_header.dart';
 import 'widgets/home_footer.dart';
@@ -36,40 +37,50 @@ class BingieDashboardHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Reinforce fullscreen mode
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Unified scaling logic
         final double width = constraints.maxWidth;
         final double height = constraints.maxHeight;
         
-        // Adjust spacing and padding proportionally
-        final double outerPadding = width * 0.03;
-        final double internalSpacing = width * 0.015;
-        
+        // Unified scaling logic for a premium look
+        final double horizontalPadding = width * 0.04;
+        // Reduced vertical padding to lower the footer slightly
+        final double verticalPadding = height * 0.02; 
+        final double gap = width * 0.015;
+
         return Container(
+          width: width,
+          height: height,
           color: HomeTheme.background,
           padding: EdgeInsets.symmetric(
-            horizontal: outerPadding,
-            vertical: outerPadding * 0.5,
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
           ),
           child: Column(
             children: [
+              // 1. Unified Premium Header
               HomeHeader(
                 onSearch: onSearch,
                 onProfile: onProfile,
                 onAbout: onAbout,
               ),
-              SizedBox(height: internalSpacing),
+              
+              SizedBox(height: gap),
+              
+              // 2. Main Dashboard (Fixed layout across all platforms)
               Expanded(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // LEFT: Large Live TV Tile
+                    // LEFT SIDE: Large LIVE TV (30% as requested)
                     Expanded(
-                      flex: 4,
+                      flex: 30,
                       child: HomeTile(
                         title: 'LIVE TV',
-                        subtitle: 'Watch Live Channels',
+                        subtitle: 'Watch Live TV Channels',
                         icon: Icons.live_tv_rounded,
                         colors: HomeTheme.liveTvColors,
                         onTap: onLiveTv,
@@ -77,31 +88,33 @@ class BingieDashboardHome extends StatelessWidget {
                         autofocus: true,
                       ),
                     ),
-                    SizedBox(width: internalSpacing),
-                    // RIGHT SIDE: Grid area
+                    
+                    SizedBox(width: gap),
+                    
+                    // RIGHT SIDE: (70% as requested)
                     Expanded(
-                      flex: 8,
+                      flex: 70,
                       child: Column(
                         children: [
-                          // TOP ROW: Movies & Series
+                          // Upper Right: Movies & Series
                           Expanded(
-                            flex: 3,
+                            flex: 70, // Increased top row flex to reduce bottom row height
                             child: Row(
                               children: [
                                 Expanded(
                                   child: HomeTile(
                                     title: 'MOVIES',
-                                    subtitle: 'Browse VOD',
+                                    subtitle: 'Browse and watch movies',
                                     icon: Icons.play_circle_outline_rounded,
                                     colors: HomeTheme.moviesColors,
                                     onTap: onMovies,
                                   ),
                                 ),
-                                SizedBox(width: internalSpacing),
+                                SizedBox(width: gap),
                                 Expanded(
                                   child: HomeTile(
                                     title: 'SERIES',
-                                    subtitle: 'Watch TV Shows',
+                                    subtitle: 'Discover and binge series',
                                     icon: Icons.movie_creation_outlined,
                                     colors: HomeTheme.seriesColors,
                                     onTap: onSeries,
@@ -110,38 +123,40 @@ class BingieDashboardHome extends StatelessWidget {
                               ],
                             ),
                           ),
-                          SizedBox(height: internalSpacing),
-                          // BOTTOM ROW: Announcements, Update, Settings
+                          
+                          SizedBox(height: gap),
+                          
+                          // Lower Right: Announcements, Update, Settings (Height reduced)
                           Expanded(
-                            flex: 2,
+                            flex: 30, // Reduced bottom row flex as requested
                             child: Row(
                               children: [
                                 Expanded(
                                   child: HomeTile(
-                                    title: 'INFO',
-                                    subtitle: 'Service News',
+                                    title: 'NEWS',
+                                    subtitle: 'Service alerts',
                                     icon: Icons.campaign_outlined,
                                     colors: HomeTheme.darkTileColors,
                                     iconColor: HomeTheme.iconAnnouncements,
                                     onTap: onAnnouncements,
                                   ),
                                 ),
-                                SizedBox(width: internalSpacing),
+                                SizedBox(width: gap),
                                 Expanded(
                                   child: HomeTile(
                                     title: 'UPDATE',
-                                    subtitle: 'Refresh All',
+                                    subtitle: 'Refresh app',
                                     icon: Icons.sync_rounded,
                                     colors: HomeTheme.darkTileColors,
                                     iconColor: HomeTheme.iconUpdate,
                                     onTap: onUpdate,
                                   ),
                                 ),
-                                SizedBox(width: internalSpacing),
+                                SizedBox(width: gap),
                                 Expanded(
                                   child: HomeTile(
                                     title: 'SETTINGS',
-                                    subtitle: 'App Options',
+                                    subtitle: 'App options',
                                     icon: Icons.settings_outlined,
                                     colors: HomeTheme.darkTileColors,
                                     iconColor: HomeTheme.iconSettings,
@@ -157,7 +172,11 @@ class BingieDashboardHome extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: internalSpacing * 0.8),
+              
+              // Reduced gap before footer to lower its position
+              SizedBox(height: gap * 0.3),
+              
+              // 3. Compact Footer
               HomeFooter(
                 username: username,
                 expiryDate: expiryDate,

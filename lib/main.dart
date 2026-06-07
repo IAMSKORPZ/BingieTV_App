@@ -22,6 +22,11 @@ import 'l10n/supported_languages.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+
+  // Enable true fullscreen mode
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.immersiveSticky,
+  );
   
   // Lock orientation to landscape
   await SystemChrome.setPreferredOrientations([

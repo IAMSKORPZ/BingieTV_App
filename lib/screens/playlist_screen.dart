@@ -5,7 +5,6 @@ import '../../controllers/playlist_controller.dart';
 import '../../models/playlist_model.dart';
 import '../../widgets/playlist_card.dart';
 import '../../widgets/playlist_states.dart';
-import '../shared/widgets/app_shell.dart';
 import 'playlist_type_screen.dart';
 
 class PlaylistScreen extends StatefulWidget {
@@ -16,64 +15,55 @@ class PlaylistScreen extends StatefulWidget {
 }
 
 class PlaylistScreenState extends State<PlaylistScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => PlaylistController(),
-      child: _PlaylistScreenBody(),
-    );
-  }
-}
+  bool _hasAttemptedLoad = false;
 
-class _PlaylistScreenBody extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    // Use the global provider and load once
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializePlaylistsIfNeeded(context);
+      final controller = context.read<PlaylistController>();
+      if (!controller.isLoading) {
+        controller.loadPlaylists(context).then((_) {
+          if (mounted) {
+            setState(() {
+              _hasAttemptedLoad = true;
+            });
+          }
+        });
+      }
     });
+  }
 
-    return AppShell(
-      title: context.loc.my_playlists,
-      onRefresh: () => context.read<PlaylistController>().loadPlaylists(context),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
       body: Consumer<PlaylistController>(
-        builder: (context, controller, child) =>
-            _buildBodyFromState(context, controller),
+        builder: (context, controller, child) {
+          // 1. Initial Loading (Only when first opening the app/screen)
+          if (controller.isLoading && !_hasAttemptedLoad) {
+            return const PlaylistLoadingState();
+          }
+
+          // 2. Error State
+          if (controller.error != null) {
+            return PlaylistErrorState(
+              error: controller.error!,
+              onRetry: () => controller.loadPlaylists(context),
+            );
+          }
+
+          // 3. No Playlists Found (Redesign UI)
+          if (controller.playlists.isEmpty) {
+            return const PlaylistTypeScreen();
+          }
+
+          // 4. List of Playlists (Standard UI)
+          return _buildPlaylistList(context, controller);
+        },
       ),
       floatingActionButton: _buildFloatingActionButton(context),
     );
-  }
-
-  void _initializePlaylistsIfNeeded(BuildContext context) {
-    final controller = context.read<PlaylistController>();
-    if (!controller.isLoading &&
-        controller.playlists.isEmpty &&
-        controller.error == null) {
-      controller.loadPlaylists(context);
-    }
-  }
-
-  Widget _buildBodyFromState(
-    BuildContext context,
-    PlaylistController controller,
-  ) {
-    if (controller.isLoading) {
-      return const PlaylistLoadingState();
-    }
-
-    if (controller.error != null) {
-      return PlaylistErrorState(
-        error: controller.error!,
-        onRetry: () => controller.loadPlaylists(context),
-      );
-    }
-
-    if (controller.playlists.isEmpty) {
-      return PlaylistEmptyState(
-        onCreatePlaylist: () => _navigateToCreatePlaylist(context),
-      );
-    }
-
-    return _buildPlaylistList(context, controller);
   }
 
   Widget _buildPlaylistList(
@@ -102,6 +92,9 @@ class _PlaylistScreenBody extends StatelessWidget {
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
+    final controller = context.watch<PlaylistController>();
+    if (controller.playlists.isEmpty) return const SizedBox.shrink();
+
     return FloatingActionButton(
       onPressed: () => _navigateToCreatePlaylist(context),
       tooltip: context.loc.create_new_playlist,

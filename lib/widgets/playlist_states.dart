@@ -1,19 +1,56 @@
 import 'package:another_iptv_player/l10n/localization_extension.dart';
+import 'package:another_iptv_player/services/config_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class PlaylistLoadingState extends StatelessWidget {
   const PlaylistLoadingState({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text(context.loc.loading_playlists),
-        ],
+    final config = context.watch<ConfigService>().config;
+    
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: config.backgrounds.home.isNotEmpty
+                ? NetworkImage(config.backgrounds.home)
+                : const AssetImage('assets/images/background.png') as ImageProvider,
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withValues(alpha: 0.5),
+              BlendMode.darken,
+            ),
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/images/App_Logo.png',
+                height: 100,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => 
+                  const Icon(Icons.play_arrow_rounded, color: Color(0xFF00B7FF), size: 80),
+              ),
+              const SizedBox(height: 40),
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFC12CFF)),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                context.loc.loading_playlists.toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -41,7 +78,7 @@ class PlaylistErrorState extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               context.loc.error_occurred,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -92,7 +129,6 @@ class PlaylistEmptyState extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               context.loc.empty_playlist_message,
-              // 'İlk playlist\'inizi oluşturarak başlayın.\nXtream Code veya M3U formatında\nplaylist ekleyebilirsiniz.',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[500],

@@ -87,11 +87,11 @@ class NewXtreamCodePlaylistScreenState
                   children: [
                     Image.asset(
                       'assets/images/App_Logo.png',
-                      height: 100,
+                      height: 100, // Reduced by 10% from 110
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.play_arrow_rounded, color: Color(0xFF00B7FF), size: 80),
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.play_arrow_rounded, color: Color(0xFF00B7FF), size: 60),
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 16), // Target spacing
                     _SideButton(
                       icon: Icons.vpn_lock_rounded,
                       label: 'CONNECT VPN',
@@ -101,12 +101,13 @@ class NewXtreamCodePlaylistScreenState
                         );
                       },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16), // Target spacing
                     _SideButton(
                       icon: Icons.view_list_rounded,
                       label: 'LIST PLAYLISTS',
                       onTap: () => Navigator.pop(context),
                     ),
+                    const Spacer(),
                   ],
                 ),
               ),
@@ -130,40 +131,40 @@ class NewXtreamCodePlaylistScreenState
                               'ENTER YOUR PLAYLIST DETAILS',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 24,
+                                fontSize: 32, // Target size
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 1.2,
                               ),
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 20),
                             _buildField(
                               controller: _nameController,
                               label: 'Playlist Name',
-                              icon: Icons.playlist_add_rounded,
+                              icon: Icons.list_rounded,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
                             _buildField(
                               controller: _usernameController,
                               label: 'Username',
-                              icon: Icons.person_rounded,
+                              icon: Icons.person_outline_rounded,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
                             _buildField(
                               controller: _passwordController,
                               label: 'Password',
-                              icon: Icons.lock_rounded,
+                              icon: Icons.lock_outline_rounded,
                               isPassword: true,
                               obscure: _obscurePassword,
                               onToggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
                             _buildField(
                               controller: _urlController,
-                              label: 'Server URL',
+                              label: 'http://url_here.com:port',
                               icon: Icons.link_rounded,
                               hint: 'http://example.com:8080',
                             ),
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 24),
                             _buildAddButton(controller),
                             if (controller.error != null) ...[
                               const SizedBox(height: 20),
@@ -196,7 +197,7 @@ class NewXtreamCodePlaylistScreenState
     VoidCallback? onToggleObscure,
   }) {
     return Container(
-      height: 75,
+      height: 60, // Target height
       decoration: BoxDecoration(
         color: const Color(0xFF0F1423).withValues(alpha: 0.75),
         borderRadius: BorderRadius.circular(18),
@@ -228,7 +229,7 @@ class NewXtreamCodePlaylistScreenState
   Widget _buildAddButton(PlaylistController controller) {
     return Container(
       width: double.infinity,
-      height: 60,
+      height: 60, // Target height
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFC12CFF), Color(0xFF00B7FF)],
@@ -334,7 +335,7 @@ class _SideButtonState extends State<_SideButton> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: double.infinity,
-          height: 65,
+          height: 60, // Target height
           decoration: BoxDecoration(
             color: _isFocused ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(16),

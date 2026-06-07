@@ -18,26 +18,11 @@ class PlaylistTypeScreen extends StatefulWidget {
 
 class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
   String _version = '1.0.0';
-  late Timer _timer;
-  DateTime _now = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          _now = DateTime.now();
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
   }
 
   Future<void> _loadVersion() async {
@@ -80,112 +65,139 @@ class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
                       errorBuilder: (context, error, stackTrace) => const Icon(Icons.play_arrow_rounded, color: Color(0xFF00B7FF), size: 40),
                     ),
                     const Spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          DateFormat('hh:mm a').format(_now),
-                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
-                        ),
-                        Text(
-                          DateFormat('MMM d, yyyy').format(_now),
-                          style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
-                        ),
-                      ],
-                    ),
+                    const _LiveClock(),
                   ],
                 ),
               ),
-              
-              const Spacer(flex: 1),
               
               // Title
-              const Text(
-                'CHOOSE PLAYLIST TYPE',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.5,
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  'CHOOSE PLAYLIST TYPE',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
+                  ),
                 ),
               ),
               
-              const SizedBox(height: 48),
-              
-              // Cards
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _TypeCard(
-                        title: 'M3U PLAYLIST',
-                        icon: Icons.playlist_play_rounded,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const NewM3uPlaylistScreen()),
-                          );
-                        },
+              // Cards Area - Expanded to fill available space and prevent overflow
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isMobile = constraints.maxWidth < 700;
+                    
+                    if (isMobile) {
+                      return ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                        children: [
+                          _TypeCard(
+                            title: 'M3U PLAYLIST',
+                            icon: Icons.playlist_play_rounded,
+                            height: 180,
+                            onTap: () => _navToM3u(context),
+                          ),
+                          const SizedBox(height: 16),
+                          _TypeCard(
+                            title: 'XTREAM CODE',
+                            icon: Icons.stream_rounded,
+                            height: 180,
+                            onTap: () => _navToXtream(context),
+                          ),
+                          const SizedBox(height: 16),
+                          _TypeCard(
+                            title: 'LOCAL DATA',
+                            icon: Icons.folder_open_rounded,
+                            height: 180,
+                            onTap: () => _showLocalDataMsg(context),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: AspectRatio(
+                                aspectRatio: 1.1,
+                                child: _TypeCard(
+                                  title: 'M3U PLAYLIST',
+                                  icon: Icons.playlist_play_rounded,
+                                  onTap: () => _navToM3u(context),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            Expanded(
+                              child: AspectRatio(
+                                aspectRatio: 1.1,
+                                child: _TypeCard(
+                                  title: 'XTREAM CODE',
+                                  icon: Icons.stream_rounded,
+                                  onTap: () => _navToXtream(context),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            Expanded(
+                              child: AspectRatio(
+                                aspectRatio: 1.1,
+                                child: _TypeCard(
+                                  title: 'LOCAL DATA',
+                                  icon: Icons.folder_open_rounded,
+                                  onTap: () => _showLocalDataMsg(context),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 24),
-                    Expanded(
-                      child: _TypeCard(
-                        title: 'XTREAM CODE',
-                        icon: Icons.stream_rounded,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const NewXtreamCodePlaylistScreen()),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 24),
-                    Expanded(
-                      child: _TypeCard(
-                        title: 'LOCAL DATA',
-                        icon: Icons.folder_open_rounded,
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Local Data coming soon')),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
               
-              const Spacer(flex: 2),
-              
-              // Footer
+              // Footer - Outside Expanded to always remain visible
               Container(
-                height: 50,
+                height: 60,
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
                   color: Colors.black.withValues(alpha: 0.3),
                 ),
                 child: Row(
                   children: [
-                    Text(
-                      'PLAYLISTS: ${playlistController.playlists.length}',
-                      style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700),
+                    Row(
+                      children: [
+                        const Icon(Icons.grid_view_rounded, color: Colors.white38, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${playlistController.playlists.length} PLAYLISTS',
+                          style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                        ),
+                      ],
                     ),
                     const Spacer(),
                     Text(
-                      'VERSION: $_version',
-                      style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold),
+                      'VERSION $_version',
+                      style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                     ),
                     const Spacer(),
                     const Row(
                       children: [
-                        Icon(Icons.circle, color: Colors.green, size: 8),
-                        SizedBox(width: 8),
+                        Icon(Icons.person_outline_rounded, color: Colors.white38, size: 18),
+                        const SizedBox(width: 8),
                         Text(
-                          'ACCOUNT STATUS: ACTIVE',
-                          style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700),
+                          'NOT LOGGED IN',
+                          style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5),
                         ),
                       ],
                     ),
@@ -198,17 +210,78 @@ class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
       ),
     );
   }
+
+  void _navToM3u(BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const NewM3uPlaylistScreen()));
+  }
+
+  void _navToXtream(BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const NewXtreamCodePlaylistScreen()));
+  }
+
+  void _showLocalDataMsg(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Local Data coming soon')));
+  }
+}
+
+class _LiveClock extends StatefulWidget {
+  const _LiveClock();
+
+  @override
+  State<_LiveClock> createState() => _LiveClockState();
+}
+
+class _LiveClockState extends State<_LiveClock> {
+  late Timer _timer;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _now = DateTime.now();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          DateFormat('hh:mm a').format(_now),
+          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+        ),
+        Text(
+          DateFormat('MMM d, yyyy').format(_now),
+          style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
+        ),
+      ],
+    );
+  }
 }
 
 class _TypeCard extends StatefulWidget {
   final String title;
   final IconData icon;
   final VoidCallback onTap;
+  final double? height;
 
   const _TypeCard({
     required this.title,
     required this.icon,
     required this.onTap,
+    this.height,
   });
 
   @override
@@ -235,7 +308,7 @@ class _TypeCardState extends State<_TypeCard> {
           scale: _isFocused ? 1.05 : 1.0,
           duration: const Duration(milliseconds: 200),
           child: Container(
-            height: 220,
+            height: widget.height,
             decoration: BoxDecoration(
               color: const Color(0xFF0F1423).withValues(alpha: 0.75),
               borderRadius: BorderRadius.circular(24),
@@ -261,13 +334,19 @@ class _TypeCardState extends State<_TypeCard> {
                   child: Icon(widget.icon, size: 64, color: Colors.white),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  widget.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      widget.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
                   ),
                 ),
               ],

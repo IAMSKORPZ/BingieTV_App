@@ -37,181 +37,189 @@ class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
     
     return Scaffold(
       backgroundColor: const Color(0xFF050816),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: config.backgrounds.home.isNotEmpty
-                ? NetworkImage(config.backgrounds.home)
-                : const AssetImage('assets/images/background.png') as ImageProvider,
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withValues(alpha: 0.4),
-              BlendMode.darken,
-            ),
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Row(
-                  children: [
-                    Image.asset(
-                      'assets/images/App_Logo.png',
-                      height: 50,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.play_arrow_rounded, color: Color(0xFF00B7FF), size: 40),
-                    ),
-                    const Spacer(),
-                    const _LiveClock(),
-                  ],
-                ),
-              ),
-              
-              const Spacer(flex: 2), // Top Spacer to help center content
-              
-              // Title
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  'CHOOSE PLAYLIST TYPE',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-              ),
-              
-              // Cards Area - Expanded to fill available space
-              Expanded(
-                flex: 8, // Occupy most of the available vertical space
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isMobile = constraints.maxWidth < 700;
-                    
-                    if (isMobile) {
-                      return ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-                        children: [
-                          _TypeCard(
-                            title: 'M3U PLAYLIST',
-                            icon: Icons.playlist_play_rounded,
-                            height: 160,
-                            onTap: () => _navToM3u(context),
-                          ),
-                          const SizedBox(height: 12),
-                          _TypeCard(
-                            title: 'XTREAM CODE',
-                            icon: Icons.stream_rounded,
-                            height: 160,
-                            onTap: () => _navToXtream(context),
-                          ),
-                          const SizedBox(height: 12),
-                          _TypeCard(
-                            title: 'LOCAL DATA',
-                            icon: Icons.folder_open_rounded,
-                            height: 160,
-                            onTap: () => _showLocalDataMsg(context),
-                          ),
-                        ],
-                      );
-                    }
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final double width = constraints.maxWidth;
+          final double height = constraints.maxHeight;
 
-                    return Center(
+          // Responsive Breakpoints
+          final bool isMobile = width < 700;
+          final bool isTV = width >= 1600;
+
+          // Logo Scaling
+          double logoHeight;
+          if (isMobile) {
+            logoHeight = 60;
+          } else if (isTV) {
+            logoHeight = 120;
+          } else {
+            logoHeight = 90;
+          }
+
+          // Title sizing and gaps
+          double titleFontSize = isMobile ? 22 : (isTV ? 36 : 30);
+          double titleGap = isMobile ? 15 : (isTV ? 25 : 20);
+
+          // Tile Sizing (Fixed per breakpoint)
+          double cardWidth;
+          double cardHeight;
+          if (isMobile) {
+            cardWidth = width * 0.23; // Reduced from 0.28 (~18% reduction)
+            cardHeight = 110;
+          } else if (isTV) {
+            cardWidth = 270; // Reduced from 320 (~15% reduction)
+            cardHeight = 210;
+          } else {
+            cardWidth = 220; // Reduced from 260 (~15% reduction)
+            cardHeight = 170;
+          }
+
+          // Emergency scaling if height is critically low
+          // (e.g. mobile landscape)
+          if (height < 450) {
+            cardHeight *= 0.7;
+            logoHeight *= 0.7;
+            titleGap *= 0.5;
+          }
+
+          return Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: config.backgrounds.home.isNotEmpty
+                    ? NetworkImage(config.backgrounds.home)
+                    : const AssetImage('assets/images/background.png') as ImageProvider,
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withValues(alpha: 0.4),
+                  BlendMode.darken,
+                ),
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // 1. Header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Image.asset(
+                          'assets/images/App_Logo.png',
+                          height: logoHeight,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => 
+                            Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoHeight * 0.7),
+                        ),
+                        const Spacer(),
+                        const _LiveClock(),
+                      ],
+                    ),
+                  ),
+                  
+                  const Spacer(flex: 1), // Top breathing room
+                  
+                  // 2. Title
+                  Text(
+                    'CHOOSE PLAYLIST TYPE',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 20), // Reduced gap between title and cards
+                  
+                  // 3. Main Dashboard (Expanded & Centered)
+                  Expanded(
+                    flex: 10,
+                    child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Expanded(
-                              child: AspectRatio(
-                                aspectRatio: 1.1,
-                                child: _TypeCard(
-                                  title: 'M3U PLAYLIST',
-                                  icon: Icons.playlist_play_rounded,
-                                  onTap: () => _navToM3u(context),
-                                ),
-                              ),
+                            _TypeCard(
+                              title: 'M3U PLAYLIST',
+                              icon: Icons.playlist_play_rounded,
+                              width: cardWidth,
+                              height: cardHeight,
+                              onTap: () => _navToM3u(context),
                             ),
-                            const SizedBox(width: 24),
-                            Expanded(
-                              child: AspectRatio(
-                                aspectRatio: 1.1,
-                                child: _TypeCard(
-                                  title: 'XTREAM CODE',
-                                  icon: Icons.stream_rounded,
-                                  onTap: () => _navToXtream(context),
-                                ),
-                              ),
+                            const SizedBox(width: 20),
+                            _TypeCard(
+                              title: 'XTREAM CODE',
+                              icon: Icons.stream_rounded,
+                              width: cardWidth,
+                              height: cardHeight,
+                              onTap: () => _navToXtream(context),
                             ),
-                            const SizedBox(width: 24),
-                            Expanded(
-                              child: AspectRatio(
-                                aspectRatio: 1.1,
-                                child: _TypeCard(
-                                  title: 'LOCAL DATA',
-                                  icon: Icons.folder_open_rounded,
-                                  onTap: () => _showLocalDataMsg(context),
-                                ),
-                              ),
+                            const SizedBox(width: 20),
+                            _TypeCard(
+                              title: 'LOCAL DATA',
+                              icon: Icons.folder_open_rounded,
+                              width: cardWidth,
+                              height: cardHeight,
+                              onTap: () => _showLocalDataMsg(context),
                             ),
                           ],
                         ),
                       ),
-                    );
-                  },
-                ),
-              ),
-              
-              const Spacer(flex: 3), // Bottom Spacer - larger flex to push content UP
-              
-              // Footer - Outside Expanded to always remain visible
-              Container(
-                height: 60,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                decoration: BoxDecoration(
-                  border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
-                  color: Colors.black.withValues(alpha: 0.3),
-                ),
-                child: Row(
-                  children: [
-                    Row(
+                    ),
+                  ),
+                  
+                  const Spacer(flex: 3), // Bottom Spacer - larger flex to push everything UP
+                  
+                  // 4. Footer (Fixed at bottom)
+                  Container(
+                    height: 60,
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
+                      color: Colors.black.withValues(alpha: 0.3),
+                    ),
+                    child: Row(
                       children: [
-                        const Icon(Icons.grid_view_rounded, color: Colors.white38, size: 18),
-                        const SizedBox(width: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.grid_view_rounded, color: Colors.white38, size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${playlistController.playlists.length} PLAYLISTS',
+                              style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
                         Text(
-                          '${playlistController.playlists.length} PLAYLISTS',
-                          style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                          'VERSION $_version',
+                          style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                        ),
+                        const Spacer(),
+                        Row(
+                          children: [
+                            const Icon(Icons.person_outline_rounded, color: Colors.white38, size: 18),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'NOT LOGGED IN',
+                              style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    const Spacer(),
-                    Text(
-                      'VERSION $_version',
-                      style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                    ),
-                    const Spacer(),
-                    const Row(
-                      children: [
-                        Icon(Icons.person_outline_rounded, color: Colors.white38, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          'NOT LOGGED IN',
-                          style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -262,6 +270,7 @@ class _LiveClockState extends State<_LiveClock> {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           DateFormat('hh:mm a').format(_now),
@@ -280,13 +289,15 @@ class _TypeCard extends StatefulWidget {
   final String title;
   final IconData icon;
   final VoidCallback onTap;
-  final double? height;
+  final double width;
+  final double height;
 
   const _TypeCard({
     required this.title,
     required this.icon,
     required this.onTap,
-    this.height,
+    required this.width,
+    required this.height,
   });
 
   @override
@@ -313,7 +324,9 @@ class _TypeCardState extends State<_TypeCard> {
           scale: _isFocused ? 1.05 : 1.0,
           duration: const Duration(milliseconds: 200),
           child: Container(
+            width: widget.width,
             height: widget.height,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
               color: const Color(0xFF0F1423).withValues(alpha: 0.75),
               borderRadius: BorderRadius.circular(24),
@@ -336,21 +349,19 @@ class _TypeCardState extends State<_TypeCard> {
                   shaderCallback: (bounds) => const LinearGradient(
                     colors: [Color(0xFFC12CFF), Color(0xFF00B7FF)],
                   ).createShader(bounds),
-                  child: Icon(widget.icon, size: 64, color: Colors.white),
+                  child: Icon(widget.icon, size: widget.height * 0.35, color: Colors.white),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12), 
                 FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      widget.title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.8,
-                      ),
+                  child: Text(
+                    widget.title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
                     ),
                   ),
                 ),

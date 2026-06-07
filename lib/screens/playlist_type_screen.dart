@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../controllers/playlist_controller.dart';
 import '../services/config_service.dart';
 import 'm3u/new_m3u_playlist_screen.dart';
 import 'xtream-codes/new_xtream_code_playlist_screen.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 class PlaylistTypeScreen extends StatefulWidget {
   const PlaylistTypeScreen({super.key});
@@ -17,23 +15,14 @@ class PlaylistTypeScreen extends StatefulWidget {
 }
 
 class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
-  String _version = '1.0.0';
-
   @override
   void initState() {
     super.initState();
-    _loadVersion();
-  }
-
-  Future<void> _loadVersion() async {
-    final info = await PackageInfo.fromPlatform();
-    if (mounted) setState(() => _version = info.version);
   }
 
   @override
   Widget build(BuildContext context) {
     final config = context.watch<ConfigService>().config;
-    final playlistController = context.watch<PlaylistController>();
     
     return Scaffold(
       backgroundColor: const Color(0xFF050816),
@@ -46,14 +35,14 @@ class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
           final bool isMobile = width < 700;
           final bool isTV = width >= 1600;
 
-          // Logo Scaling
+          // Logo Scaling - Increased by ~30% for high visibility
           double logoHeight;
           if (isMobile) {
-            logoHeight = 60;
+            logoHeight = 80; // Was 60
           } else if (isTV) {
-            logoHeight = 120;
+            logoHeight = 160; // Was 120
           } else {
-            logoHeight = 90;
+            logoHeight = 120; // Was 90
           }
 
           // Title sizing and gaps
@@ -175,46 +164,6 @@ class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
                   ),
                   
                   const Spacer(flex: 3), // Bottom Spacer - larger flex to push everything UP
-                  
-                  // 4. Footer (Fixed at bottom)
-                  Container(
-                    height: 60,
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    decoration: BoxDecoration(
-                      border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
-                      color: Colors.black.withValues(alpha: 0.3),
-                    ),
-                    child: Row(
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.grid_view_rounded, color: Colors.white38, size: 18),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${playlistController.playlists.length} PLAYLISTS',
-                              style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-                        Text(
-                          'VERSION $_version',
-                          style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                        ),
-                        const Spacer(),
-                        Row(
-                          children: [
-                            const Icon(Icons.person_outline_rounded, color: Colors.white38, size: 18),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'NOT LOGGED IN',
-                              style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),

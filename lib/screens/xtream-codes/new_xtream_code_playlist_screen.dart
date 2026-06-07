@@ -156,7 +156,7 @@ class NewXtreamCodePlaylistScreenState
                               errorBuilder: (context, error, stackTrace) => 
                                 Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoWidth * 0.4),
                             ),
-                            const SizedBox(height: 45), // Target 40-50px spacing
+                            const SizedBox(height: 15), // Reduced gap to move buttons UP while logo stays fixed
                             SizedBox(
                               width: 220,
                               height: 60,
@@ -182,6 +182,7 @@ class NewXtreamCodePlaylistScreenState
                                 onTap: () => Navigator.pop(context),
                               ),
                             ),
+                            const SizedBox(height: 30), // Compensatory spacer to keep logo fixed in center
                           ],
                         ),
                       ),

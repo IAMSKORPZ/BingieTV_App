@@ -35,14 +35,14 @@ class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
           final bool isMobile = width < 700;
           final bool isTV = width >= 1600;
 
-          // Logo Scaling - Increased by ~30% for high visibility
+          // Logo Scaling - Refined size increase
           double logoHeight;
           if (isMobile) {
-            logoHeight = 80; // Was 60
+            logoHeight = 95; // Increased by ~18%
           } else if (isTV) {
-            logoHeight = 160; // Was 120
+            logoHeight = 190; // Increased by ~18%
           } else {
-            logoHeight = 120; // Was 90
+            logoHeight = 140; // Increased by ~16%
           }
 
           // Title sizing and gaps
@@ -110,15 +110,18 @@ class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
                   
                   const Spacer(flex: 1), // Top breathing room
                   
-                  // 2. Title
-                  Text(
-                    'CHOOSE PLAYLIST TYPE',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: titleFontSize,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.5,
+                  // 2. Title - Moved upward for better balance
+                  Transform.translate(
+                    offset: const Offset(0, -25),
+                    child: Text(
+                      'CHOOSE PLAYLIST TYPE',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.5,
+                      ),
                     ),
                   ),
                   

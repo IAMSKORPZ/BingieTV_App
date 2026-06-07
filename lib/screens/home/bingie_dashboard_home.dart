@@ -146,7 +146,7 @@ class BingieDashboardHome extends StatelessWidget {
                             
                             SizedBox(height: gap),
                             
-                            // Lower Right: Announcements, Update, Settings
+                            // Lower Right: Announcements, Update, Settings (Static buttons with no descriptions)
                             Expanded(
                               flex: 30,
                               child: Row(
@@ -154,12 +154,8 @@ class BingieDashboardHome extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: HomeTile(
-                                      title: config.announcement.enabled && config.announcement.title.isNotEmpty 
-                                          ? config.announcement.title.toUpperCase() 
-                                          : 'NEWS',
-                                      subtitle: config.announcement.enabled && config.announcement.message.isNotEmpty 
-                                          ? config.announcement.message 
-                                          : 'Service alerts',
+                                      title: 'ANNOUNCEMENTS',
+                                      subtitle: '',
                                       icon: Icons.campaign_outlined,
                                       colors: HomeTheme.darkTileColors,
                                       iconColor: HomeTheme.iconAnnouncements,
@@ -170,7 +166,7 @@ class BingieDashboardHome extends StatelessWidget {
                                   Expanded(
                                     child: HomeTile(
                                       title: 'UPDATE',
-                                      subtitle: 'Refresh app',
+                                      subtitle: '',
                                       icon: Icons.sync_rounded,
                                       colors: HomeTheme.darkTileColors,
                                       iconColor: HomeTheme.iconUpdate,
@@ -181,7 +177,7 @@ class BingieDashboardHome extends StatelessWidget {
                                   Expanded(
                                     child: HomeTile(
                                       title: 'SETTINGS',
-                                      subtitle: 'App options',
+                                      subtitle: '',
                                       icon: Icons.settings_outlined,
                                       colors: HomeTheme.darkTileColors,
                                       iconColor: HomeTheme.iconSettings,

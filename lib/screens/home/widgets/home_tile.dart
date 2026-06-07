@@ -42,11 +42,12 @@ class _HomeTileState extends State<HomeTile> {
       builder: (context, constraints) {
         final double tileHeight = constraints.maxHeight;
         
-        // Scale content based on tile size to prevent "zoomed-in" look
-        final double iconSize = widget.large ? (tileHeight * 0.28) : (tileHeight * 0.26);
-        final double titleSize = widget.large ? (tileHeight * 0.11) : (tileHeight * 0.12);
+        // Scale content based on tile size
+        // Bottom row (large=false) now uses much larger icons and text for TV readability
+        final double iconSize = widget.large ? (tileHeight * 0.28) : (tileHeight * 0.45);
+        final double titleSize = widget.large ? (tileHeight * 0.11) : (tileHeight * 0.22);
         final double subtitleSize = titleSize * 0.5;
-        final double spacing = tileHeight * 0.04;
+        final double spacing = widget.large ? (tileHeight * 0.04) : (tileHeight * 0.08);
         final double padding = tileHeight * 0.08;
 
         return FocusableActionDetector(
@@ -118,8 +119,8 @@ class _HomeTileState extends State<HomeTile> {
                         ),
                       ),
                     ),
-                    if (tileHeight > 100) ...[
-                      const SizedBox(height: 4),
+                    if (widget.subtitle.isNotEmpty && tileHeight > 100) ...[
+                      SizedBox(height: widget.large ? 4 : 2),
                       Text(
                         widget.subtitle,
                         textAlign: TextAlign.center,

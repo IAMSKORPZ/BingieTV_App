@@ -1,4 +1,3 @@
-import 'package:another_iptv_player/l10n/localization_extension.dart';
 import 'package:another_iptv_player/screens/xtream-codes/xtream_code_data_loader_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -57,14 +56,11 @@ class NewXtreamCodePlaylistScreenState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     final config = context.watch<ConfigService>().config;
     final loginBg = config.backgrounds.login;
 
     return Scaffold(
-      appBar: AppBar(title: Text('${config.branding.appName} Login')),
+      backgroundColor: const Color(0xFF050816),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -73,401 +69,194 @@ class NewXtreamCodePlaylistScreenState
                 : const AssetImage('assets/images/background.png') as ImageProvider,
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-              Colors.black.withValues(alpha: 0.6),
+              Colors.black.withValues(alpha: 0.5),
               BlendMode.darken,
             ),
           ),
         ),
-        child: Consumer<PlaylistController>(
-          builder: (context, controller, child) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
+        child: Row(
+          children: [
+            // Left Panel
+            Expanded(
+              flex: 4,
+              child: Container(
+                padding: const EdgeInsets.all(48),
+                color: Colors.black.withValues(alpha: 0.2),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader(colorScheme, config.branding.appName),
-                    const SizedBox(height: 32),
-                    _buildPlaylistNameField(colorScheme),
-                    SizedBox(height: 20),
-                    _buildUrlField(colorScheme),
-                    SizedBox(height: 20),
-                    _buildUsernameField(colorScheme),
-                    SizedBox(height: 20),
-                    _buildPasswordField(colorScheme),
-                    SizedBox(height: 32),
-                    _buildSaveButton(controller, colorScheme),
-                    if (controller.error != null) ...[
-                      SizedBox(height: 20),
-                      _buildErrorCard(controller.error!, colorScheme),
-                    ],
-                    SizedBox(height: 20),
-                    _buildInfoCard(colorScheme),
+                    Image.asset(
+                      'assets/images/App_Logo.png',
+                      height: 100,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.play_arrow_rounded, color: Color(0xFF00B7FF), size: 80),
+                    ),
+                    const Spacer(),
+                    _SideButton(
+                      icon: Icons.vpn_lock_rounded,
+                      label: 'CONNECT VPN',
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('VPN Service coming soon')),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    _SideButton(
+                      icon: Icons.view_list_rounded,
+                      label: 'LIST PLAYLISTS',
+                      onTap: () => Navigator.pop(context),
+                    ),
                   ],
                 ),
               ),
-            );
-          },
+            ),
+
+            // Right Panel (Form)
+            Expanded(
+              flex: 6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 60),
+                child: Center(
+                  child: Consumer<PlaylistController>(
+                    builder: (context, controller, child) {
+                      return Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'ENTER YOUR PLAYLIST DETAILS',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            _buildField(
+                              controller: _nameController,
+                              label: 'Playlist Name',
+                              icon: Icons.playlist_add_rounded,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildField(
+                              controller: _usernameController,
+                              label: 'Username',
+                              icon: Icons.person_rounded,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildField(
+                              controller: _passwordController,
+                              label: 'Password',
+                              icon: Icons.lock_rounded,
+                              isPassword: true,
+                              obscure: _obscurePassword,
+                              onToggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildField(
+                              controller: _urlController,
+                              label: 'Server URL',
+                              icon: Icons.link_rounded,
+                              hint: 'http://example.com:8080',
+                            ),
+                            const SizedBox(height: 40),
+                            _buildAddButton(controller),
+                            if (controller.error != null) ...[
+                              const SizedBox(height: 20),
+                              Text(
+                                controller.error!,
+                                style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(ColorScheme colorScheme, String appName) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: colorScheme.primary,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Icon(Icons.stream, size: 30, color: colorScheme.onPrimary),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          '$appName Setup',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        SizedBox(height: 8),
-        Text(
-          context.loc.xtream_code_description,
-          style: TextStyle(
-            fontSize: 16,
-            color: colorScheme.onSurface.withValues(alpha: 0.7),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPlaylistNameField(ColorScheme colorScheme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.loc.playlist_name,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        SizedBox(height: 8),
-        TextFormField(
-          controller: _nameController,
+  Widget _buildField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? hint,
+    bool isPassword = false,
+    bool obscure = false,
+    VoidCallback? onToggleObscure,
+  }) {
+    return Container(
+      height: 75,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F1423).withValues(alpha: 0.75),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF00B7FF).withValues(alpha: 0.3)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Center(
+        child: TextFormField(
+          controller: controller,
+          obscureText: obscure,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
           decoration: InputDecoration(
-            hintText: context.loc.playlist_name_placeholder,
-            prefixIcon: Icon(Icons.playlist_add, color: colorScheme.primary),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colorScheme.outline),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colorScheme.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: colorScheme.surface,
+            border: InputBorder.none,
+            icon: Icon(icon, color: const Color(0xFFC12CFF), size: 24),
+            hintText: label,
+            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 16),
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(obscure ? Icons.visibility_off : Icons.visibility, color: Colors.white38),
+                    onPressed: onToggleObscure,
+                  )
+                : null,
           ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return context.loc.playlist_name_required;
-            }
-            if (value.trim().length < 2) {
-              return context.loc.playlist_name_min_2;
-            }
-            return null;
-          },
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildUrlField(ColorScheme colorScheme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.loc.api_url,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
-          ),
+  Widget _buildAddButton(PlaylistController controller) {
+    return Container(
+      width: double.infinity,
+      height: 60,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFC12CFF), Color(0xFF00B7FF)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
         ),
-        SizedBox(height: 8),
-        TextFormField(
-          controller: _urlController,
-          keyboardType: TextInputType.url,
-          decoration: InputDecoration(
-            hintText: 'http://example.com:8080',
-            prefixIcon: Icon(Icons.link, color: colorScheme.primary),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colorScheme.outline),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colorScheme.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: colorScheme.surface,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00B7FF).withValues(alpha: 0.4),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return context.loc.api_url_required;
-            }
-
-            final uri = Uri.tryParse(value.trim());
-            if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
-              return context.loc.url_format_validate_error;
-            }
-
-            if (!['http', 'https'].contains(uri.scheme)) {
-              return context.loc.url_format_validate_error;
-            }
-
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUsernameField(ColorScheme colorScheme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.loc.username,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        SizedBox(height: 8),
-        TextFormField(
-          controller: _usernameController,
-          decoration: InputDecoration(
-            hintText: context.loc.username_placeholder,
-            prefixIcon: Icon(Icons.person, color: colorScheme.primary),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colorScheme.outline),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colorScheme.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: colorScheme.surface,
-          ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return context.loc.username_required;
-            }
-            if (value.trim().length < 3) {
-              return context.loc.username_min_3;
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPasswordField(ColorScheme colorScheme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.loc.password,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        SizedBox(height: 8),
-        TextFormField(
-          controller: _passwordController,
-          obscureText: _obscurePassword,
-          decoration: InputDecoration(
-            hintText: context.loc.password_placeholder,
-            prefixIcon: Icon(Icons.lock, color: colorScheme.primary),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-              onPressed: () {
-                setState(() {
-                  _obscurePassword = !_obscurePassword;
-                });
-              },
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colorScheme.outline),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colorScheme.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: colorScheme.surface,
-          ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return context.loc.password_required;
-            }
-            if (value.length < 3) {
-              return context.loc.password_min_3;
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSaveButton(
-    PlaylistController controller,
-    ColorScheme colorScheme,
-  ) {
-    return SizedBox(
-      height: 56,
+        ],
+      ),
       child: ElevatedButton(
-        onPressed: controller.isLoading
-            ? null
-            : (_isFormValid ? _savePlaylist : null),
+        onPressed: controller.isLoading ? null : (_isFormValid ? _savePlaylist : null),
         style: ElevatedButton.styleFrom(
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
-          disabledBackgroundColor: colorScheme.onSurface.withValues(alpha: 0.12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: controller.isLoading ? 0 : 2,
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         ),
         child: controller.isLoading
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        colorScheme.onPrimary,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Text(
-                    context.loc.submitting,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.save, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    context.loc.submit_create_playlist,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ],
+            ? const CircularProgressIndicator(color: Colors.white)
+            : const Text(
+                'ADD PLAYLIST',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.5),
               ),
-      ),
-    );
-  }
-
-  Widget _buildErrorCard(String error, ColorScheme colorScheme) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.error),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: colorScheme.error),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.loc.error_occurred,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onErrorContainer,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  error,
-                  style: TextStyle(
-                    color: colorScheme.onErrorContainer,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(ColorScheme colorScheme) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.primary),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.info_outline, color: colorScheme.primary, size: 20),
-              SizedBox(width: 8),
-              Text(
-                context.loc.info,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onPrimaryContainer,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Text(
-            '${context.loc.all_datas_are_stored_in_device}\n${context.loc.url_format_validate_message}',
-            style: TextStyle(
-              color: colorScheme.onPrimaryContainer,
-              fontSize: 13,
-              height: 1.4,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -493,7 +282,7 @@ class NewXtreamCodePlaylistScreenState
       var playerInfo = await repository.getPlayerInfo(forceRefresh: true);
 
       if (playerInfo == null) {
-        controller.setError(context.loc.invalid_credentials);
+        controller.setError('Invalid credentials or server unavailable');
         return;
       }
 
@@ -515,5 +304,63 @@ class NewXtreamCodePlaylistScreenState
         );
       }
     }
+  }
+}
+
+class _SideButton extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _SideButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  State<_SideButton> createState() => _SideButtonState();
+}
+
+class _SideButtonState extends State<_SideButton> {
+  bool _isFocused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusableActionDetector(
+      onFocusChange: (val) => setState(() => _isFocused = val),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: double.infinity,
+          height: 65,
+          decoration: BoxDecoration(
+            color: _isFocused ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: _isFocused ? const Color(0xFF00B7FF) : Colors.white.withValues(alpha: 0.1),
+              width: _isFocused ? 2 : 1,
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Icon(widget.icon, color: _isFocused ? const Color(0xFF00B7FF) : Colors.white70, size: 28),
+              const SizedBox(width: 16),
+              Text(
+                widget.label,
+                style: TextStyle(
+                  color: _isFocused ? Colors.white : Colors.white70,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

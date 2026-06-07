@@ -14,6 +14,7 @@ import 'screens/app_initializer_screen.dart';
 import 'services/cache_policy_service.dart';
 import 'services/performance_service.dart';
 import 'services/config_service.dart';
+import 'services/announcement_service.dart';
 import 'widgets/maintenance_banner.dart';
 import 'widgets/update_startup_check.dart';
 import 'l10n/app_localizations.dart';
@@ -46,6 +47,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => ThemeManager()),
         ChangeNotifierProvider(create: (_) => BrandingController()..load()),
         ChangeNotifierProvider(create: (_) => ConfigService()..initialize()),
+        ChangeNotifierProvider(create: (_) => AnnouncementService()..initialize()),
         ChangeNotifierProvider(create: (_) => UpdateController()..loadState()),
       ],
       child: const MyApp(),

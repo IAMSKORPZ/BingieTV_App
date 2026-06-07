@@ -1,174 +1,277 @@
-import 'package:another_iptv_player/l10n/localization_extension.dart';
-import 'package:another_iptv_player/screens/m3u/new_m3u_playlist_screen.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../controllers/playlist_controller.dart';
+import '../services/config_service.dart';
+import 'm3u/new_m3u_playlist_screen.dart';
 import 'xtream-codes/new_xtream_code_playlist_screen.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-class PlaylistTypeScreen extends StatelessWidget {
+class PlaylistTypeScreen extends StatefulWidget {
   const PlaylistTypeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          context.loc.create_new_playlist,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        elevation: 0,
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 20),
-                      Text(
-                        context.loc.select_playlist_type,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        context.loc.select_playlist_message,
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 40),
-                      _buildPlaylistTypeCard(
-                        context,
-                        title: 'Xtream Codes',
-                        subtitle: context.loc.xtream_code_title,
-                        description: context.loc.xtream_code_description,
-                        icon: Icons.stream,
-                        color: Colors.blue,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  NewXtreamCodePlaylistScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      SizedBox(height: 20),
-                      _buildPlaylistTypeCard(
-                        context,
-                        title: 'M3U Playlist',
-                        subtitle: context.loc.m3u_playlist_title,
-                        description: context.loc.m3u_playlist_description,
-                        icon: Icons.playlist_play,
-                        color: Colors.green,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => NewM3uPlaylistScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      Spacer(),
-                      Container(
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info_outline, color: Colors.blue),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                context.loc.select_playlist_type_footer,
-                                style: TextStyle(
-                                  color: Colors.blue[800],
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 24),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
+  State<PlaylistTypeScreen> createState() => _PlaylistTypeScreenState();
+}
+
+class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
+  String _version = '1.0.0';
+  late Timer _timer;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _now = DateTime.now();
+        });
+      }
+    });
   }
 
-  Widget _buildPlaylistTypeCard(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required String description,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: EdgeInsets.all(24),
-          child: Row(
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) setState(() => _version = info.version);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final config = context.watch<ConfigService>().config;
+    final playlistController = context.watch<PlaylistController>();
+    
+    return Scaffold(
+      backgroundColor: const Color(0xFF050816),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: config.backgrounds.home.isNotEmpty
+                ? NetworkImage(config.backgrounds.home)
+                : const AssetImage('assets/images/background.png') as ImageProvider,
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withValues(alpha: 0.4),
+              BlendMode.darken,
+            ),
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
             children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Icon(icon, size: 30, color: Colors.white),
-              ),
-              SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Row(
                   children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Image.asset(
+                      'assets/images/App_Logo.png',
+                      height: 50,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.play_arrow_rounded, color: Color(0xFF00B7FF), size: 40),
                     ),
-                    SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: color,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      description,
-                      style: TextStyle(fontSize: 13, height: 1.3),
+                    const Spacer(),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          DateFormat('hh:mm a').format(_now),
+                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                        ),
+                        Text(
+                          DateFormat('MMM d, yyyy').format(_now),
+                          style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 20),
+              
+              const Spacer(flex: 1),
+              
+              // Title
+              const Text(
+                'CHOOSE PLAYLIST TYPE',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              
+              const SizedBox(height: 48),
+              
+              // Cards
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _TypeCard(
+                        title: 'M3U PLAYLIST',
+                        icon: Icons.playlist_play_rounded,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const NewM3uPlaylistScreen()),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: _TypeCard(
+                        title: 'XTREAM CODE',
+                        icon: Icons.stream_rounded,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const NewXtreamCodePlaylistScreen()),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: _TypeCard(
+                        title: 'LOCAL DATA',
+                        icon: Icons.folder_open_rounded,
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Local Data coming soon')),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const Spacer(flex: 2),
+              
+              // Footer
+              Container(
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.3),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      'PLAYLISTS: ${playlistController.playlists.length}',
+                      style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'VERSION: $_version',
+                      style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    const Row(
+                      children: [
+                        Icon(Icons.circle, color: Colors.green, size: 8),
+                        SizedBox(width: 8),
+                        Text(
+                          'ACCOUNT STATUS: ACTIVE',
+                          style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TypeCard extends StatefulWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _TypeCard({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  State<_TypeCard> createState() => _TypeCardState();
+}
+
+class _TypeCardState extends State<_TypeCard> {
+  bool _isFocused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusableActionDetector(
+      onFocusChange: (val) => setState(() => _isFocused = val),
+      shortcuts: const {
+        SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+        SingleActivator(LogicalKeyboardKey.select): ActivateIntent(),
+      },
+      actions: {
+        ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) => widget.onTap()),
+      },
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: _isFocused ? 1.05 : 1.0,
+          duration: const Duration(milliseconds: 200),
+          child: Container(
+            height: 220,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F1423).withValues(alpha: 0.75),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: _isFocused ? const Color(0xFF00B7FF) : Colors.white.withValues(alpha: 0.1),
+                width: _isFocused ? 3 : 1.5,
+              ),
+              boxShadow: _isFocused ? [
+                BoxShadow(
+                  color: const Color(0xFFC12CFF).withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                )
+              ] : [],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ShaderMask(
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [Color(0xFFC12CFF), Color(0xFF00B7FF)],
+                  ).createShader(bounds),
+                  child: Icon(widget.icon, size: 64, color: Colors.white),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  widget.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

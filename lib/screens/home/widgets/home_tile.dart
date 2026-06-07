@@ -42,13 +42,12 @@ class _HomeTileState extends State<HomeTile> {
       builder: (context, constraints) {
         final double tileHeight = constraints.maxHeight;
         
-        // Scale content based on tile size
-        // Bottom row (large=false) now uses much larger icons and text for TV readability
-        final double iconSize = widget.large ? (tileHeight * 0.28) : (tileHeight * 0.45);
-        final double titleSize = widget.large ? (tileHeight * 0.11) : (tileHeight * 0.22);
-        final double subtitleSize = titleSize * 0.5;
-        final double spacing = widget.large ? (tileHeight * 0.04) : (tileHeight * 0.08);
-        final double padding = tileHeight * 0.08;
+        // Optimized scaling to prevent overflows while maintaining large TV visuals
+        final double iconSize = widget.large ? (tileHeight * 0.28) : (tileHeight * 0.42);
+        final double titleSize = widget.large ? (tileHeight * 0.11) : (tileHeight * 0.18);
+        final double subtitleSize = titleSize * 0.45;
+        final double spacing = widget.large ? (tileHeight * 0.04) : (tileHeight * 0.02);
+        final double padding = tileHeight * 0.05;
 
         return FocusableActionDetector(
           autofocus: widget.autofocus,
@@ -120,7 +119,7 @@ class _HomeTileState extends State<HomeTile> {
                       ),
                     ),
                     if (widget.subtitle.isNotEmpty && tileHeight > 100) ...[
-                      SizedBox(height: widget.large ? 4 : 2),
+                      const SizedBox(height: 2),
                       Text(
                         widget.subtitle,
                         textAlign: TextAlign.center,
@@ -130,7 +129,7 @@ class _HomeTileState extends State<HomeTile> {
                           color: Colors.white.withValues(alpha: 0.75),
                           fontSize: subtitleSize,
                           fontWeight: FontWeight.w500,
-                          height: 1.2,
+                          height: 1.1,
                         ),
                       ),
                     ],

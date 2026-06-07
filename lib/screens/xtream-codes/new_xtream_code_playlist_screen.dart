@@ -139,12 +139,12 @@ class NewXtreamCodePlaylistScreenState
             child: SafeArea(
               child: Row(
                 children: [
-                  if (!isMobile)
+                    if (!isMobile)
                     Expanded(
                       flex: 4,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        color: Colors.black.withValues(alpha: 0.2),
+                        // Removed dark tint overlay
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -156,7 +156,7 @@ class NewXtreamCodePlaylistScreenState
                               errorBuilder: (context, error, stackTrace) => 
                                 Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoWidth * 0.4),
                             ),
-                            const SizedBox(height: 50), // Increased gap to move logo UP
+                            const SizedBox(height: 45), // Target 40-50px spacing
                             SizedBox(
                               width: 220,
                               height: 60,
@@ -171,7 +171,7 @@ class NewXtreamCodePlaylistScreenState
                                 },
                               ),
                             ),
-                            const SizedBox(height: 8), // Reduced gap for tighter grouping
+                            const SizedBox(height: 12), // 12-16px spacing for grouping
                             SizedBox(
                               width: 220,
                               height: 60,
@@ -499,7 +499,7 @@ class _XTextFieldState extends State<_XTextField> {
   @override
   Widget build(BuildContext context) {
     return AnimatedScale(
-      scale: _isFocused ? 1.02 : 1.0,
+      scale: _isFocused ? 1.01 : 1.0,
       duration: const Duration(milliseconds: 200),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -509,13 +509,18 @@ class _XTextFieldState extends State<_XTextField> {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: _isFocused ? const Color(0xFF00B7FF) : const Color(0xFF00B7FF).withValues(alpha: 0.3),
-            width: _isFocused ? 2.5 : 1,
+            width: _isFocused ? 3.0 : 1, // Increased border thickness
           ),
           boxShadow: _isFocused ? [
             BoxShadow(
-              color: const Color(0xFF00B7FF).withValues(alpha: 0.2),
-              blurRadius: 10,
-              spreadRadius: 1,
+              color: const Color(0xFF00B7FF).withValues(alpha: 0.4), // Stronger cyan glow
+              blurRadius: 15,
+              spreadRadius: 2,
+            ),
+            BoxShadow(
+              color: const Color(0xFF00B7FF).withValues(alpha: 0.2), // Soft outer glow
+              blurRadius: 25,
+              spreadRadius: 4,
             )
           ] : [],
         ),

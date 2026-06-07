@@ -24,12 +24,24 @@ class NewXtreamCodePlaylistScreenState
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  late FocusNode _playlistFocus;
+  late FocusNode _usernameFocus;
+  late FocusNode _passwordFocus;
+  late FocusNode _urlFocus;
+  late FocusNode _submitFocus;
+
   bool _obscurePassword = true;
   bool _isFormValid = false;
 
   @override
   void initState() {
     super.initState();
+    _playlistFocus = FocusNode();
+    _usernameFocus = FocusNode();
+    _passwordFocus = FocusNode();
+    _urlFocus = FocusNode();
+    _submitFocus = FocusNode();
+
     _nameController.addListener(_validateForm);
     _urlController.addListener(_validateForm);
     _usernameController.addListener(_validateForm);
@@ -42,6 +54,11 @@ class NewXtreamCodePlaylistScreenState
     _urlController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
+    _playlistFocus.dispose();
+    _usernameFocus.dispose();
+    _passwordFocus.dispose();
+    _urlFocus.dispose();
+    _submitFocus.dispose();
     super.dispose();
   }
 
@@ -59,31 +76,50 @@ class NewXtreamCodePlaylistScreenState
   Widget build(BuildContext context) {
     final config = context.watch<ConfigService>().config;
     final loginBg = config.backgrounds.login;
+    final viewInsets = MediaQuery.of(context).viewInsets;
 
     return Scaffold(
       backgroundColor: const Color(0xFF050816),
+      resizeToAvoidBottomInset: false, // Manual AnimatedPadding control
       body: LayoutBuilder(
         builder: (context, constraints) {
           final double width = constraints.maxWidth;
+          final double height = constraints.maxHeight;
           final bool isMobile = width < 700;
-          final bool isTablet = width >= 700 && width < 1100;
-          final bool isDesktop = width >= 1100 && width < 1600;
+          final bool isTV = width >= 1600;
           
           double logoHeight;
-          if (isMobile) logoHeight = 80;
-          else if (isTablet) logoHeight = 110;
-          else if (isDesktop) logoHeight = 110;
-          else logoHeight = 140;
+          if (isMobile) logoHeight = 60;
+          else if (isTV) logoHeight = 120;
+          else logoHeight = 90;
 
-          double titleFontSize = isMobile ? 22 : (isTablet ? 26 : 30);
-          
           double fieldHeight;
-          if (isMobile) fieldHeight = 55;
-          else if (isTablet) fieldHeight = 65;
-          else if (isDesktop) fieldHeight = 65;
-          else fieldHeight = 70;
+          double buttonHeight;
+          if (isMobile) {
+            fieldHeight = 52;
+            buttonHeight = 50;
+          } else if (isTV) {
+            fieldHeight = 65;
+            buttonHeight = 60;
+          } else {
+            fieldHeight = 60;
+            buttonHeight = 55;
+          }
+
+          double titleFontSize = isMobile ? 20 : 24;
+          double spacing = isMobile ? 8 : 12;
+
+          if (height < 450) {
+             logoHeight *= 0.7;
+             fieldHeight *= 0.8;
+             buttonHeight *= 0.8;
+             spacing = 6;
+             titleFontSize = 18;
+          }
 
           return Container(
+            width: width,
+            height: height,
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: loginBg.isNotEmpty
@@ -96,156 +132,219 @@ class NewXtreamCodePlaylistScreenState
                 ),
               ),
             ),
-            child: Row(
-              children: [
-                // Left Panel
-                if (!isMobile)
-                Expanded(
-                  flex: 4,
-                  child: Container(
-                    padding: const EdgeInsets.all(48),
-                    color: Colors.black.withValues(alpha: 0.2),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.asset(
-                          'assets/images/App_Logo.png',
-                          height: logoHeight,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) => 
-                            Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoHeight * 0.7),
-                        ),
-                        const SizedBox(height: 24),
-                        _SideButton(
-                          icon: Icons.vpn_lock_rounded,
-                          label: 'CONNECT VPN',
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('VPN Service coming soon')),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _SideButton(
-                          icon: Icons.view_list_rounded,
-                          label: 'LIST PLAYLISTS',
-                          onTap: () => Navigator.pop(context),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Right Panel (Form)
-                Expanded(
-                  flex: 6,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
-                    child: Center(
-                      child: SingleChildScrollView(
-                        physics: isMobile ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
-                        child: Consumer<PlaylistController>(
-                          builder: (context, controller, child) {
-                            return Form(
-                              key: _formKey,
+            child: SafeArea(
+              child: AnimatedPadding(
+                duration: const Duration(milliseconds: 200),
+                padding: EdgeInsets.only(bottom: viewInsets.bottom),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          // Left Panel (Compressed & Grouped)
+                          if (!isMobile)
+                          Expanded(
+                            flex: 4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 40),
+                              color: Colors.black.withValues(alpha: 0.2),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (isMobile) ...[
-                                    Image.asset(
-                                      'assets/images/App_Logo.png',
-                                      height: 70,
-                                      fit: BoxFit.contain,
-                                    ),
-                                    const SizedBox(height: 24),
-                                  ],
-                                  Text(
-                                    'ENTER YOUR PLAYLIST DETAILS',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: isMobile ? TextAlign.center : TextAlign.left,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: titleFontSize,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 1.2,
-                                    ),
+                                  Image.asset(
+                                    'assets/images/App_Logo.png',
+                                    height: logoHeight,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) => 
+                                      Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoHeight * 0.7),
                                   ),
                                   const SizedBox(height: 16),
-                                  _XTextField(
-                                    controller: _nameController,
-                                    label: 'Playlist Name',
-                                    icon: Icons.list_rounded,
-                                    height: fieldHeight,
+                                  _SideButton(
+                                    icon: Icons.vpn_lock_rounded,
+                                    label: 'CONNECT VPN',
+                                    height: buttonHeight,
+                                    onTap: () {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('VPN Service coming soon')),
+                                      );
+                                    },
                                   ),
                                   const SizedBox(height: 12),
-                                  _XTextField(
-                                    controller: _usernameController,
-                                    label: 'Username',
-                                    icon: Icons.person_outline_rounded,
-                                    height: fieldHeight,
+                                  _SideButton(
+                                    icon: Icons.view_list_rounded,
+                                    label: 'LIST PLAYLISTS',
+                                    height: buttonHeight,
+                                    onTap: () => Navigator.pop(context),
                                   ),
-                                  const SizedBox(height: 12),
-                                  _XTextField(
-                                    controller: _passwordController,
-                                    label: 'Password',
-                                    icon: Icons.lock_outline_rounded,
-                                    isPassword: true,
-                                    obscure: _obscurePassword,
-                                    height: fieldHeight,
-                                    onToggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _XTextField(
-                                    controller: _urlController,
-                                    label: 'http://url_here.com:port',
-                                    icon: Icons.link_rounded,
-                                    height: fieldHeight,
-                                    hint: 'http://example.com:8080',
-                                  ),
-                                  const SizedBox(height: 20),
-                                  _AddPlaylistButton(
-                                    isLoading: controller.isLoading,
-                                    height: fieldHeight,
-                                    onTap: controller.isLoading ? null : (_isFormValid ? _savePlaylist : null),
-                                  ),
-                                  if (isMobile) ...[
-                                     const SizedBox(height: 16),
-                                     Row(
-                                       mainAxisAlignment: MainAxisAlignment.center,
-                                       children: [
-                                         IconButton(
-                                           icon: const Icon(Icons.vpn_lock_rounded, color: Colors.white70),
-                                           onPressed: () {},
-                                         ),
-                                         const SizedBox(width: 20),
-                                         IconButton(
-                                           icon: const Icon(Icons.view_list_rounded, color: Colors.white70),
-                                           onPressed: () => Navigator.pop(context),
-                                         ),
-                                       ],
-                                     ),
-                                  ],
-                                  if (controller.error != null) ...[
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      controller.error!,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13),
-                                    ),
-                                  ],
                                 ],
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          ),
+
+                          // Right Panel (High-Efficiency Form)
+                          Expanded(
+                            flex: 6,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
+                              child: Center(
+                                child: SingleChildScrollView(
+                                  physics: (height < 500 || viewInsets.bottom > 0) ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
+                                  child: Consumer<PlaylistController>(
+                                    builder: (context, controller, child) {
+                                      return Form(
+                                        key: _formKey,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                                          children: [
+                                            if (isMobile && viewInsets.bottom == 0) ...[
+                                              Image.asset(
+                                                'assets/images/App_Logo.png',
+                                                height: logoHeight,
+                                                fit: BoxFit.contain,
+                                              ),
+                                              const SizedBox(height: 16),
+                                            ],
+                                            Text(
+                                              'ENTER YOUR PLAYLIST DETAILS',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              textAlign: isMobile ? TextAlign.center : TextAlign.left,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: titleFontSize,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 1.2,
+                                              ),
+                                            ),
+                                            SizedBox(height: spacing),
+                                            _XTextField(
+                                              controller: _nameController,
+                                              focusNode: _playlistFocus,
+                                              label: 'Playlist Name',
+                                              icon: Icons.list_rounded,
+                                              height: fieldHeight,
+                                              textInputAction: TextInputAction.next,
+                                              onSubmitted: (_) {
+                                                if (mounted) FocusScope.of(context).requestFocus(_usernameFocus);
+                                              },
+                                            ),
+                                            SizedBox(height: spacing),
+                                            _XTextField(
+                                              controller: _usernameController,
+                                              focusNode: _usernameFocus,
+                                              label: 'Username',
+                                              icon: Icons.person_outline_rounded,
+                                              height: fieldHeight,
+                                              textInputAction: TextInputAction.next,
+                                              onSubmitted: (_) {
+                                                if (mounted) FocusScope.of(context).requestFocus(_passwordFocus);
+                                              },
+                                            ),
+                                            SizedBox(height: spacing),
+                                            _XTextField(
+                                              controller: _passwordController,
+                                              focusNode: _passwordFocus,
+                                              label: 'Password',
+                                              icon: Icons.lock_outline_rounded,
+                                              isPassword: true,
+                                              obscure: _obscurePassword,
+                                              height: fieldHeight,
+                                              textInputAction: TextInputAction.next,
+                                              onSubmitted: (_) {
+                                                if (mounted) FocusScope.of(context).requestFocus(_urlFocus);
+                                              },
+                                              onToggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
+                                            ),
+                                            SizedBox(height: spacing),
+                                            _XTextField(
+                                              controller: _urlController,
+                                              focusNode: _urlFocus,
+                                              label: 'http://url_here.com:port',
+                                              icon: Icons.link_rounded,
+                                              height: fieldHeight,
+                                              hint: 'http://example.com:8080',
+                                              textInputAction: TextInputAction.done,
+                                              onSubmitted: (_) {
+                                                if (mounted) _savePlaylist();
+                                              },
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _AddPlaylistButton(
+                                              focusNode: _submitFocus,
+                                              isLoading: controller.isLoading,
+                                              height: buttonHeight,
+                                              onTap: controller.isLoading ? null : (_isFormValid ? _savePlaylist : null),
+                                            ),
+                                            if (isMobile && viewInsets.bottom == 0) ...[
+                                               const SizedBox(height: 12),
+                                               Row(
+                                                 mainAxisAlignment: MainAxisAlignment.center,
+                                                 children: [
+                                                   IconButton(
+                                                     icon: const Icon(Icons.vpn_lock_rounded, color: Colors.white70),
+                                                     onPressed: () {},
+                                                   ),
+                                                   const SizedBox(width: 20),
+                                                   IconButton(
+                                                     icon: const Icon(Icons.view_list_rounded, color: Colors.white70),
+                                                     onPressed: () => Navigator.pop(context),
+                                                   ),
+                                                 ],
+                                               ),
+                                            ],
+                                            if (controller.error != null) ...[
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                controller.error!,
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                    
+                    // Footer - Pinned to bottom, always visible
+                    Container(
+                      height: 50,
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      decoration: BoxDecoration(
+                        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
+                        color: Colors.black.withValues(alpha: 0.3),
+                      ),
+                      child: Row(
+                        children: [
+                          const Text(
+                            '0 PLAYLISTS',
+                            style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700),
+                          ),
+                          const Spacer(),
+                          const Text(
+                            'VERSION 1.0.0',
+                            style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                          const Spacer(),
+                          const Text(
+                            'NOT LOGGED IN',
+                            style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           );
         },
@@ -303,11 +402,13 @@ class _SideButton extends StatefulWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final double height;
 
   const _SideButton({
     required this.icon,
     required this.label,
     required this.onTap,
+    required this.height,
   });
 
   @override
@@ -370,22 +471,28 @@ class _SideButtonState extends State<_SideButton> {
 
 class _XTextField extends StatefulWidget {
   final TextEditingController controller;
+  final FocusNode focusNode;
   final String label;
   final IconData icon;
   final String? hint;
   final bool isPassword;
   final bool obscure;
   final double height;
+  final TextInputAction textInputAction;
+  final Function(String)? onSubmitted;
   final VoidCallback? onToggleObscure;
 
   const _XTextField({
     required this.controller,
+    required this.focusNode,
     required this.label,
     required this.icon,
     required this.height,
     this.hint,
     this.isPassword = false,
     this.obscure = false,
+    this.textInputAction = TextInputAction.next,
+    this.onSubmitted,
     this.onToggleObscure,
   });
 
@@ -397,51 +504,71 @@ class _XTextFieldState extends State<_XTextField> {
   bool _isFocused = false;
 
   @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(_handleFocusChange);
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode.removeListener(_handleFocusChange);
+    super.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (mounted) {
+      setState(() {
+        _isFocused = widget.focusNode.hasFocus;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Focus(
-      onFocusChange: (val) => setState(() => _isFocused = val),
-      child: AnimatedScale(
-        scale: _isFocused ? 1.02 : 1.0,
+    return AnimatedScale(
+      scale: _isFocused ? 1.02 : 1.0,
+      duration: const Duration(milliseconds: 200),
+      child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          height: widget.height,
-          decoration: BoxDecoration(
-            color: const Color(0xFF0F1423).withValues(alpha: 0.75),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: _isFocused ? const Color(0xFF00B7FF) : const Color(0xFF00B7FF).withValues(alpha: 0.3),
-              width: _isFocused ? 2.5 : 1,
-            ),
-            boxShadow: _isFocused ? [
-              BoxShadow(
-                color: const Color(0xFF00B7FF).withValues(alpha: 0.3),
-                blurRadius: 20,
-                spreadRadius: 2,
-              )
-            ] : [],
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F1423).withValues(alpha: 0.75),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: _isFocused ? const Color(0xFF00B7FF) : const Color(0xFF00B7FF).withValues(alpha: 0.3),
+            width: _isFocused ? 2.5 : 1,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Center(
-            child: TextFormField(
-              controller: widget.controller,
-              obscureText: widget.obscure,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
-              decoration: InputDecoration(
-                isDense: true,
-                border: InputBorder.none,
-                icon: Icon(widget.icon, color: const Color(0xFFC12CFF), size: 22),
-                hintText: widget.label,
-                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 15),
-                suffixIcon: widget.isPassword
-                    ? IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        icon: Icon(widget.obscure ? Icons.visibility_off : Icons.visibility, color: Colors.white38, size: 20),
-                        onPressed: widget.onToggleObscure,
-                      )
-                    : null,
-              ),
+          boxShadow: _isFocused ? [
+            BoxShadow(
+              color: const Color(0xFF00B7FF).withValues(alpha: 0.2),
+              blurRadius: 10,
+              spreadRadius: 1,
+            )
+          ] : [],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Center(
+          child: TextFormField(
+            controller: widget.controller,
+            focusNode: widget.focusNode,
+            obscureText: widget.obscure,
+            textInputAction: widget.textInputAction,
+            onFieldSubmitted: widget.onSubmitted,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
+            decoration: InputDecoration(
+              isDense: true,
+              border: InputBorder.none,
+              icon: Icon(widget.icon, color: const Color(0xFFC12CFF), size: 22),
+              hintText: widget.label,
+              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 15),
+              suffixIcon: widget.isPassword
+                  ? IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: Icon(widget.obscure ? Icons.visibility_off : Icons.visibility, color: Colors.white38, size: 20),
+                      onPressed: widget.onToggleObscure,
+                    )
+                  : null,
             ),
           ),
         ),
@@ -453,9 +580,10 @@ class _XTextFieldState extends State<_XTextField> {
 class _AddPlaylistButton extends StatefulWidget {
   final bool isLoading;
   final double height;
+  final FocusNode focusNode;
   final VoidCallback? onTap;
 
-  const _AddPlaylistButton({required this.isLoading, required this.height, this.onTap});
+  const _AddPlaylistButton({required this.isLoading, required this.height, required this.focusNode, this.onTap});
 
   @override
   State<_AddPlaylistButton> createState() => _AddPlaylistButtonState();
@@ -467,6 +595,7 @@ class _AddPlaylistButtonState extends State<_AddPlaylistButton> {
   @override
   Widget build(BuildContext context) {
     return FocusableActionDetector(
+      focusNode: widget.focusNode,
       onFocusChange: (val) => setState(() => _isFocused = val),
       shortcuts: {
         const SingleActivator(LogicalKeyboardKey.enter): const ActivateIntent(),

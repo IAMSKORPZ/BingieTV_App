@@ -3,6 +3,8 @@ import 'package:another_iptv_player/repositories/iptv_repository.dart';
 import 'package:another_iptv_player/services/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../controllers/branding_controller.dart';
 import '../../controllers/xtream_code_home_controller.dart';
 import '../../models/playlist_model.dart';
 import '../../models/content_type.dart';
@@ -16,7 +18,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../movies/xtream_movies_screen.dart';
 import '../series/xtream_series_screen.dart';
-import '../live_stream/xtream_live_screen.dart';
+import '../settings/announcement_center_screen.dart';
 
 class XtreamCodeHomeScreen extends StatefulWidget {
   final Playlist playlist;
@@ -64,21 +66,39 @@ class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
   }
 
   void _showAboutDialog() {
+    final branding = context.read<BrandingController>().branding;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF101827),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('About BingieTV', style: TextStyle(color: Colors.white)),
-        content: const Text('BingieTV is a premium IPTV player.', style: TextStyle(color: Colors.white70)),
+        title: Text('About ${branding.appName}', style: const TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('BingieTV is a premium IPTV player.', style: TextStyle(color: Colors.white70)),
+            const SizedBox(height: 12),
+            if (branding.websiteUrl != null)
+              _AboutLink(label: 'Website', url: branding.websiteUrl!),
+            if (branding.discordUrl != null)
+              _AboutLink(label: 'Discord', url: branding.discordUrl!),
+            if (branding.supportUrl != null)
+              _AboutLink(label: 'Support', url: branding.supportUrl!),
+            const SizedBox(height: 12),
+            Text('Version: $_version', style: const TextStyle(color: Colors.white54, fontSize: 12)),
+          ],
+        ),
         actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))],
       ),
     );
   }
 
   void _showAnnouncements() {
-    // Reusing existing logic or providing placeholder
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No announcements available.')));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AnnouncementCenterScreen()),
+    );
   }
 
   @override
@@ -138,5 +158,25 @@ class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
 
   void _navigateToSearch(ContentType contentType) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => SearchScreen(contentType: contentType)));
+  }
+}
+
+class _AboutLink extends StatelessWidget {
+  final String label;
+  final String url;
+  const _AboutLink({required this.label, required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Text(
+          '$label: $url',
+          style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+        ),
+      ),
+    );
   }
 }

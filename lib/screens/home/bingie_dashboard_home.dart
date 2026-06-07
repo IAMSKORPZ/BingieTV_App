@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../../controllers/branding_controller.dart';
 import 'widgets/home_tile.dart';
 import 'widgets/home_header.dart';
 import 'widgets/home_footer.dart';
@@ -42,6 +44,7 @@ class BingieDashboardHome extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final branding = context.watch<BrandingController>().branding;
         final double width = constraints.maxWidth;
         final double height = constraints.maxHeight;
         
@@ -54,7 +57,19 @@ class BingieDashboardHome extends StatelessWidget {
         return Container(
           width: width,
           height: height,
-          color: HomeTheme.background,
+          decoration: BoxDecoration(
+            color: HomeTheme.background,
+            image: DecorationImage(
+              image: branding.homeBackgroundUrl != null
+                  ? NetworkImage(branding.homeBackgroundUrl!)
+                  : const AssetImage('assets/tv_banner.png') as ImageProvider,
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(
+                Colors.black.withValues(alpha: 0.5),
+                BlendMode.darken,
+              ),
+            ),
+          ),
           padding: EdgeInsets.symmetric(
             horizontal: horizontalPadding,
             vertical: verticalPadding,

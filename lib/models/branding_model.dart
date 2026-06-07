@@ -6,6 +6,8 @@ class BrandingModel {
   final String? supportUrl;
   final String? websiteUrl;
   final String? discordUrl;
+  final String? homeBackgroundUrl;
+  final String? loginBackgroundUrl;
 
   const BrandingModel({
     required this.appName,
@@ -15,9 +17,16 @@ class BrandingModel {
     this.supportUrl,
     this.websiteUrl,
     this.discordUrl,
+    this.homeBackgroundUrl,
+    this.loginBackgroundUrl,
   });
 
-  static const defaults = BrandingModel(appName: 'BingieTV');
+  static const defaults = BrandingModel(
+    appName: 'BingieTV',
+    websiteUrl: 'https://bingietv.app',
+    discordUrl: 'https://discord.gg/bingietv',
+    supportUrl: 'https://t.me/bingietv_support',
+  );
 
   Map<String, dynamic> toJson() {
     return {
@@ -28,6 +37,8 @@ class BrandingModel {
       'supportUrl': supportUrl,
       'websiteUrl': websiteUrl,
       'discordUrl': discordUrl,
+      'homeBackgroundUrl': homeBackgroundUrl,
+      'loginBackgroundUrl': loginBackgroundUrl,
     };
   }
 
@@ -41,6 +52,8 @@ class BrandingModel {
       supportUrl: _optionalUrl(json['supportUrl']),
       websiteUrl: _optionalUrl(json['websiteUrl']),
       discordUrl: _optionalUrl(json['discordUrl']),
+      homeBackgroundUrl: _optionalUrl(json['homeBackgroundUrl']),
+      loginBackgroundUrl: _optionalUrl(json['loginBackgroundUrl']),
     );
   }
 

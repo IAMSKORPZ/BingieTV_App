@@ -2,6 +2,7 @@ import 'package:another_iptv_player/l10n/localization_extension.dart';
 import 'package:another_iptv_player/screens/xtream-codes/xtream_code_data_loader_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../controllers/branding_controller.dart';
 import '../../../../controllers/playlist_controller.dart';
 import '../../../../models/api_configuration_model.dart';
 import '../../../../models/playlist_model.dart';
@@ -59,39 +60,55 @@ class NewXtreamCodePlaylistScreenState
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final branding = context.watch<BrandingController>().branding;
+
     return Scaffold(
       appBar: AppBar(title: Text('XStream Playlist')),
-      body: Consumer<PlaylistController>(
-        builder: (context, controller, child) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildHeader(colorScheme),
-                  SizedBox(height: 32),
-                  _buildPlaylistNameField(colorScheme),
-                  SizedBox(height: 20),
-                  _buildUrlField(colorScheme),
-                  SizedBox(height: 20),
-                  _buildUsernameField(colorScheme),
-                  SizedBox(height: 20),
-                  _buildPasswordField(colorScheme),
-                  SizedBox(height: 32),
-                  _buildSaveButton(controller, colorScheme),
-                  if (controller.error != null) ...[
-                    SizedBox(height: 20),
-                    _buildErrorCard(controller.error!, colorScheme),
-                  ],
-                  SizedBox(height: 20),
-                  _buildInfoCard(colorScheme),
-                ],
-              ),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: branding.loginBackgroundUrl != null
+                ? NetworkImage(branding.loginBackgroundUrl!)
+                : const AssetImage('assets/tv_banner.png') as ImageProvider,
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withValues(alpha: 0.6),
+              BlendMode.darken,
             ),
-          );
-        },
+          ),
+        ),
+        child: Consumer<PlaylistController>(
+          builder: (context, controller, child) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildHeader(colorScheme),
+                    SizedBox(height: 32),
+                    _buildPlaylistNameField(colorScheme),
+                    SizedBox(height: 20),
+                    _buildUrlField(colorScheme),
+                    SizedBox(height: 20),
+                    _buildUsernameField(colorScheme),
+                    SizedBox(height: 20),
+                    _buildPasswordField(colorScheme),
+                    SizedBox(height: 32),
+                    _buildSaveButton(controller, colorScheme),
+                    if (controller.error != null) ...[
+                      SizedBox(height: 20),
+                      _buildErrorCard(controller.error!, colorScheme),
+                    ],
+                    SizedBox(height: 20),
+                    _buildInfoCard(colorScheme),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../../../controllers/branding_controller.dart';
 import '../home_theme.dart';
 
 class HomeHeader extends StatelessWidget {
@@ -18,6 +20,7 @@ class HomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
+    final branding = context.watch<BrandingController>().branding;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -29,13 +32,9 @@ class HomeHeader extends StatelessWidget {
             const Icon(Icons.play_arrow_rounded, color: Color(0xFF3B82F6), size: 24),
             if (!isSmall) ...[
               const SizedBox(width: 6),
-              const Text(
-                'BINGIE',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.1),
-              ),
-              const Text(
-                'TV',
-                style: TextStyle(color: Color(0xFF60A5FA), fontSize: 18, fontWeight: FontWeight.w900),
+              Text(
+                branding.appName.toUpperCase(),
+                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.1),
               ),
             ],
             const Spacer(),

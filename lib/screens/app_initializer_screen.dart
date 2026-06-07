@@ -3,6 +3,8 @@ import 'package:another_iptv_player/screens/m3u/m3u_home_screen.dart';
 import 'package:another_iptv_player/screens/playlist_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../../controllers/branding_controller.dart';
 import '../../repositories/user_preferences.dart';
 import '../../services/app_state.dart';
 import '../../services/playlist_service.dart';
@@ -51,7 +53,9 @@ class _AppInitializerScreenState extends State<AppInitializerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    final branding = context.watch<BrandingController>();
+    
+    if (_isLoading || branding.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 

@@ -50,10 +50,17 @@ class RemoteConfigService {
       : provider = provider ?? GitHubRemoteConfigProvider();
 
   Future<RemoteConfigSnapshot> load({bool forceRefresh = false}) async {
+    final cached = await _tryCache();
+    
+    if (!forceRefresh && cached != null && cached.lastSyncTime != null) {
+      final age = DateTime.now().difference(cached.lastSyncTime!);
+      if (age < const Duration(hours: 6)) {
+        return cached;
+      }
+    }
+
     final remote = await _tryRemote();
     if (remote != null) return remote;
-
-    final cached = await _tryCache();
     if (cached != null) return cached;
 
     return RemoteConfigSnapshot.defaults;

@@ -49,10 +49,9 @@ class BingieDashboardHome extends StatelessWidget {
         final double height = constraints.maxHeight;
         
         // Unified scaling logic for a premium look
-        final double horizontalPadding = width * 0.04;
-        // Reduced vertical padding to lower the footer slightly
-        final double verticalPadding = height * 0.02; 
-        final double gap = width * 0.015;
+        final double horizontalPadding = width * 0.05; // Slightly increased for better aspect ratio
+        final double verticalPadding = height * 0.01; // Reduced to give more height to tiles
+        final double gap = width * 0.012; // Tighter gaps for a cleaner look
 
         final homeBg = config.backgrounds.home;
 
@@ -85,7 +84,7 @@ class BingieDashboardHome extends StatelessWidget {
                 onAbout: onAbout,
               ),
               
-              SizedBox(height: gap),
+              const SizedBox(height: 8), // Minimal gap to move dashboard as high as possible
               
               // 2. Main Dashboard (Fixed layout across all platforms)
               Expanded(
@@ -113,9 +112,9 @@ class BingieDashboardHome extends StatelessWidget {
                       flex: 70,
                       child: Column(
                         children: [
-                          // Upper Right: Movies & Series
+                          // Upper Right: Movies & Series (Increased height significantly)
                           Expanded(
-                            flex: 70, // Increased top row flex to reduce bottom row height
+                            flex: 72, // Target 35-45% height increase for top row
                             child: Row(
                               children: [
                                 Expanded(
@@ -143,9 +142,9 @@ class BingieDashboardHome extends StatelessWidget {
                           
                           SizedBox(height: gap),
                           
-                          // Lower Right: Announcements, Update, Settings (Height reduced)
+                          // Lower Right: Announcements, Update, Settings (Proportional height)
                           Expanded(
-                            flex: 30, // Reduced bottom row flex as requested
+                            flex: 28, // Balanced row height for utility tiles
                             child: Row(
                               children: [
                                 Expanded(
@@ -194,8 +193,8 @@ class BingieDashboardHome extends StatelessWidget {
                 ),
               ),
               
-              // Reduced gap before footer to lower its position
-              SizedBox(height: gap * 0.3),
+              // Increased gap before footer to move dashboard up and clear space
+              const SizedBox(height: 50),
               
               // 3. Compact Footer
               HomeFooter(

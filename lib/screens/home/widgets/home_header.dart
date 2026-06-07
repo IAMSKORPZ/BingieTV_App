@@ -24,12 +24,12 @@ class HomeHeader extends StatelessWidget {
         
         return Row(
           children: [
-            // Left: Logo
+            // Left: Logo (Branding text removed)
             Image.asset(
               'assets/images/App_Logo.png',
-              height: 28,
+              height: 90,
               fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.play_arrow_rounded, color: Color(0xFF3B82F6), size: 24),
+              errorBuilder: (context, error, stackTrace) => const Icon(Icons.play_arrow_rounded, color: Color(0xFF3B82F6), size: 48),
             ),
             const Spacer(),
             // Center: Time & Date (Fixed formatting)

@@ -18,6 +18,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../movies/xtream_movies_screen.dart';
 import '../series/xtream_series_screen.dart';
+import '../live_stream/xtream_live_screen.dart';
 import '../settings/announcement_center_screen.dart';
 
 class XtreamCodeHomeScreen extends StatefulWidget {
@@ -145,9 +146,9 @@ class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
                 version: _version,
               ),
               WatchHistoryScreen(playlistId: widget.playlist.id),
-              const XtreamLiveScreen(),
-              const XtreamMoviesScreen(),
-              const XtreamSeriesScreen(),
+              XtreamLiveScreen(),
+              XtreamMoviesScreen(),
+              XtreamSeriesScreen(),
               XtreamCodePlaylistSettingsScreen(playlist: widget.playlist),
             ],
           );

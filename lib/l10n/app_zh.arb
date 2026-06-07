@@ -290,5 +290,6 @@
   "series_content_type": "剧集",
   "last_update": "最后更新",
   "minutes": "分钟",
-  "duration_label": "时长"
+  "duration_label": "时长",
+  "announcements": "公告"
 }

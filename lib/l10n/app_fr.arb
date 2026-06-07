@@ -290,5 +290,6 @@
   "series_content_type": "Série",
   "last_update": "Dernière Mise à Jour",
   "minutes": "min",
-  "duration_label": "Durée"
+  "duration_label": "Durée",
+  "announcements": "Annonces"
 }

@@ -77,10 +77,11 @@ class NewXtreamCodePlaylistScreenState
     final config = context.watch<ConfigService>().config;
     final loginBg = config.backgrounds.login;
     final viewInsets = MediaQuery.of(context).viewInsets;
+    final bool keyboardVisible = viewInsets.bottom > 0;
 
     return Scaffold(
       backgroundColor: const Color(0xFF050816),
-      resizeToAvoidBottomInset: false, // Manual AnimatedPadding control
+      resizeToAvoidBottomInset: false,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final double width = constraints.maxWidth;
@@ -92,6 +93,8 @@ class NewXtreamCodePlaylistScreenState
           if (isMobile) logoHeight = 60;
           else if (isTV) logoHeight = 120;
           else logoHeight = 90;
+
+          if (keyboardVisible) logoHeight *= 0.7; // Shrink logo in input mode
 
           double fieldHeight;
           double buttonHeight;
@@ -141,7 +144,7 @@ class NewXtreamCodePlaylistScreenState
                     Expanded(
                       child: Row(
                         children: [
-                          // Left Panel (Compressed & Grouped)
+                          // Left Panel
                           if (!isMobile)
                           Expanded(
                             flex: 4,
@@ -152,44 +155,56 @@ class NewXtreamCodePlaylistScreenState
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Image.asset(
-                                    'assets/images/App_Logo.png',
-                                    height: logoHeight,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (context, error, stackTrace) => 
-                                      Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoHeight * 0.7),
+                                  AnimatedSize(
+                                    duration: const Duration(milliseconds: 200),
+                                    child: Image.asset(
+                                      'assets/images/App_Logo.png',
+                                      height: logoHeight,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (context, error, stackTrace) => 
+                                        Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoHeight * 0.7),
+                                    ),
                                   ),
-                                  const SizedBox(height: 16),
-                                  _SideButton(
-                                    icon: Icons.vpn_lock_rounded,
-                                    label: 'CONNECT VPN',
-                                    height: buttonHeight,
-                                    onTap: () {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('VPN Service coming soon')),
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _SideButton(
-                                    icon: Icons.view_list_rounded,
-                                    label: 'LIST PLAYLISTS',
-                                    height: buttonHeight,
-                                    onTap: () => Navigator.pop(context),
+                                  
+                                  AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 200),
+                                    child: !keyboardVisible ? Column(
+                                      key: const ValueKey('side_buttons'),
+                                      children: [
+                                        const SizedBox(height: 16),
+                                        _SideButton(
+                                          icon: Icons.vpn_lock_rounded,
+                                          label: 'CONNECT VPN',
+                                          height: buttonHeight,
+                                          onTap: () {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('VPN Service coming soon')),
+                                            );
+                                          },
+                                        ),
+                                        const SizedBox(height: 12),
+                                        _SideButton(
+                                          icon: Icons.view_list_rounded,
+                                          label: 'LIST PLAYLISTS',
+                                          height: buttonHeight,
+                                          onTap: () => Navigator.pop(context),
+                                        ),
+                                      ],
+                                    ) : const SizedBox.shrink(key: ValueKey('empty')),
                                   ),
                                 ],
                               ),
                             ),
                           ),
 
-                          // Right Panel (High-Efficiency Form)
+                          // Right Panel (Form)
                           Expanded(
                             flex: 6,
                             child: Container(
                               padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
                               child: Center(
                                 child: SingleChildScrollView(
-                                  physics: (height < 500 || viewInsets.bottom > 0) ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
+                                  physics: (height < 500 || keyboardVisible) ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
                                   child: Consumer<PlaylistController>(
                                     builder: (context, controller, child) {
                                       return Form(
@@ -198,7 +213,7 @@ class NewXtreamCodePlaylistScreenState
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
                                           children: [
-                                            if (isMobile && viewInsets.bottom == 0) ...[
+                                            if (isMobile && !keyboardVisible) ...[
                                               Image.asset(
                                                 'assets/images/App_Logo.png',
                                                 height: logoHeight,
@@ -277,7 +292,7 @@ class NewXtreamCodePlaylistScreenState
                                               height: buttonHeight,
                                               onTap: controller.isLoading ? null : (_isFormValid ? _savePlaylist : null),
                                             ),
-                                            if (isMobile && viewInsets.bottom == 0) ...[
+                                            if (isMobile && !keyboardVisible) ...[
                                                const SizedBox(height: 12),
                                                Row(
                                                  mainAxisAlignment: MainAxisAlignment.center,
@@ -315,7 +330,8 @@ class NewXtreamCodePlaylistScreenState
                       ),
                     ),
                     
-                    // Footer - Pinned to bottom, always visible
+                    // Footer
+                    if (!keyboardVisible)
                     Container(
                       height: 50,
                       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -430,7 +446,7 @@ class _SideButtonState extends State<_SideButton> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             width: double.infinity,
-            height: 60,
+            height: widget.height,
             decoration: BoxDecoration(
               color: _isFocused ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),

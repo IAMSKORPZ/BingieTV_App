@@ -15,5 +15,5 @@ class HomeTheme {
   static const Color iconUpdate = Color(0xFF22E3B6);
   static const Color iconSettings = Color(0xFFFFC02E);
 
-  static const double borderRadius = 26.0;
+  static const double borderRadius = 32.0;
 }

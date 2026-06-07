@@ -65,13 +65,22 @@ class BingieDashboardHome extends StatelessWidget {
                   ? NetworkImage(homeBg)
                   : const AssetImage('assets/images/background.png') as ImageProvider,
               fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(
-                Colors.black.withValues(alpha: 0.5),
-                BlendMode.darken,
-              ),
             ),
           ),
-          child: Padding(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  HomeTheme.background.withValues(alpha: 0.4),
+                  HomeTheme.background.withValues(alpha: 0.8),
+                  HomeTheme.background,
+                ],
+                stops: const [0.0, 0.6, 1.0],
+              ),
+            ),
+            child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: horizontalPadding,
               vertical: verticalPadding,
@@ -204,6 +213,7 @@ class BingieDashboardHome extends StatelessWidget {
                 ),
               ],
             ),
+          ),
           ),
         );
       },

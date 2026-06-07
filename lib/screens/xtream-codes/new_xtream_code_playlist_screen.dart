@@ -76,8 +76,6 @@ class NewXtreamCodePlaylistScreenState
   Widget build(BuildContext context) {
     final config = context.watch<ConfigService>().config;
     final loginBg = config.backgrounds.login;
-    final viewInsets = MediaQuery.of(context).viewInsets;
-    final bool keyboardVisible = viewInsets.bottom > 0;
 
     return Scaffold(
       backgroundColor: const Color(0xFF050816),
@@ -89,12 +87,14 @@ class NewXtreamCodePlaylistScreenState
           final bool isMobile = width < 700;
           final bool isTV = width >= 1600;
           
-          double logoHeight;
-          if (isMobile) logoHeight = 60;
-          else if (isTV) logoHeight = 120;
-          else logoHeight = 90;
-
-          if (keyboardVisible) logoHeight *= 0.7; // Shrink logo in input mode
+          double logoWidth;
+          if (isMobile) {
+            logoWidth = 110; 
+          } else if (isTV) {
+            logoWidth = 190; 
+          } else {
+            logoWidth = 150; 
+          }
 
           double fieldHeight;
           double buttonHeight;
@@ -113,7 +113,7 @@ class NewXtreamCodePlaylistScreenState
           double spacing = isMobile ? 8 : 12;
 
           if (height < 450) {
-             logoHeight *= 0.7;
+             logoWidth *= 0.8;
              fieldHeight *= 0.8;
              buttonHeight *= 0.8;
              spacing = 6;
@@ -136,230 +136,184 @@ class NewXtreamCodePlaylistScreenState
               ),
             ),
             child: SafeArea(
-              child: AnimatedPadding(
-                duration: const Duration(milliseconds: 200),
-                padding: EdgeInsets.only(bottom: viewInsets.bottom),
-                child: Column(
-                  children: [
+              child: Row(
+                children: [
+                  if (!isMobile)
                     Expanded(
-                      child: Row(
-                        children: [
-                          // Left Panel
-                          if (!isMobile)
-                          Expanded(
-                            flex: 4,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 40),
-                              color: Colors.black.withValues(alpha: 0.2),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  AnimatedSize(
-                                    duration: const Duration(milliseconds: 200),
-                                    child: Image.asset(
-                                      'assets/images/App_Logo.png',
-                                      height: logoHeight,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (context, error, stackTrace) => 
-                                        Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoHeight * 0.7),
+                      flex: 4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        color: Colors.black.withValues(alpha: 0.2),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/images/logo.png',
+                              width: logoWidth,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => 
+                                Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoWidth * 0.4),
+                            ),
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              width: 220,
+                              height: 60,
+                              child: _SideButton(
+                                icon: Icons.vpn_lock_rounded,
+                                label: 'CONNECT VPN',
+                                height: 60,
+                                onTap: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('VPN Service coming soon')),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: 220,
+                              height: 60,
+                              child: _SideButton(
+                                icon: Icons.view_list_rounded,
+                                label: 'LIST PLAYLISTS',
+                                height: 60,
+                                onTap: () => Navigator.pop(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  Expanded(
+                    flex: 6,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
+                      child: Center(
+                        child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          child: Consumer<PlaylistController>(
+                            builder: (context, controller, child) {
+                              return Form(
+                                key: _formKey,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                                  children: [
+                                    if (isMobile) ...[
+                                      Image.asset(
+                                        'assets/images/logo.png',
+                                        width: logoWidth,
+                                        fit: BoxFit.contain,
+                                      ),
+                                      const SizedBox(height: 16),
+                                    ],
+                                    Text(
+                                      'ENTER YOUR PLAYLIST DETAILS',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: isMobile ? TextAlign.center : TextAlign.left,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: titleFontSize,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 1.2,
+                                      ),
                                     ),
-                                  ),
-                                  
-                                  AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 200),
-                                    child: !keyboardVisible ? Column(
-                                      key: const ValueKey('side_buttons'),
-                                      children: [
-                                        const SizedBox(height: 16),
-                                        _SideButton(
-                                          icon: Icons.vpn_lock_rounded,
-                                          label: 'CONNECT VPN',
-                                          height: buttonHeight,
-                                          onTap: () {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('VPN Service coming soon')),
-                                            );
-                                          },
-                                        ),
-                                        const SizedBox(height: 12),
-                                        _SideButton(
-                                          icon: Icons.view_list_rounded,
-                                          label: 'LIST PLAYLISTS',
-                                          height: buttonHeight,
-                                          onTap: () => Navigator.pop(context),
-                                        ),
-                                      ],
-                                    ) : const SizedBox.shrink(key: ValueKey('empty')),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          // Right Panel (Form)
-                          Expanded(
-                            flex: 6,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 60),
-                              child: Center(
-                                child: SingleChildScrollView(
-                                  physics: (height < 500 || keyboardVisible) ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
-                                  child: Consumer<PlaylistController>(
-                                    builder: (context, controller, child) {
-                                      return Form(
-                                        key: _formKey,
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-                                          children: [
-                                            if (isMobile && !keyboardVisible) ...[
-                                              Image.asset(
-                                                'assets/images/App_Logo.png',
-                                                height: logoHeight,
-                                                fit: BoxFit.contain,
-                                              ),
-                                              const SizedBox(height: 16),
-                                            ],
-                                            Text(
-                                              'ENTER YOUR PLAYLIST DETAILS',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              textAlign: isMobile ? TextAlign.center : TextAlign.left,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: titleFontSize,
-                                                fontWeight: FontWeight.w900,
-                                                letterSpacing: 1.2,
-                                              ),
-                                            ),
-                                            SizedBox(height: spacing),
-                                            _XTextField(
-                                              controller: _nameController,
-                                              focusNode: _playlistFocus,
-                                              label: 'Playlist Name',
-                                              icon: Icons.list_rounded,
-                                              height: fieldHeight,
-                                              textInputAction: TextInputAction.next,
-                                              onSubmitted: (_) {
-                                                if (mounted) FocusScope.of(context).requestFocus(_usernameFocus);
-                                              },
-                                            ),
-                                            SizedBox(height: spacing),
-                                            _XTextField(
-                                              controller: _usernameController,
-                                              focusNode: _usernameFocus,
-                                              label: 'Username',
-                                              icon: Icons.person_outline_rounded,
-                                              height: fieldHeight,
-                                              textInputAction: TextInputAction.next,
-                                              onSubmitted: (_) {
-                                                if (mounted) FocusScope.of(context).requestFocus(_passwordFocus);
-                                              },
-                                            ),
-                                            SizedBox(height: spacing),
-                                            _XTextField(
-                                              controller: _passwordController,
-                                              focusNode: _passwordFocus,
-                                              label: 'Password',
-                                              icon: Icons.lock_outline_rounded,
-                                              isPassword: true,
-                                              obscure: _obscurePassword,
-                                              height: fieldHeight,
-                                              textInputAction: TextInputAction.next,
-                                              onSubmitted: (_) {
-                                                if (mounted) FocusScope.of(context).requestFocus(_urlFocus);
-                                              },
-                                              onToggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
-                                            ),
-                                            SizedBox(height: spacing),
-                                            _XTextField(
-                                              controller: _urlController,
-                                              focusNode: _urlFocus,
-                                              label: 'http://url_here.com:port',
-                                              icon: Icons.link_rounded,
-                                              height: fieldHeight,
-                                              hint: 'http://example.com:8080',
-                                              textInputAction: TextInputAction.done,
-                                              onSubmitted: (_) {
-                                                if (mounted) _savePlaylist();
-                                              },
-                                            ),
-                                            const SizedBox(height: 12),
-                                            _AddPlaylistButton(
-                                              focusNode: _submitFocus,
-                                              isLoading: controller.isLoading,
-                                              height: buttonHeight,
-                                              onTap: controller.isLoading ? null : (_isFormValid ? _savePlaylist : null),
-                                            ),
-                                            if (isMobile && !keyboardVisible) ...[
-                                               const SizedBox(height: 12),
-                                               Row(
-                                                 mainAxisAlignment: MainAxisAlignment.center,
-                                                 children: [
-                                                   IconButton(
-                                                     icon: const Icon(Icons.vpn_lock_rounded, color: Colors.white70),
-                                                     onPressed: () {},
-                                                   ),
-                                                   const SizedBox(width: 20),
-                                                   IconButton(
-                                                     icon: const Icon(Icons.view_list_rounded, color: Colors.white70),
-                                                     onPressed: () => Navigator.pop(context),
-                                                   ),
-                                                 ],
-                                               ),
-                                            ],
-                                            if (controller.error != null) ...[
-                                              const SizedBox(height: 8),
-                                              Text(
-                                                controller.error!,
-                                                textAlign: TextAlign.center,
-                                                style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13),
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                    SizedBox(height: spacing),
+                                    _XTextField(
+                                      controller: _nameController,
+                                      focusNode: _playlistFocus,
+                                      label: 'Playlist Name',
+                                      icon: Icons.list_rounded,
+                                      height: fieldHeight,
+                                      textInputAction: TextInputAction.next,
+                                      onSubmitted: (_) {
+                                        if (mounted) FocusScope.of(context).requestFocus(_usernameFocus);
+                                      },
+                                    ),
+                                    SizedBox(height: spacing),
+                                    _XTextField(
+                                      controller: _usernameController,
+                                      focusNode: _usernameFocus,
+                                      label: 'Username',
+                                      icon: Icons.person_outline_rounded,
+                                      height: fieldHeight,
+                                      textInputAction: TextInputAction.next,
+                                      onSubmitted: (_) {
+                                        if (mounted) FocusScope.of(context).requestFocus(_passwordFocus);
+                                      },
+                                    ),
+                                    SizedBox(height: spacing),
+                                    _XTextField(
+                                      controller: _passwordController,
+                                      focusNode: _passwordFocus,
+                                      label: 'Password',
+                                      icon: Icons.lock_outline_rounded,
+                                      isPassword: true,
+                                      obscure: _obscurePassword,
+                                      height: fieldHeight,
+                                      textInputAction: TextInputAction.next,
+                                      onSubmitted: (_) {
+                                        if (mounted) FocusScope.of(context).requestFocus(_urlFocus);
+                                      },
+                                      onToggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
+                                    ),
+                                    SizedBox(height: spacing),
+                                    _XTextField(
+                                      controller: _urlController,
+                                      focusNode: _urlFocus,
+                                      label: 'http://url_here.com:port',
+                                      icon: Icons.link_rounded,
+                                      height: fieldHeight,
+                                      hint: 'http://example.com:8080',
+                                      textInputAction: TextInputAction.done,
+                                      onSubmitted: (_) {
+                                        if (mounted) _savePlaylist();
+                                      },
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _AddPlaylistButton(
+                                      focusNode: _submitFocus,
+                                      isLoading: controller.isLoading,
+                                      height: buttonHeight,
+                                      onTap: controller.isLoading ? null : (_isFormValid ? _savePlaylist : null),
+                                    ),
+                                    if (isMobile) ...[
+                                       const SizedBox(height: 12),
+                                       Row(
+                                         mainAxisAlignment: MainAxisAlignment.center,
+                                         children: [
+                                           IconButton(
+                                             icon: const Icon(Icons.vpn_lock_rounded, color: Colors.white70),
+                                             onPressed: () {},
+                                           ),
+                                           const SizedBox(width: 20),
+                                           IconButton(
+                                             icon: const Icon(Icons.view_list_rounded, color: Colors.white70),
+                                             onPressed: () => Navigator.pop(context),
+                                           ),
+                                         ],
+                                       ),
+                                    ],
+                                    if (controller.error != null) ...[
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        controller.error!,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13),
+                                      ),
+                                    ],
+                                  ],
                                 ),
-                              ),
-                            ),
+                              );
+                            },
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                    
-                    // Footer
-                    if (!keyboardVisible)
-                    Container(
-                      height: 50,
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      decoration: BoxDecoration(
-                        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
-                        color: Colors.black.withValues(alpha: 0.3),
-                      ),
-                      child: Row(
-                        children: [
-                          const Text(
-                            '0 PLAYLISTS',
-                            style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700),
-                          ),
-                          const Spacer(),
-                          const Text(
-                            'VERSION 1.0.0',
-                            style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold),
-                          ),
-                          const Spacer(),
-                          const Text(
-                            'NOT LOGGED IN',
-                            style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );
@@ -401,7 +355,7 @@ class NewXtreamCodePlaylistScreenState
         password: _passwordController.text.trim(),
       );
 
-      if (playlist != null) {
+      if (playlist != null && mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(

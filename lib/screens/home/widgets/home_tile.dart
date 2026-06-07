@@ -44,7 +44,6 @@ class _HomeTileState extends State<HomeTile> {
       builder: (context, constraints) {
         final double tileHeight = constraints.maxHeight;
         
-        // Optimized scaling to prevent overflows while maintaining large TV visuals
         final double iconSize = widget.large ? (tileHeight * 0.28) : (tileHeight * 0.42);
         final double titleSize = widget.large ? (tileHeight * 0.11) : (tileHeight * 0.18);
         final double subtitleSize = titleSize * 0.45;
@@ -113,7 +112,6 @@ class _HomeTileState extends State<HomeTile> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Only one icon per tile, no faded background icon
                           Icon(widget.icon, color: mainColor, size: iconSize),
                           SizedBox(height: spacing),
                           FittedBox(

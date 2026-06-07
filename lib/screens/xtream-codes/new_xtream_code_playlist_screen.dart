@@ -87,13 +87,14 @@ class NewXtreamCodePlaylistScreenState
           final bool isMobile = width < 700;
           final bool isTV = width >= 1600;
           
+          // Logo Scaling (Width-based) + 10% Increase
           double logoWidth;
           if (isMobile) {
-            logoWidth = 110; 
+            logoWidth = 120; 
           } else if (isTV) {
-            logoWidth = 190; 
+            logoWidth = 210; 
           } else {
-            logoWidth = 150; 
+            logoWidth = 165; 
           }
 
           double fieldHeight;
@@ -155,7 +156,7 @@ class NewXtreamCodePlaylistScreenState
                               errorBuilder: (context, error, stackTrace) => 
                                 Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoWidth * 0.4),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 50), // Increased gap to move logo UP
                             SizedBox(
                               width: 220,
                               height: 60,
@@ -170,7 +171,7 @@ class NewXtreamCodePlaylistScreenState
                                 },
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 8), // Reduced gap for tighter grouping
                             SizedBox(
                               width: 220,
                               height: 60,
@@ -418,6 +419,8 @@ class _SideButtonState extends State<_SideButton> {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(widget.icon, color: _isFocused ? const Color(0xFF00B7FF) : Colors.white70, size: 28),
                 const SizedBox(width: 16),

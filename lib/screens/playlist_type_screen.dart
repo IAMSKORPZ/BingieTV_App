@@ -306,11 +306,15 @@ class _TypeCard extends StatefulWidget {
 
 class _TypeCardState extends State<_TypeCard> {
   bool _isFocused = false;
+  bool _isHovered = false;
+
+  bool get active => _isFocused || _isHovered;
 
   @override
   Widget build(BuildContext context) {
     return FocusableActionDetector(
       onFocusChange: (val) => setState(() => _isFocused = val),
+      onShowHoverHighlight: (val) => setState(() => _isHovered = val),
       shortcuts: const {
         SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
         SingleActivator(LogicalKeyboardKey.select): ActivateIntent(),
@@ -318,54 +322,75 @@ class _TypeCardState extends State<_TypeCard> {
       actions: {
         ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) => widget.onTap()),
       },
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedScale(
-          scale: _isFocused ? 1.05 : 1.0,
-          duration: const Duration(milliseconds: 200),
-          child: Container(
-            width: widget.width,
-            height: widget.height,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0F1423).withValues(alpha: 0.75),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: _isFocused ? const Color(0xFF00B7FF) : Colors.white.withValues(alpha: 0.1),
-                width: _isFocused ? 3 : 1.5,
-              ),
-              boxShadow: _isFocused ? [
-                BoxShadow(
-                  color: const Color(0xFFC12CFF).withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  spreadRadius: 2,
-                )
-              ] : [],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ShaderMask(
-                  shaderCallback: (bounds) => const LinearGradient(
-                    colors: [Color(0xFFC12CFF), Color(0xFF00B7FF)],
-                  ).createShader(bounds),
-                  child: Icon(widget.icon, size: widget.height * 0.35, color: Colors.white),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedScale(
+            scale: active ? 1.04 : 1.0,
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              width: widget.width,
+              height: widget.height,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F1423).withValues(alpha: 0.75),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: active 
+                      ? const Color(0xFF00B7FF)
+                      : const Color(0xFF00B7FF).withValues(alpha: 0.2),
+                  width: active ? 3 : 1.5,
                 ),
-                const SizedBox(height: 12), 
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    widget.title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.8,
+                boxShadow: active ? [
+                  BoxShadow(
+                    color: const Color(0xFFC12CFF).withValues(alpha: 0.4),
+                    blurRadius: 24,
+                    spreadRadius: 2,
+                  ),
+                  BoxShadow(
+                    color: const Color(0xFF00B7FF).withValues(alpha: 0.3),
+                    blurRadius: 18,
+                    spreadRadius: 1,
+                  ),
+                ] : [],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedScale(
+                    scale: active ? 1.15 : 1.0,
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    child: ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [Color(0xFFC12CFF), Color(0xFF00B7FF)],
+                      ).createShader(bounds),
+                      child: Icon(widget.icon, size: 48, color: Colors.white),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16), 
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        widget.title,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

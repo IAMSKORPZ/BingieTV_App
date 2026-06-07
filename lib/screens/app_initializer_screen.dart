@@ -2,6 +2,7 @@ import 'package:another_iptv_player/models/playlist_model.dart';
 import 'package:another_iptv_player/screens/m3u/m3u_home_screen.dart';
 import 'package:another_iptv_player/screens/playlist_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../repositories/user_preferences.dart';
 import '../../services/app_state.dart';
 import '../../services/playlist_service.dart';
@@ -21,7 +22,15 @@ class _AppInitializerScreenState extends State<AppInitializerScreen> {
   @override
   void initState() {
     super.initState();
+    _lockOrientation();
     _loadLastPlaylist();
+  }
+
+  Future<void> _lockOrientation() async {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
   }
 
   Future<void> _loadLastPlaylist() async {

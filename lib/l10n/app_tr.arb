@@ -284,5 +284,6 @@
   "series_content_type": "Dizi",
   "last_update": "Son Güncelleme",
   "minutes": "dk",
-  "duration_label": "Süre"
+  "duration_label": "Süre",
+  "announcements": "Duyurular"
 }

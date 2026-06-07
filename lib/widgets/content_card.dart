@@ -85,7 +85,7 @@ class ContentCard extends StatelessWidget {
                     )
                         : _buildTitleCard(context),
                   ),
-                  if (ratingBadge != null) ratingBadge,
+                  ?ratingBadge,
                   if (isRecent)
                     Positioned(
                       top: 4,

@@ -11,26 +11,23 @@ import '../screens/xtream-codes/xtream_code_data_loader_screen.dart';
 
 class XtreamCodeHomeController extends ChangeNotifier {
   late PageController _pageController;
-  final IptvRepository _repository = AppState.xtreamCodeRepository!;
+  final IptvRepository? _repository;
 
   ApiResponse? _userInfo;
   int _currentIndex = 0;
-  final bool _isLoading = false;
+  bool _isLoading = false;
 
   final List<CategoryViewModel> _liveCategories = [];
   final List<CategoryViewModel> _movieCategories = [];
   final List<CategoryViewModel> _seriesCategories = [];
 
-  // --- Categoriy hidden ---
   final Set<String> _hiddenMovieCategoryIds = {};
   final Set<String> _hiddenSeriesCategoryIds = {};
 
-  // Getters publics
   ApiResponse? get userInfo => _userInfo;
   Set<String> get hiddenMovieCategoryIds => _hiddenMovieCategoryIds;
   Set<String> get hiddenSeriesCategoryIds => _hiddenSeriesCategoryIds;
 
-  // Fonctions toggle
   void toggleMovieCategoryVisibility(String categoryId) {
     if (_hiddenMovieCategoryIds.contains(categoryId)) {
       _hiddenMovieCategoryIds.remove(categoryId);
@@ -49,7 +46,6 @@ class XtreamCodeHomeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Getters filtrés
   List<CategoryViewModel> get visibleMovieCategories => _movieCategories
       .where((c) => !_hiddenMovieCategoryIds.contains(c.category.categoryId))
       .toList();
@@ -58,20 +54,14 @@ class XtreamCodeHomeController extends ChangeNotifier {
       .where((c) => !_hiddenSeriesCategoryIds.contains(c.category.categoryId))
       .toList();
 
-  // Getters
   PageController get pageController => _pageController;
-
   int get currentIndex => _currentIndex;
-
   bool get isLoading => _isLoading;
-
   List<CategoryViewModel>? get liveCategories => _liveCategories;
-
   List<CategoryViewModel> get movieCategories => _movieCategories;
-
   List<CategoryViewModel> get seriesCategories => _seriesCategories;
 
-  XtreamCodeHomeController(bool all) {
+  XtreamCodeHomeController(bool all) : _repository = AppState.xtreamCodeRepository {
     _pageController = PageController();
     _loadCategories(all);
   }
@@ -85,13 +75,8 @@ class XtreamCodeHomeController extends ChangeNotifier {
   void onNavigationTap(int index) {
     _currentIndex = index;
     notifyListeners();
-
     if (_pageController.hasClients) {
-      _pageController.animateToPage(
-        index,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+      _pageController.animateToPage(index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     }
   }
 
@@ -101,159 +86,66 @@ class XtreamCodeHomeController extends ChangeNotifier {
   }
 
   String getPageTitle(BuildContext context) {
-    switch (currentIndex) {
-      case 0:
-        return context.loc.home;
-      case 1:
-        return context.loc.history;
-      case 2:
-        return context.loc.live_streams;
-      case 3:
-        return context.loc.movies;
-      case 4:
-        return context.loc.series_plural;
-      case 5:
-        return context.loc.settings;
-      default:
-        return 'BingieTV';
-    }
+    try {
+      switch (currentIndex) {
+        case 0: return context.loc.home;
+        case 1: return context.loc.history;
+        case 2: return context.loc.live_streams;
+        case 3: return context.loc.movies;
+        case 4: return context.loc.series_plural;
+        case 5: return context.loc.settings;
+        default: return 'BingieTV';
+      }
+    } catch (_) { return 'BingieTV'; }
   }
 
   Future<void> _loadCategories(bool all) async {
+    if (_repository == null) return;
     try {
-      _userInfo = await _repository.getPlayerInfo();
-      var liveCategories = await _repository.getLiveCategories();
-      if (liveCategories != null && liveCategories.isNotEmpty) {
-        for (var liveCategory in liveCategories) {
-          var liveStreams = await _repository.getLiveChannelsByCategoryId(
-            categoryId: liveCategory.categoryId,
-            top: 10,
-          );
-
-          if (liveStreams == null || liveStreams.isEmpty) continue;
-
-          var categoryViewModel = CategoryViewModel(
-            category: liveCategory,
-            contentItems: liveStreams
-                .map(
-                  (x) => ContentItem(
-                x.streamId,
-                x.name,
-                x.streamIcon,
-                ContentType.liveStream,
-                liveStream: x,
-              ),
-            )
-                .toList(),
-          );
-          if (!all) {
-            if (!await UserPreferences.getHiddenCategory(
-              liveCategory.categoryId,
-            )) {
-              _liveCategories.add(categoryViewModel);
-            }
-          } else {
-            _liveCategories.add(categoryViewModel);
-          }
-        }
-      }
-
-      var movieCategories = await _repository.getVodCategories();
-      if (movieCategories != null && movieCategories.isNotEmpty) {
-        for (var movieCategory in movieCategories) {
-          var movies = await _repository.getMovies(
-            categoryId: movieCategory.categoryId,
-            top: 10,
-          );
-
-          if (movies == null || movies.isEmpty) {
-            continue;
-          }
-
-          var categoryViewModel = CategoryViewModel(
-            category: movieCategory,
-            contentItems: movies
-                .map(
-                  (x) => ContentItem(
-                x.streamId,
-                x.name,
-                x.streamIcon,
-                ContentType.vod,
-                containerExtension: x.containerExtension,
-                vodStream: x,
-              ),
-            )
-                .toList(),
-          );
-          if (!all) {
-            if (!await UserPreferences.getHiddenCategory(
-              movieCategory.categoryId,
-            )) {
-              _movieCategories.add(categoryViewModel);
-            }
-          } else {
-            _movieCategories.add(categoryViewModel);
-          }
-        }
-      }
-
-      var seriesCategories = await _repository.getSeriesCategories();
-      if (seriesCategories != null && seriesCategories.isNotEmpty) {
-        for (var seriesCategory in seriesCategories) {
-          var series = await _repository.getSeries(
-            categoryId: seriesCategory.categoryId,
-            top: 10,
-          );
-
-          if (series == null || series.isEmpty) {
-            continue;
-          }
-
-          var categoryViewModel = CategoryViewModel(
-            category: seriesCategory,
-            contentItems: series
-                .map(
-                  (x) => ContentItem(
-                x.seriesId,
-                x.name,
-                x.cover ?? '',
-                ContentType.series,
-                seriesStream: x,
-              ),
-            )
-                .toList(),
-          );
-          if (!all) {
-            if (!await UserPreferences.getHiddenCategory(
-              seriesCategory.categoryId,
-            )) {
-              _seriesCategories.add(categoryViewModel);
-            }
-          } else {
-            _seriesCategories.add(categoryViewModel);
-          }
-        }
-      }
-
+      _isLoading = true;
       notifyListeners();
-    } catch (e, st) {
-      debugPrint(st.toString());
-    }
+      _userInfo = await _repository!.getPlayerInfo();
+      
+      final liveCats = await _repository!.getLiveCategories();
+      if (liveCats != null) {
+        for (var cat in liveCats) {
+          final streams = await _repository!.getLiveChannelsByCategoryId(categoryId: cat.categoryId, top: 10);
+          if (streams == null || streams.isEmpty) continue;
+          final vm = CategoryViewModel(category: cat, contentItems: streams.map((x) => ContentItem(x.streamId, x.name, x.streamIcon, ContentType.liveStream, liveStream: x)).toList());
+          if (!all) { if (!await UserPreferences.getHiddenCategory(cat.categoryId)) _liveCategories.add(vm); }
+          else _liveCategories.add(vm);
+        }
+      }
+      
+      final movieCats = await _repository!.getVodCategories();
+      if (movieCats != null) {
+        for (var cat in movieCats) {
+          final movies = await _repository!.getMovies(categoryId: cat.categoryId, top: 10);
+          if (movies == null || movies.isEmpty) continue;
+          final vm = CategoryViewModel(category: cat, contentItems: movies.map((x) => ContentItem(x.streamId, x.name, x.streamIcon, ContentType.vod, containerExtension: x.containerExtension, vodStream: x)).toList());
+          if (!all) { if (!await UserPreferences.getHiddenCategory(cat.categoryId)) _movieCategories.add(vm); }
+          else _movieCategories.add(vm);
+        }
+      }
+      
+      final seriesCats = await _repository!.getSeriesCategories();
+      if (seriesCats != null) {
+        for (var cat in seriesCats) {
+          final series = await _repository!.getSeries(categoryId: cat.categoryId, top: 10);
+          if (series == null || series.isEmpty) continue;
+          final vm = CategoryViewModel(category: cat, contentItems: series.map((x) => ContentItem(x.seriesId, x.name, x.cover ?? '', ContentType.series, seriesStream: x)).toList());
+          if (!all) { if (!await UserPreferences.getHiddenCategory(cat.categoryId)) _seriesCategories.add(vm); }
+          else _seriesCategories.add(vm);
+        }
+      }
+    } catch (e) { debugPrint(e.toString()); }
+    finally { _isLoading = false; notifyListeners(); }
   }
 
-  void refresh() {
-    notifyListeners();
-  }
+  void refresh() => notifyListeners();
 
-  refreshAllData(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => XtreamCodeDataLoaderScreen(
-          playlist: AppState.currentPlaylist!,
-          refreshAll: true,
-        ),
-      ),
-    );
+  void refreshAllData(BuildContext context) {
+    if (AppState.currentPlaylist == null) return;
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => XtreamCodeDataLoaderScreen(playlist: AppState.currentPlaylist!, refreshAll: true)));
   }
 }

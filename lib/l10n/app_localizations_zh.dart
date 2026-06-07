@@ -822,4 +822,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get duration_label => '时长';
+
+  @override
+  String get announcements => 'Announcements';
 }

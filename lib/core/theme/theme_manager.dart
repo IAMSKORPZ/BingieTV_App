@@ -1,55 +1,49 @@
-import 'package:another_iptv_player/core/theme/app_theme.dart';
-import 'package:another_iptv_player/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
+import '../../repositories/user_preferences.dart';
+import 'app_theme.dart';
+import 'theme_storage.dart';
 
-class ThemeManager {
-  static ThemeData buildTheme(BingieThemePalette palette) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: palette.primary,
-      brightness: Brightness.dark,
-      primary: palette.primary,
-      secondary: palette.secondary,
-      surface: palette.surface,
-    );
+class ThemeManager extends ChangeNotifier {
+  AppThemeType _currentThemeType = AppThemeType.bingieNeon;
+  ThemeMode _themeMode = ThemeMode.dark;
 
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: scheme.copyWith(
-        background: palette.background,
-        onSurface: palette.text,
-      ),
-      scaffoldBackgroundColor: palette.background,
-      cardTheme: CardThemeData(
-        color: palette.surface,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(color: palette.primary.withValues(alpha: 0.22)),
-        ),
-      ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: palette.background,
-        foregroundColor: palette.text,
-        elevation: 0,
-        centerTitle: false,
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: palette.primary,
-          foregroundColor: palette.text,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      ),
-      extensions: [
-        BingieThemeExtension(
-          brandGradient: LinearGradient(
-            colors: [palette.primary, palette.secondary, palette.accent],
-          ),
-          focusGlow: palette.accent,
-          glassBorder: palette.primary.withValues(alpha: 0.35),
-        ),
-      ],
-    );
+  AppThemeType get currentThemeType => _currentThemeType;
+  ThemeMode get themeMode => _themeMode;
+
+  ThemeData get currentThemeData => AppTheme.getTheme(_currentThemeType);
+
+  ThemeManager() {
+    _init();
+  }
+
+  Future<void> _init() async {
+    _currentThemeType = await ThemeStorage.loadTheme();
+    _themeMode = await UserPreferences.getThemeMode();
+    notifyListeners();
+  }
+
+  Future<void> setThemeType(AppThemeType type) async {
+    _currentThemeType = type;
+    await ThemeStorage.saveTheme(type);
+    notifyListeners();
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    _themeMode = mode;
+    await UserPreferences.setThemeMode(mode);
+    notifyListeners();
+  }
+
+  // Legacy support aliases
+  AppThemeType get selectedThemeType => _currentThemeType;
+  // This helps when existing code expects a field named 'currentTheme' that is an enum
+  AppThemeType get currentTheme => _currentThemeType; 
+  Future<void> setAppTheme(AppThemeType type) => setThemeType(type);
+  Future<void> setTheme(dynamic val) async {
+    if (val is AppThemeType) {
+      await setThemeType(val);
+    } else if (val is ThemeMode) {
+      await setThemeMode(val);
+    }
   }
 }

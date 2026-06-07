@@ -5,8 +5,8 @@ import 'package:another_iptv_player/models/content_type.dart';
 import 'package:another_iptv_player/models/playlist_content_model.dart';
 import '../screens/live_stream/live_stream_screen.dart';
 import '../screens/m3u/m3u_player_screen.dart';
-import '../screens/movies/movie_screen.dart';
-import '../screens/series/series_screen.dart';
+import '../screens/movies/movie_details_screen.dart';
+import '../screens/series/series_details_screen.dart';
 
 void navigateByContentType(BuildContext context, ContentItem content) {
   if (isM3u &&
@@ -42,7 +42,7 @@ void navigateByContentType(BuildContext context, ContentItem content) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => MovieScreen(contentItem: content),
+          builder: (context) => MovieDetailsScreen(contentItem: content),
         ),
       );
     case ContentType.series:
@@ -50,7 +50,7 @@ void navigateByContentType(BuildContext context, ContentItem content) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SeriesScreen(contentItem: content),
+            builder: (context) => SeriesDetailsScreen(contentItem: content),
           ),
         );
       } else if (isM3u) {

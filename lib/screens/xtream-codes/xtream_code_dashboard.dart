@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:another_iptv_player/l10n/localization_extension.dart';
 import 'package:another_iptv_player/models/playlist_model.dart';
-import 'package:another_iptv_player/services/app_state.dart';
 import 'package:another_iptv_player/controllers/xtream_code_home_controller.dart';
 import 'package:another_iptv_player/screens/settings/announcement_center_screen.dart';
 import 'package:another_iptv_player/widgets/tv_focusable.dart';
@@ -398,7 +397,7 @@ class _XtreamCodeDashboardState extends State<XtreamCodeDashboard> {
     String expiration = 'Lifetime';
     if (userInfo?.userInfo.expDate != null) {
       try {
-        final date = DateTime.fromMillisecondsSinceEpoch(int.parse(userInfo!.userInfo.expDate!) * 1000);
+        final date = DateTime.fromMillisecondsSinceEpoch(int.parse(userInfo!.userInfo.expDate) * 1000);
         expiration = DateFormat('MMM d, yyyy').format(date);
       } catch (_) {}
     }

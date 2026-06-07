@@ -1,4 +1,4 @@
-import 'package:another_iptv_player/controllers/theme_provider.dart';
+import 'package:another_iptv_player/core/theme/theme_manager.dart';
 import 'package:another_iptv_player/core/theme/app_theme.dart';
 import 'package:another_iptv_player/shared/widgets/app_card.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +9,14 @@ class AppearanceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
+    final themeManager = context.watch<ThemeManager>();
+    
     return Scaffold(
       appBar: AppBar(title: const Text('Appearance')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('Built-in Themes', style: Theme.of(context).textTheme.titleMedium),
+          Text('Themes', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
           GridView.builder(
             shrinkWrap: true,
@@ -26,41 +27,16 @@ class AppearanceScreen extends StatelessWidget {
               crossAxisSpacing: 12,
               childAspectRatio: 1.15,
             ),
-            itemCount: BingieThemes.builtIn.length,
+            itemCount: AppThemeType.values.length - 1, // Exclude custom for now
             itemBuilder: (context, index) {
-              final palette = BingieThemes.builtIn[index];
-              final selected = themeProvider.palette.id == palette.id;
+              final type = AppThemeType.values[index];
+              final selected = themeManager.currentThemeType == type;
               return _ThemeTile(
-                palette: palette,
+                type: type,
                 selected: selected,
-                onTap: () => themeProvider.setBingieTheme(palette),
+                onTap: () => themeManager.setThemeType(type),
               );
             },
-          ),
-          const SizedBox(height: 20),
-          AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Custom Themes', style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: null,
-                      icon: const Icon(Icons.file_upload_outlined),
-                      label: const Text('Import JSON'),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      onPressed: null,
-                      icon: const Icon(Icons.file_download_outlined),
-                      label: const Text('Export JSON'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ),
         ],
       ),
@@ -69,18 +45,20 @@ class AppearanceScreen extends StatelessWidget {
 }
 
 class _ThemeTile extends StatelessWidget {
-  final BingieThemePalette palette;
+  final AppThemeType type;
   final bool selected;
   final VoidCallback onTap;
 
   const _ThemeTile({
-    required this.palette,
+    required this.type,
     required this.selected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final themeData = AppTheme.getTheme(type);
+    
     return AppCard(
       padding: EdgeInsets.zero,
       onTap: onTap,
@@ -90,7 +68,13 @@ class _ThemeTile extends StatelessWidget {
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [palette.primary, palette.secondary, palette.background],
+                colors: [
+                  themeData.colorScheme.primary,
+                  themeData.colorScheme.secondary,
+                  themeData.scaffoldBackgroundColor,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
@@ -102,14 +86,13 @@ class _ThemeTile extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _Swatch(color: palette.primary),
-                    _Swatch(color: palette.secondary),
-                    _Swatch(color: palette.accent),
+                    _Swatch(color: themeData.colorScheme.primary),
+                    _Swatch(color: themeData.colorScheme.secondary),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  palette.name,
+                  _getThemeName(type),
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
               ],
@@ -124,6 +107,19 @@ class _ThemeTile extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _getThemeName(AppThemeType type) {
+    switch (type) {
+      case AppThemeType.bingieNeon: return 'Bingie Neon';
+      case AppThemeType.emerald: return 'Emerald';
+      case AppThemeType.crimson: return 'Crimson';
+      case AppThemeType.ocean: return 'Ocean';
+      case AppThemeType.gold: return 'Gold';
+      case AppThemeType.midnight: return 'Midnight';
+      case AppThemeType.amoled: return 'AMOLED';
+      default: return 'Custom';
+    }
   }
 }
 

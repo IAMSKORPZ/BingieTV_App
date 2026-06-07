@@ -844,4 +844,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get duration_label => 'المدة';
+
+  @override
+  String get announcements => 'إعلانات';
 }

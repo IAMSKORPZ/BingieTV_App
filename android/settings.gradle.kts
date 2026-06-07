@@ -23,6 +23,4 @@ plugins {
 }
 
 include(":app")
-include(":package_info_plus")
-include(":wakelock_plus")
 

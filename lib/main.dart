@@ -1,36 +1,43 @@
 import 'dart:async';
 
-import 'package:another_iptv_player/controllers/branding_controller.dart';
-import 'package:another_iptv_player/controllers/playlist_controller.dart';
-import 'package:another_iptv_player/controllers/update_controller.dart';
-import 'package:another_iptv_player/screens/app_initializer_screen.dart';
-import 'package:another_iptv_player/services/cache_policy_service.dart';
-import 'package:another_iptv_player/services/performance_service.dart';
-import 'package:another_iptv_player/widgets/maintenance_banner.dart';
-import 'package:another_iptv_player/widgets/update_startup_check.dart';
+import 'package:another_iptv_player/core/theme/theme_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:another_iptv_player/services/service_locator.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'controllers/locale_provider.dart';
-import 'controllers/theme_provider.dart';
-import 'core/theme/theme_manager.dart';
+import 'controllers/playlist_controller.dart';
+import 'controllers/branding_controller.dart';
+import 'controllers/update_controller.dart';
+import 'screens/app_initializer_screen.dart';
+import 'services/cache_policy_service.dart';
+import 'services/performance_service.dart';
+import 'widgets/maintenance_banner.dart';
+import 'widgets/update_startup_check.dart';
 import 'l10n/app_localizations.dart';
 import 'package:media_kit/media_kit.dart';
 import 'l10n/supported_languages.dart';
-import 'utils/app_themes.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+  
+  // Lock orientation to landscape
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+
   await PerformanceService.track('startup_setup', setupServiceLocator);
   unawaited(CachePolicyService().cleanupTemporaryCache());
+  
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => PlaylistController()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeManager()),
         ChangeNotifierProvider(create: (_) => BrandingController()..load()),
         ChangeNotifierProvider(create: (_) => UpdateController()..loadState()),
       ],
@@ -45,7 +52,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context);
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeManager = Provider.of<ThemeManager>(context);
     final brandingController = Provider.of<BrandingController>(context);
 
     return MaterialApp(
@@ -59,17 +66,14 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       title: brandingController.branding.appName,
-      theme: brandingController.applyRemoteTheme(AppThemes.lightTheme),
-      darkTheme: brandingController.applyRemoteTheme(
-        ThemeManager.buildTheme(themeProvider.palette),
-      ),
-      themeMode: themeProvider.themeMode,
+      theme: themeManager.currentThemeData,
+      themeMode: ThemeMode.dark,
       builder: (context, child) => FocusTraversalGroup(
         policy: ReadingOrderTraversalPolicy(),
         child: child ?? const SizedBox.shrink(),
       ),
       home: UpdateStartupCheck(
-        child: MaintenanceBanner(child: AppInitializerScreen()),
+        child: MaintenanceBanner(child: const AppInitializerScreen()),
       ),
       debugShowCheckedModeBanner: false,
     );

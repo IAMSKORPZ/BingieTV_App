@@ -37,7 +37,7 @@ class StalkerApiService {
       'type': type == 'live' ? 'itv' : 'vod',
       'action': type == 'live' ? 'get_ordered_list' : 'get_ordered_list',
       'p': page.toString(),
-      if (categoryId != null) 'category': categoryId,
+      'category': ?categoryId,
       'JsHttpRequest': '1-xml',
     });
   }

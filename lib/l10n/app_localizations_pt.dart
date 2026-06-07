@@ -852,4 +852,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get duration_label => 'Duração';
+
+  @override
+  String get announcements => 'Announcements';
 }

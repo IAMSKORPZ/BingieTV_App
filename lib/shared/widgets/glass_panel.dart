@@ -1,28 +1,43 @@
-import 'package:another_iptv_player/core/theme/theme_extensions.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../core/theme/theme_extensions.dart';
 
 class GlassPanel extends StatelessWidget {
   final Widget child;
-  final EdgeInsets padding;
+  final double borderRadius;
+  final double blur;
+  final double opacity;
+  final EdgeInsetsGeometry? padding;
+  final BoxBorder? border;
 
   const GlassPanel({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(16),
+    this.borderRadius = 16.0,
+    this.blur = 10.0,
+    this.opacity = 0.1,
+    this.padding,
+    this.border,
   });
 
   @override
   Widget build(BuildContext context) {
-    final extension = Theme.of(context).extension<BingieThemeExtension>();
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.78),
-        border: Border.all(
-          color: extension?.glassBorder ?? Colors.white24,
+    final theme = BingieThemeExtension.of(context);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: theme.glassColor.withValues(alpha: opacity),
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: border ?? Border.all(color: theme.glassBorder),
+          ),
+          child: child,
         ),
-        borderRadius: BorderRadius.circular(8),
       ),
-      child: Padding(padding: padding, child: child),
     );
   }
 }

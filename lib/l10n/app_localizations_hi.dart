@@ -845,4 +845,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get duration_label => 'अवधि';
+
+  @override
+  String get announcements => 'Announcements';
 }

@@ -31,7 +31,7 @@ class ProviderListScreen extends StatelessWidget {
               child: ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: controller.providers.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   final provider = controller.providers[index];
                   return _ProviderTile(provider: provider);

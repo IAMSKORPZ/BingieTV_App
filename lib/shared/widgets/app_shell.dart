@@ -1,214 +1,158 @@
-import 'dart:async';
-
-import 'package:another_iptv_player/core/theme/theme_extensions.dart';
-import 'package:another_iptv_player/models/content_type.dart';
-import 'package:another_iptv_player/screens/search_screen.dart';
-import 'package:another_iptv_player/screens/settings/provider_list_screen.dart';
-import 'package:another_iptv_player/shared/widgets/focus_wrapper.dart';
-import 'package:another_iptv_player/shared/widgets/profile_avatar.dart';
-import 'package:another_iptv_player/services/app_state.dart';
 import 'package:flutter/material.dart';
+import 'sidebar_item.dart';
+import 'universal_top_bar.dart';
 
-class AppShell extends StatelessWidget {
-  final String title;
-  final Widget body;
+class AppShell extends StatefulWidget {
+  final List<Widget>? pages;
+  final Widget? body;
+  final List<({IconData icon, String label})>? navItems;
+  final int currentIndex;
+  final Function(int)? onIndexChanged;
+  final VoidCallback? onSearchTap;
+  final VoidCallback? onProfileTap;
+  final VoidCallback? onRefreshTap;
+  final VoidCallback? onSettingsTap;
+  final String? title;
   final Widget? floatingActionButton;
-  final Future<void> Function()? onRefresh;
-  final bool showBack;
+  final VoidCallback? onRefresh;
 
   const AppShell({
     super.key,
-    required this.title,
-    required this.body,
+    this.pages,
+    this.body,
+    this.navItems,
+    this.currentIndex = 0,
+    this.onIndexChanged,
+    this.onSearchTap,
+    this.onProfileTap,
+    this.onRefreshTap,
+    this.onSettingsTap,
+    this.title,
     this.floatingActionButton,
     this.onRefresh,
-    this.showBack = false,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: FocusTraversalGroup(
-          policy: ReadingOrderTraversalPolicy(),
-          child: Column(
-            children: [
-              AppTopBar(
-                title: title,
-                showBack: showBack,
-                onRefresh: onRefresh,
-              ),
-              Expanded(child: body),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: floatingActionButton,
-    );
-  }
+  State<AppShell> createState() => _AppShellState();
 }
 
-class AppTopBar extends StatefulWidget {
-  final String title;
-  final Future<void> Function()? onRefresh;
-  final bool showBack;
-
-  const AppTopBar({
-    super.key,
-    required this.title,
-    this.onRefresh,
-    this.showBack = false,
-  });
-
-  @override
-  State<AppTopBar> createState() => _AppTopBarState();
-}
-
-class _AppTopBarState extends State<AppTopBar> {
-  late final Timer _timer;
-  DateTime _now = DateTime.now();
-  bool _refreshing = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
-      setState(() => _now = DateTime.now());
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
+class _AppShellState extends State<AppShell> {
+  bool _isSidebarCollapsed = true;
 
   @override
   Widget build(BuildContext context) {
-    final extension = Theme.of(context).extension<BingieThemeExtension>();
-    return Container(
-      height: 72,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.background,
-        border: Border(
-          bottom: BorderSide(
-            color: extension?.glassBorder ?? Colors.white12,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          if (widget.showBack)
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.maybePop(context),
-            ),
-          FocusWrapper(
-            child: Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+        final isLargeDesktop = constraints.maxWidth >= 1200;
+        
+        // Only show global sidebar if on a very large screen and not on dashboard
+        final bool showSidebar = isLargeDesktop && widget.navItems != null && widget.currentIndex != 0;
+
+        return PopScope(
+          canPop: widget.currentIndex == 0,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            // If not on home, go back to home instead of exiting
+            if (widget.currentIndex != 0) {
+              widget.onIndexChanged?.call(0);
+            }
+          },
+          child: Scaffold(
+            body: Row(
               children: [
-                const Icon(Icons.live_tv, size: 22),
-                const SizedBox(width: 8),
-                Text(
-                  'BingieTV',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
+                if (showSidebar)
+                  MouseRegion(
+                    onEnter: (_) => setState(() => _isSidebarCollapsed = false),
+                    onExit: (_) => setState(() => _isSidebarCollapsed = true),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: _isSidebarCollapsed ? 70 : 200,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        border: Border(
+                          right: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.05),
+                            width: 1,
+                          ),
+                        ),
                       ),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          const Icon(Icons.tv, color: Colors.blue, size: 30),
+                          const SizedBox(height: 30),
+                          Expanded(
+                            child: ListView.separated(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              itemCount: widget.navItems!.length,
+                              separatorBuilder: (_, __) => const SizedBox(height: 4),
+                              itemBuilder: (context, index) {
+                                final item = widget.navItems![index];
+                                return SidebarItem(
+                                  icon: item.icon,
+                                  label: item.label,
+                                  selected: widget.currentIndex == index,
+                                  isCollapsed: _isSidebarCollapsed,
+                                  onTap: () => widget.onIndexChanged?.call(index),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                Expanded(
+                  child: SafeArea(
+                    child: Column(
+                      children: [
+                        if (widget.currentIndex != 0)
+                          UniversalTopBar(
+                            title: widget.title,
+                            onSearchTap: widget.onSearchTap,
+                            onProfileTap: widget.onProfileTap,
+                            onRefreshTap: widget.onRefreshTap ?? widget.onRefresh,
+                            onSettingsTap: widget.onSettingsTap,
+                          ),
+                        Expanded(
+                          child: widget.pages != null
+                              ? IndexedStack(
+                                  index: widget.currentIndex,
+                                  children: widget.pages!,
+                                )
+                              : (widget.body ?? const SizedBox.shrink()),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 24),
-          Text(
-            widget.title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-          const Spacer(),
-          Text(
-            _formatTime(_now),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(width: 12),
-          Text(
-            _formatDate(_now),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(width: 12),
-          IconButton(
-            tooltip: 'Search',
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              if (AppState.currentPlaylist == null) return;
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const SearchScreen(
-                    contentType: ContentType.liveStream,
-                  ),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            tooltip: 'Refresh',
-            icon: _refreshing
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+            floatingActionButton: widget.floatingActionButton,
+            // Hide bottom navigation bar completely in landscape for a premium look
+            bottomNavigationBar: (!isLandscape && widget.navItems != null && widget.currentIndex != 0)
+                ? BottomNavigationBar(
+                    currentIndex: widget.currentIndex,
+                    onTap: widget.onIndexChanged,
+                    type: BottomNavigationBarType.fixed,
+                    selectedFontSize: 10,
+                    unselectedFontSize: 10,
+                    iconSize: 20,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    selectedItemColor: Theme.of(context).primaryColor,
+                    unselectedItemColor: Colors.white.withValues(alpha: 0.5),
+                    items: widget.navItems!
+                        .map((item) => BottomNavigationBarItem(
+                              icon: Icon(item.icon),
+                              label: item.label,
+                            ))
+                        .toList(),
                   )
-                : const Icon(Icons.refresh),
-            onPressed: widget.onRefresh == null || _refreshing
-                ? null
-                : () async {
-                    setState(() => _refreshing = true);
-                    try {
-                      await widget.onRefresh?.call();
-                    } finally {
-                      if (mounted) setState(() => _refreshing = false);
-                    }
-                  },
+                : null,
           ),
-          IconButton(
-            tooltip: 'Settings',
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ProviderListScreen()),
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-          const ProfileAvatar(label: 'B'),
-        ],
-      ),
+        );
+      },
     );
-  }
-
-  String _formatTime(DateTime value) {
-    final hour = value.hour.toString().padLeft(2, '0');
-    final minute = value.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
-  }
-
-  String _formatDate(DateTime value) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${value.day} ${months[value.month - 1]} ${value.year}';
   }
 }

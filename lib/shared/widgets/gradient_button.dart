@@ -1,37 +1,66 @@
-import 'package:another_iptv_player/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
+import '../../core/theme/theme_extensions.dart';
 
 class GradientButton extends StatelessWidget {
   final Widget child;
   final VoidCallback? onPressed;
+  final double borderRadius;
+  final LinearGradient? gradient;
+  final double? width;
+  final double height;
+  final EdgeInsetsGeometry? padding;
   final IconData? icon;
 
   const GradientButton({
     super.key,
     required this.child,
     this.onPressed,
+    this.borderRadius = 12.0,
+    this.gradient,
+    this.width,
+    this.height = 50.0,
+    this.padding,
     this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    final extension = Theme.of(context).extension<BingieThemeExtension>();
-    final gradient = extension?.brandGradient;
-    return Opacity(
-      opacity: onPressed == null ? 0.5 : 1,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: FilledButton.icon(
-          onPressed: onPressed,
-          icon: icon == null ? const SizedBox.shrink() : Icon(icon),
-          label: child,
-          style: FilledButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
+    final theme = BingieThemeExtension.of(context);
+
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        gradient: gradient ?? theme.primaryGradient,
+        borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: (gradient ?? theme.primaryGradient).colors.first.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+          padding: padding,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, color: Colors.white),
+              const SizedBox(width: 8),
+            ],
+            child,
+          ],
         ),
       ),
     );

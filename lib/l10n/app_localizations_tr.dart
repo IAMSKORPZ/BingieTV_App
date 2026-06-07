@@ -844,4 +844,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get duration_label => 'Süre';
+
+  @override
+  String get announcements => 'Duyurular';
 }

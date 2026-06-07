@@ -12,7 +12,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../controllers/locale_provider.dart';
 import '../../controllers/xtream_code_home_controller.dart';
-import '../../controllers/theme_provider.dart';
+import '../../core/theme/theme_manager.dart';
 import '../../l10n/supported_languages.dart';
 import '../../models/m3u_item.dart';
 import '../../repositories/user_preferences.dart';
@@ -123,7 +123,7 @@ class _GeneralSettingsWidgetState extends State<GeneralSettingsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeManager = Provider.of<ThemeManager>(context);
     return _isLoading
         ? const Center(child: CircularProgressIndicator())
         : Column(
@@ -140,7 +140,7 @@ class _GeneralSettingsWidgetState extends State<GeneralSettingsWidget> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => PlaylistScreen()),
+                      builder: (context) => const PlaylistScreen()),
                 );
               }
             },
@@ -315,7 +315,7 @@ class _GeneralSettingsWidgetState extends State<GeneralSettingsWidget> {
                 onChanged: (value) async {
                   if (value != null) {
                     final themeMode = _stringToThemeMode(value);
-                    await themeProvider.setTheme(themeMode);
+                    await themeManager.setThemeMode(themeMode);
                     setState(() {
                       _selectedTheme = value;
                     });
@@ -459,7 +459,7 @@ class _GeneralSettingsWidgetState extends State<GeneralSettingsWidget> {
     );
   }
 
-  refreshM3uPlaylist() async {
+  Future<void> refreshM3uPlaylist() async {
     List<M3uItem> oldM3uItems = AppState.m3uItems!;
     List<M3uItem> newM3uItems = [];
 
@@ -489,15 +489,17 @@ class _GeneralSettingsWidgetState extends State<GeneralSettingsWidget> {
 
     await database.deleteAllM3uItems(AppState.currentPlaylist!.id);
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => M3uDataLoaderScreen(
-          playlist: AppState.currentPlaylist!,
-          m3uItems: newM3uItems,
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => M3uDataLoaderScreen(
+            playlist: AppState.currentPlaylist!,
+            m3uItems: newM3uItems,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Future<void> _pickFile() async {

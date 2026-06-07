@@ -74,6 +74,8 @@ class _HomeTileState extends State<HomeTile> {
               borderRadius: BorderRadius.circular(HomeTheme.borderRadius),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 140),
+                width: double.infinity,
+                height: double.infinity,
                 padding: EdgeInsets.all(padding),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(HomeTheme.borderRadius),

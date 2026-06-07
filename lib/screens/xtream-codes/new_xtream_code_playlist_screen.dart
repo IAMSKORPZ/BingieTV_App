@@ -161,6 +161,7 @@ class NewXtreamCodePlaylistScreenState
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
+                              const SizedBox(height: 20), // Shift logo downward
                               // Watchio Logo with ambient TV glow
                               Container(
                                 decoration: BoxDecoration(
@@ -186,7 +187,7 @@ class NewXtreamCodePlaylistScreenState
                                     Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoWidth * 0.4),
                                 ),
                               ),
-                              const SizedBox(height: 45), // Target 40-50px spacing Logo -> VPN
+                              const SizedBox(height: 25), // Reduced gap to move logo closer to buttons
                               SizedBox(
                                 width: 220,
                                 height: 60,

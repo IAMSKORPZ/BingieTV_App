@@ -70,9 +70,11 @@ class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
                 ),
               ),
               
+              const Spacer(flex: 2), // Top Spacer to help center content
+              
               // Title
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
+                padding: EdgeInsets.symmetric(vertical: 10),
                 child: Text(
                   'CHOOSE PLAYLIST TYPE',
                   textAlign: TextAlign.center,
@@ -85,34 +87,35 @@ class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
                 ),
               ),
               
-              // Cards Area - Expanded to fill available space and prevent overflow
+              // Cards Area - Expanded to fill available space
               Expanded(
+                flex: 8, // Occupy most of the available vertical space
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final isMobile = constraints.maxWidth < 700;
                     
                     if (isMobile) {
                       return ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                         children: [
                           _TypeCard(
                             title: 'M3U PLAYLIST',
                             icon: Icons.playlist_play_rounded,
-                            height: 180,
+                            height: 160,
                             onTap: () => _navToM3u(context),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           _TypeCard(
                             title: 'XTREAM CODE',
                             icon: Icons.stream_rounded,
-                            height: 180,
+                            height: 160,
                             onTap: () => _navToXtream(context),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           _TypeCard(
                             title: 'LOCAL DATA',
                             icon: Icons.folder_open_rounded,
-                            height: 180,
+                            height: 160,
                             onTap: () => _showLocalDataMsg(context),
                           ),
                         ],
@@ -164,6 +167,8 @@ class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
                   },
                 ),
               ),
+              
+              const Spacer(flex: 3), // Bottom Spacer - larger flex to push content UP
               
               // Footer - Outside Expanded to always remain visible
               Container(

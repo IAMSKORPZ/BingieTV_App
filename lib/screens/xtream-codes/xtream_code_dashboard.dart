@@ -108,7 +108,7 @@ class _XtreamCodeDashboardState extends State<XtreamCodeDashboard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('BINGIETV',
+                      Text('WATCHIO',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: isSmallHeight ? 18 : 24,

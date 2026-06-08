@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/xtream_code_home_controller.dart';
 import '../../models/category_view_model.dart';
-import '../../models/content_type.dart';
 import '../../shared/widgets/glass_panel.dart';
 import '../../shared/widgets/sidebar_item.dart';
 import '../../utils/navigate_by_content_type.dart';
-import '../../l10n/localization_extension.dart';
 
 class XtreamLiveScreen extends StatefulWidget {
   const XtreamLiveScreen({super.key});
@@ -50,7 +48,7 @@ class _XtreamLiveScreenState extends State<XtreamLiveScreen> {
                 child: ListView.separated(
                   padding: const EdgeInsets.all(8),
                   itemCount: controller.liveCategories!.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 4),
+                  separatorBuilder: (_, _) => const SizedBox(height: 4),
                   itemBuilder: (context, index) {
                     final category = controller.liveCategories![index];
                     final isSelected = _selectedCategory?.category.categoryId == category.category.categoryId;
@@ -90,7 +88,7 @@ class _XtreamLiveScreenState extends State<XtreamLiveScreen> {
                         controller: _scrollController,
                         padding: const EdgeInsets.only(right: 8),
                         itemCount: _selectedCategory?.contentItems.length ?? 0,
-                        separatorBuilder: (_, __) => const SizedBox(height: 8),
+                        separatorBuilder: (_, _) => const SizedBox(height: 8),
                         itemBuilder: (context, index) {
                           final item = _selectedCategory!.contentItems[index];
                           return GlassPanel(
@@ -114,7 +112,7 @@ class _XtreamLiveScreenState extends State<XtreamLiveScreen> {
                                             child: Image.network(
                                               item.imagePath,
                                               fit: BoxFit.contain,
-                                              errorBuilder: (_, __, ___) => const Icon(Icons.live_tv, color: Colors.white24),
+                                              errorBuilder: (_, _, _) => const Icon(Icons.live_tv, color: Colors.white24),
                                             ),
                                           )
                                         : const Icon(Icons.live_tv, color: Colors.white24),

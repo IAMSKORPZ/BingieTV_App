@@ -21,7 +21,7 @@ class M3UHomeScreen extends StatefulWidget {
 
 class _M3UHomeScreenState extends State<M3UHomeScreen> {
   late M3UHomeController _controller;
-  String _version = '1.3.0';
+  String _version = '0.0.1';
 
   @override
   void initState() {

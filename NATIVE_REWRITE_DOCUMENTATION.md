@@ -2,7 +2,7 @@
 
 > Bu doküman, mevcut Flutter IPTV Player projesinin native platformlara (Android/iOS/TV) yeniden yazılması için hazırlanmış kapsamlı bir referans dokümandır.
 
-**Mevcut Versiyon:** 1.3.0+21  
+**Mevcut Versiyon:** 0.0.1+1
 **Flutter SDK:** ^3.9.2  
 **Desteklenen Platformlar:** Android, iOS, macOS, Windows, Linux, Web
 

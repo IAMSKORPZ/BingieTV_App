@@ -32,7 +32,7 @@ class XtreamCodeHomeScreen extends StatefulWidget {
 
 class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
   late XtreamCodeHomeController _controller;
-  String _version = '1.3.0';
+  String _version = '0.0.1';
 
   @override
   void initState() {

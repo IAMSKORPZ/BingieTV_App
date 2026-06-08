@@ -104,38 +104,44 @@ class XtreamCodeHomeController extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      _userInfo = await _repository!.getPlayerInfo();
+      _userInfo = await _repository.getPlayerInfo();
       
-      final liveCats = await _repository!.getLiveCategories();
+      final liveCats = await _repository.getLiveCategories();
       if (liveCats != null) {
         for (var cat in liveCats) {
-          final streams = await _repository!.getLiveChannelsByCategoryId(categoryId: cat.categoryId, top: 10);
+          final streams = await _repository.getLiveChannelsByCategoryId(categoryId: cat.categoryId, top: 10);
           if (streams == null || streams.isEmpty) continue;
           final vm = CategoryViewModel(category: cat, contentItems: streams.map((x) => ContentItem(x.streamId, x.name, x.streamIcon, ContentType.liveStream, liveStream: x)).toList());
           if (!all) { if (!await UserPreferences.getHiddenCategory(cat.categoryId)) _liveCategories.add(vm); }
-          else _liveCategories.add(vm);
+          else {
+            _liveCategories.add(vm);
+          }
         }
       }
       
-      final movieCats = await _repository!.getVodCategories();
+      final movieCats = await _repository.getVodCategories();
       if (movieCats != null) {
         for (var cat in movieCats) {
-          final movies = await _repository!.getMovies(categoryId: cat.categoryId, top: 10);
+          final movies = await _repository.getMovies(categoryId: cat.categoryId, top: 10);
           if (movies == null || movies.isEmpty) continue;
           final vm = CategoryViewModel(category: cat, contentItems: movies.map((x) => ContentItem(x.streamId, x.name, x.streamIcon, ContentType.vod, containerExtension: x.containerExtension, vodStream: x)).toList());
           if (!all) { if (!await UserPreferences.getHiddenCategory(cat.categoryId)) _movieCategories.add(vm); }
-          else _movieCategories.add(vm);
+          else {
+            _movieCategories.add(vm);
+          }
         }
       }
       
-      final seriesCats = await _repository!.getSeriesCategories();
+      final seriesCats = await _repository.getSeriesCategories();
       if (seriesCats != null) {
         for (var cat in seriesCats) {
-          final series = await _repository!.getSeries(categoryId: cat.categoryId, top: 10);
+          final series = await _repository.getSeries(categoryId: cat.categoryId, top: 10);
           if (series == null || series.isEmpty) continue;
           final vm = CategoryViewModel(category: cat, contentItems: series.map((x) => ContentItem(x.seriesId, x.name, x.cover ?? '', ContentType.series, seriesStream: x)).toList());
           if (!all) { if (!await UserPreferences.getHiddenCategory(cat.categoryId)) _seriesCategories.add(vm); }
-          else _seriesCategories.add(vm);
+          else {
+            _seriesCategories.add(vm);
+          }
         }
       }
     } catch (e) { debugPrint(e.toString()); }

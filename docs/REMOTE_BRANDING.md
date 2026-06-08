@@ -66,8 +66,8 @@ Example root config:
     "allowLogin": true
   },
   "updateInfo": {
-    "latestVersion": "1.3.0",
-    "minimumVersion": "1.3.0",
+    "latestVersion": "0.0.1",
+    "minimumVersion": "0.0.1",
     "forceUpdate": false,
     "updateUrl": "https://example.com/download",
     "releaseNotes": "Bug fixes."

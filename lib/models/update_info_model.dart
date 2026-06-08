@@ -14,8 +14,8 @@ class UpdateInfoModel {
   });
 
   static const defaults = UpdateInfoModel(
-    latestVersion: '1.3.0',
-    minimumVersion: '1.3.0',
+    latestVersion: '0.0.1',
+    minimumVersion: '0.0.1',
     forceUpdate: false,
   );
 

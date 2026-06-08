@@ -22,10 +22,10 @@ class BrandingModel {
   });
 
   static const defaults = BrandingModel(
-    appName: 'BingieTV',
-    websiteUrl: 'https://bingietv.app',
-    discordUrl: 'https://discord.gg/bingietv',
-    supportUrl: 'https://t.me/bingietv_support',
+    appName: 'Watchio IPTV',
+    websiteUrl: 'https://watchioiptv.app',
+    discordUrl: 'https://discord.gg/watchioiptv',
+    supportUrl: 'https://t.me/watchioiptv_support',
   );
 
   Map<String, dynamic> toJson() {

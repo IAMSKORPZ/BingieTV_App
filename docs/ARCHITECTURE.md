@@ -47,7 +47,7 @@
 
 ## Android Support
 - Flutter Android runner exists.
-- Android app id rebranded to `com.bingietv.app`.
+- Android app id rebranded to `com.watchioiptv.app`.
 - Uses foreground media playback permissions and `audio_service` activity/service.
 - Android TV intent/category support is not explicitly configured.
 

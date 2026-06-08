@@ -7,8 +7,8 @@ Future<MyAudioHandler> initAudioService() async {
   return await AudioService.init(
     builder: () => MyAudioHandler(),
     config: const AudioServiceConfig(
-      androidNotificationChannelId: 'com.bingietv.app',
-      androidNotificationChannelName: 'BingieTV',
+      androidNotificationChannelId: 'com.watchioiptv.app',
+      androidNotificationChannelName: 'Watchio IPTV',
       androidNotificationOngoing: false,
       androidShowNotificationBadge: true,
       androidStopForegroundOnPause: true,

@@ -17,7 +17,7 @@
         android:required="false" />
 
     <application
-        android:label="BingieTV"
+        android:label="Watchio IPTV"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:banner="@drawable/tv_banner"

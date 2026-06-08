@@ -86,7 +86,7 @@ class _AppShellState extends State<AppShell> {
                             child: ListView.separated(
                               padding: const EdgeInsets.symmetric(horizontal: 8),
                               itemCount: widget.navItems!.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 4),
+                              separatorBuilder: (_, _) => const SizedBox(height: 4),
                               itemBuilder: (context, index) {
                                 final item = widget.navItems![index];
                                 return SidebarItem(

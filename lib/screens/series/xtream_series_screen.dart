@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/xtream_code_home_controller.dart';
 import '../../models/category_view_model.dart';
-import '../../models/content_type.dart';
 import '../../shared/widgets/glass_panel.dart';
 import '../../shared/widgets/sidebar_item.dart';
 import '../../shared/widgets/poster_card.dart';
 import '../../utils/navigate_by_content_type.dart';
-import '../../l10n/localization_extension.dart';
 
 class XtreamSeriesScreen extends StatefulWidget {
   const XtreamSeriesScreen({super.key});
@@ -51,7 +49,7 @@ class _XtreamSeriesScreenState extends State<XtreamSeriesScreen> {
                 child: ListView.separated(
                   padding: const EdgeInsets.all(8),
                   itemCount: controller.seriesCategories.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 4),
+                  separatorBuilder: (_, _) => const SizedBox(height: 4),
                   itemBuilder: (context, index) {
                     final category = controller.seriesCategories[index];
                     final isSelected = _selectedCategory?.category.categoryId == category.category.categoryId;

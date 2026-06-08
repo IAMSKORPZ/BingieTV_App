@@ -14,7 +14,6 @@ import 'package:another_iptv_player/utils/get_playlist_type.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../widgets/player_widget.dart';
 
@@ -136,7 +135,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     final url = _backdropUrl ?? _posterUrl;
     if (url == null) return Container(color: Colors.black);
     return Stack(fit: StackFit.expand, children: [
-      CachedNetworkImage(imageUrl: url, fit: BoxFit.cover, errorWidget: (_, __, ___) => Container(color: Colors.black)),
+      CachedNetworkImage(imageUrl: url, fit: BoxFit.cover, errorWidget: (_, _, _) => Container(color: Colors.black)),
       BackdropFilter(filter: ImageFilter.blur(sigmaX: _backdropUrl != null ? 5 : 15, sigmaY: _backdropUrl != null ? 5 : 15), child: Container(color: Colors.black.withValues(alpha: 0.5))),
       Container(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withValues(alpha: 0.2), Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.8), Theme.of(context).scaffoldBackgroundColor], stops: const [0.0, 0.4, 0.8, 1.0]))),
     ]);
@@ -165,7 +164,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       if (rating != null) ...[rating, const SizedBox(height: 12)],
       if (chips != null) ...[chips, const SizedBox(height: 18)],
       if (description != null) ...[description, const SizedBox(height: 18)],
-      if (extra != null) extra,
+      ?extra,
     ]);
   }
 
@@ -200,7 +199,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     return GlassPanel(padding: const EdgeInsets.fromLTRB(16, 14, 16, 16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('You May Also Like', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
       const SizedBox(height: 12),
-      SizedBox(height: 220, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: items.length, separatorBuilder: (_, __) => const SizedBox(width: 12), itemBuilder: (context, index) {
+      SizedBox(height: 220, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: items.length, separatorBuilder: (_, _) => const SizedBox(width: 12), itemBuilder: (context, index) {
         final item = items[index];
         return SizedBox(width: 126, child: PosterCard(title: item.name, imageUrl: item.coverPath ?? item.imagePath, subtitle: item.vodStream?.genre, rating: item.vodStream?.rating.isNotEmpty == true ? item.vodStream!.rating : null, onTap: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => MovieDetailsScreen(contentItem: item)))));
       })),

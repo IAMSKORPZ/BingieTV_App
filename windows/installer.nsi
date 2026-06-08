@@ -28,14 +28,14 @@ InstallDirRegKey HKCU "Software\BingieTV" ""
 RequestExecutionLevel admin
 
 ; Version information
-VIProductVersion "1.3.0.0"
-VIAddVersionKey "ProductName" "BingieTV"
+VIProductVersion "0.0.1.0"
+VIAddVersionKey "ProductName" "Watchio IPTV"
 VIAddVersionKey "Comments" "A modern IPTV player application"
-VIAddVersionKey "CompanyName" "BingieTV"
-VIAddVersionKey "LegalCopyright" "Copyright © 2025"
-VIAddVersionKey "FileDescription" "BingieTV Installer"
-VIAddVersionKey "FileVersion" "1.3.0.0"
-VIAddVersionKey "ProductVersion" "1.3.0.0"
+VIAddVersionKey "CompanyName" "Watchio IPTV"
+VIAddVersionKey "LegalCopyright" "Copyright © 2026"
+VIAddVersionKey "FileDescription" "Watchio IPTV Installer"
+VIAddVersionKey "FileVersion" "0.0.1.0"
+VIAddVersionKey "ProductVersion" "0.0.1.0"
 
 ;--------------------------------
 ; Interface Settings

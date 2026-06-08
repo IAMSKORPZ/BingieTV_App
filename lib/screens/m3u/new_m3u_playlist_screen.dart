@@ -48,10 +48,12 @@ class NewM3uPlaylistScreenState extends State<NewM3uPlaylistScreen> {
 
   void _validateForm() {
     setState(() {
-      _isFormValid = _nameController.text.trim().isNotEmpty &&
-          (_isUrlSource
-              ? _urlController.text.trim().isNotEmpty
-              : _selectedFilePath != null);
+      final String name = _nameController.text.trim();
+      if (_isUrlSource) {
+        _isFormValid = name.isNotEmpty && _urlController.text.trim().isNotEmpty;
+      } else {
+        _isFormValid = name.isNotEmpty && _selectedFilePath != null;
+      }
     });
   }
 
@@ -406,33 +408,63 @@ class NewM3uPlaylistScreenState extends State<NewM3uPlaylistScreen> {
   }
 
   Future<void> _savePlaylist() async {
-    if (_formKey.currentState!.validate()) {
-      final playlistController = Provider.of<PlaylistController>(
-        context,
-        listen: false,
-      );
+    final playlistController = Provider.of<PlaylistController>(
+      context,
+      listen: false,
+    );
 
-      playlistController.clearError();
+    playlistController.clearError();
 
-      var playlist = await playlistController.createPlaylist(
-        name: _nameController.text.trim(),
-        type: PlaylistType.m3u,
-        url: _isUrlSource ? _urlController.text : _selectedFileName,
-      );
+    // 1. Validate Playlist Name
+    if (_nameController.text.trim().isEmpty) {
+      playlistController.setError("Please enter a playlist name");
+      return;
+    }
 
-      if (playlist != null && mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => M3uDataLoaderScreen(
-              playlist: playlist,
-              m3uItems: const [],
-              streamingUrl: _isUrlSource ? _urlController.text.trim() : null,
-              streamingFilePath: _isUrlSource ? null : _selectedFilePath,
-            ),
-          ),
-        );
+    // 2. Source-specific validation
+    if (_isUrlSource) {
+      final String url = _urlController.text.trim();
+      if (url.isEmpty) {
+        playlistController.setError("Please enter an M3U URL");
+        return;
       }
+      
+      final uri = Uri.tryParse(url);
+      if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
+        playlistController.setError("Please enter a valid URL");
+        return;
+      }
+
+      if (!['http', 'https'].contains(uri.scheme)) {
+        playlistController.setError("Please enter a valid HTTP/HTTPS URL");
+        return;
+      }
+    } else {
+      if (_selectedFilePath == null) {
+        playlistController.setError("Please select an M3U file");
+        return;
+      }
+    }
+
+    // 3. Proceed with creation
+    var playlist = await playlistController.createPlaylist(
+      name: _nameController.text.trim(),
+      type: PlaylistType.m3u,
+      url: _isUrlSource ? _urlController.text.trim() : _selectedFileName,
+    );
+
+    if (playlist != null && mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => M3uDataLoaderScreen(
+            playlist: playlist,
+            m3uItems: const [],
+            streamingUrl: _isUrlSource ? _urlController.text.trim() : null,
+            streamingFilePath: _isUrlSource ? null : _selectedFilePath,
+          ),
+        ),
+      );
     }
   }
 }
@@ -810,8 +842,11 @@ class _AddPlaylistButtonState extends State<_AddPlaylistButton> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isEnabled = widget.onTap != null;
+
     return FocusableActionDetector(
       focusNode: widget.focusNode,
+      enabled: isEnabled,
       onFocusChange: (val) => setState(() => _isFocused = val),
       shortcuts: {
         const SingleActivator(LogicalKeyboardKey.enter): const ActivateIntent(),
@@ -827,47 +862,56 @@ class _AddPlaylistButtonState extends State<_AddPlaylistButton> {
         child: AnimatedScale(
           scale: _isFocused ? 1.02 : 1.0,
           duration: const Duration(milliseconds: 200),
-          child: AnimatedContainer(
+          child: AnimatedOpacity(
             duration: const Duration(milliseconds: 200),
-            width: double.infinity,
-            height: widget.height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: _isFocused
-                    ? [const Color(0xFFD14CFF), const Color(0xFF20C7FF)]
-                    : [const Color(0xFFC12CFF), const Color(0xFF00B7FF)],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
+            opacity: isEnabled ? 1.0 : 0.4,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: double.infinity,
+              height: widget.height,
+              decoration: BoxDecoration(
+                gradient: isEnabled
+                    ? LinearGradient(
+                        colors: _isFocused
+                            ? [const Color(0xFFD14CFF), const Color(0xFF20C7FF)]
+                            : [const Color(0xFFC12CFF), const Color(0xFF00B7FF)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      )
+                    : null,
+                color: isEnabled ? null : Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(18),
+                border: _isFocused
+                    ? Border.all(color: Colors.white, width: 2.5)
+                    : null,
+                boxShadow: isEnabled
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF00B7FF)
+                              .withValues(alpha: _isFocused ? 0.6 : 0.4),
+                          blurRadius: _isFocused ? 30 : 15,
+                          offset: Offset(0, _isFocused ? 8 : 4),
+                        ),
+                      ]
+                    : null,
               ),
-              borderRadius: BorderRadius.circular(18),
-              border: _isFocused
-                  ? Border.all(color: Colors.white, width: 2.5)
-                  : null,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF00B7FF)
-                      .withValues(alpha: _isFocused ? 0.6 : 0.4),
-                  blurRadius: _isFocused ? 30 : 15,
-                  offset: Offset(0, _isFocused ? 8 : 4),
-                ),
-              ],
-            ),
-            child: Center(
-              child: widget.isLoading
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2.5),
-                    )
-                  : Text(
-                      widget.label,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.5),
-                    ),
+              child: Center(
+                child: widget.isLoading
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2.5),
+                      )
+                    : Text(
+                        widget.label,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.5),
+                      ),
+              ),
             ),
           ),
         ),

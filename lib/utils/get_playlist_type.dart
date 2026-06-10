@@ -6,9 +6,11 @@ PlaylistType getPlaylistType() {
 }
 
 bool get isXtreamCode {
+  if (AppState.currentPlaylist == null) return false;
   return getPlaylistType() == PlaylistType.xtream;
 }
 
 bool get isM3u {
+  if (AppState.currentPlaylist == null) return false;
   return getPlaylistType() == PlaylistType.m3u;
 }

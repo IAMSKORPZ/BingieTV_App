@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../services/config_service.dart';
 import 'm3u/new_m3u_playlist_screen.dart';
 import 'xtream-codes/new_xtream_code_playlist_screen.dart';
+import 'local_media/local_media_library_screen.dart';
 
 class PlaylistTypeScreen extends StatefulWidget {
   const PlaylistTypeScreen({super.key});
@@ -185,7 +186,10 @@ class _PlaylistTypeScreenState extends State<PlaylistTypeScreen> {
   }
 
   void _showLocalDataMsg(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Local Data coming soon')));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LocalMediaLibraryScreen()),
+    );
   }
 }
 

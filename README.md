@@ -1,114 +1,221 @@
-# Another IPTV Player
+# Watchio IPTV
 
-<img align="right" width="110" src="https://raw.githubusercontent.com/bsogulcan/another-iptv-player/refs/heads/main/docs/public/logo.png">
+<img align="right" width="120" src="docs/assets/logo.png">
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/bsogulcan/another-iptv-player?label=Latest%20Release)
-![GitHub](https://img.shields.io/github/license/bsogulcan/another-iptv-player?color=brightgreen&label=License)
-![](https://github.com/bsogulcan/another-iptv-player/actions/workflows/build-windows.yml/badge.svg)
-![](https://github.com/bsogulcan/another-iptv-player/actions/workflows/build-linux.yml/badge.svg)
-![](https://github.com/bsogulcan/another-iptv-player/actions/workflows/build-android.yml/badge.svg)
-![](https://github.com/bsogulcan/another-iptv-player/actions/workflows/build-web.yml/badge.svg)
+![Flutter](https://img.shields.io/badge/Flutter-Ready-blue)
+![Platforms](https://img.shields.io/badge/Platforms-Android%20%7C%20Windows%20%7C%20Web-green)
+![License](https://img.shields.io/badge/License-Open%20Source-brightgreen)
 
-**Free & Open Source IPTV Streaming Solution**
+**Modern IPTV & Media Center Experience**
 
-Another IPTV Player is a lightweight, multi-platform, and feature-rich IPTV player built with Flutter.  
-Our goal is to provide all the premium features of paid IPTV players for free and with full transparency.
+Watchio IPTV is a premium multi-platform streaming application built with Flutter, designed for IPTV users who want a modern, fast, and feature-rich experience across Mobile, Desktop, Android TV, and Fire TV devices.
+
+Built with performance, usability, and customization in mind, Watchio combines IPTV streaming, local media playback, multi-profile support, cloud synchronization, and a premium TV-friendly interface into a single application.
+
+---
 
 ## ✨ Features
 
-- **Xtream Codes API Support** - Full compatibility with Xtream Codes API
-- **M3U & M3U8 Playlist Support** - Import and play from M3U/M3U8 playlists
-- **Live TV Streaming** - Watch live television channels
-- **Movies & Series** - Stream movies and TV series with full support
-- **Continue Watching** - Automatically resume where you left off
-- **Auto Play Next** - Seamless episode transitions
-- **Global Search** - Search across all content types
-- **Watch History** - Track your viewing history
-- **Favorites** - Save your favorite content for quick access
-- **Track Selection** - Choose video, audio, and subtitle tracks
-- **Track Selection Memory** - Remember your preferences
-- **Subtitle Customization** - Customize subtitle appearance
-- **Multi-language Support** - Available in 10+ languages
-- **Cross-platform** - Works on all major platforms
+### IPTV Support
 
-## 🖥️ Platforms
+* Xtream Codes API Support
+* M3U & M3U8 Playlist Support
+* Stalker Portal Support
+* Multiple Playlist Management
+* Provider Switching
+* Secure Credential Storage
+
+### Streaming
+
+* Live TV Streaming
+* Movies & VOD
+* TV Series Support
+* Catchup TV & Archive Playback
+* Continue Watching
+* Auto Play Next Episode
+* Favorites
+* Watch History
+
+### Media Playback
+
+* Video Track Selection
+* Audio Track Selection
+* Subtitle Track Selection
+* Subtitle Customization
+* Playback Memory
+* Resume Playback
+
+### Local Media Library
+
+* Local Video Playback
+* Local Music Playback
+* Local Photo Library
+* Storage Browser
+* Recently Added Media
+* Internal, SD Card & USB Support
+
+### Search & Discovery
+
+* Global Search
+* Fast Indexed Search
+* Content Categories
+* Recently Watched
+* Continue Watching
+
+### Profiles & Sync
+
+* Multi-Profile Support
+* PIN Protected Profiles
+* Profile Preferences
+* Cloud Sync Ready Architecture
+* Backup & Restore Support
+
+### TV Experience
+
+* Android TV Support
+* Fire TV Support
+* Firestick Optimized
+* D-Pad Navigation
+* Focus-Aware UI
+* TV Remote Controls
+
+### Customization
+
+* Remote Branding Support
+* Theme Customization
+* Announcement Center
+* Maintenance Messages
+* Update Channels (Stable / Beta / Dev)
+
+---
+
+## 🖥️ Supported Platforms
 
 Available on:
-- **iOS** - iPhone and iPad
-- **Android** - Phones and tablets
-- **Web** - Web browsers
-- **Windows** - Desktop application
-- **macOS** - MacOS app
-- **Linux** - Desktop Linux distributions
+
+* Android Phones & Tablets
+* Android TV
+* Amazon Fire TV
+* Amazon Firestick
+* Windows
+* Web
+* Linux
+* macOS (Planned)
+* iOS (Planned)
+
+---
 
 ## 🚀 Getting Started
 
 ### Requirements
 
-- An IPTV provider that supports **Xtream Codes API** or **M3U/M3U8 playlists**
-- Your IPTV service credentials (server URL, username, password)
+You will need:
 
-> **⚠️ Important Note:**  
-> We are **not** an IPTV provider and do **not** offer or sell any IPTV subscriptions or content.  
-> You need your own IPTV provider that supports the Xtream Codes API to use the app.  
-> No registration or payment is required to use this application.
+* An IPTV provider supporting Xtream Codes, M3U, or Stalker Portal
+* IPTV credentials supplied by your provider
+
+Supported Login Types:
+
+* Xtream Codes
+* M3U URL
+* M3U File
+* Stalker Portal
 
 ### Installation
 
-1. Download the latest release for your platform from the [Releases](https://github.com/bsogulcan/another-iptv-player/releases) page
-2. Install the application
-3. Launch the app and add your IPTV provider credentials
-4. Start streaming!
+1. Download the latest release.
+2. Install Watchio IPTV.
+3. Add your IPTV provider.
+4. Import your playlist.
+5. Start streaming.
 
-## 📚 Documentation
+---
 
-For detailed documentation, guides, and FAQs, visit our official website:
+## 🎬 Local Media Library
 
-**👉 [https://www.another-iptv-player.com](https://www.another-iptv-player.com)**
+Watchio IPTV also includes a built-in Local Media Library.
+
+Supported Formats:
+
+### Video
+
+* MP4
+* MKV
+* AVI
+* MOV
+* WEBM
+
+### Audio
+
+* MP3
+* FLAC
+* WAV
+* AAC
+* OGG
+
+### Images
+
+* JPG
+* PNG
+* WEBP
+* GIF
+
+Storage Sources:
+
+* Internal Storage
+* Downloads Folder
+* SD Card
+* USB Storage
+
+---
 
 ## 🗺️ Roadmap
 
 ### Completed ✅
 
-- [x] Xtream Codes API Support
-- [x] Live TV Streaming
-- [x] Movies Streaming
-- [x] Series Streaming
-- [x] Watch History
-- [x] Global Search
-- [x] Video, Audio, and Subtitle Track Selection
-- [x] Track Selection Memory
-- [x] Subtitle Customization
-- [x] Localization (Multi-language Support)
-- [x] M3U & M3U8 Playlist Support
-- [x] Favorites
-- [x] Improved UI/UX
+* Xtream Codes Support
+* M3U Support
+* Stalker Portal Support
+* Live TV
+* Movies
+* Series
+* Global Search
+* Favorites
+* Watch History
+* Continue Watching
+* Multi-Profiles
+* Secure Credential Storage
+* Catchup TV
+* Android TV Support
+* Firestick Support
+* Remote Branding
+* Auto Updates
+* Local Media Library
 
-### Planned 🔜
+### In Development 🚧
 
-- [ ] EPG (Electronic Program Guide) Support
-- [ ] TV Support
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Whether it's bug reports, feature requests, or code contributions, your help is appreciated.
-
-For guidelines and details, please see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## 🙏 Acknowledgement
-
-- The project name "Another IPTV Player" is inspired by [Another Redis Desktop Manager](https://github.com/qishibo/AnotherRedisDesktopManager).
-- This project uses [media_kit](https://github.com/media-kit/media-kit) as the cross-platform video & audio player for Flutter & Dart.
-- Special thanks to [JUL1EN094](https://github.com/JUL1EN094) for documenting and sharing detailed information about Xtream Code API implementation. See the [discussion](https://github.com/AndreyPavlenko/Fermata/discussions/434) for more details.
-- Special thanks to [ls-hidden](https://github.com/ls-hidden) for contributing with issues and pull requests.
-- Special thanks to [mode0192](https://github.com/mode0192) for providing detailed issues, pull requests and a test account.
-
-## 💝 Support
-
-If you'd like to help ensure this project continues to improve, consider supporting its development. Your contribution makes a real difference!
-
-<a href="https://www.buymeacoffee.com/bsogulcan" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+* Cloud Account System
+* Cross Device Sync
+* Advanced EPG
+* Multi-View
+* Picture in Picture
+* Download Manager
+* Trakt Integration
 
 ---
 
-**⚠️ Disclaimer:** Another IPTV Player does not provide any IPTV content or subscriptions. Use your own legal IPTV service.
+## ⚠️ Disclaimer
+
+Watchio IPTV does not provide, host, sell, distribute, or promote any IPTV content.
+
+Users must provide their own IPTV service credentials and ensure they comply with all applicable laws and regulations in their region.
+
+Watchio IPTV is a media player application only.
+
+---
+
+## ❤️ Acknowledgements
+
+Special thanks to the Flutter community and all contributors who help improve Watchio IPTV.
+
+Built with Flutter and designed for the next generation of IPTV streaming.

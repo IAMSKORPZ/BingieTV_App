@@ -15,6 +15,7 @@ class AppShell extends StatefulWidget {
   final String? title;
   final Widget? floatingActionButton;
   final VoidCallback? onRefresh;
+  final List<int>? hideBarsIndices;
 
   const AppShell({
     super.key,
@@ -30,6 +31,7 @@ class AppShell extends StatefulWidget {
     this.title,
     this.floatingActionButton,
     this.onRefresh,
+    this.hideBarsIndices,
   });
 
   @override
@@ -47,7 +49,7 @@ class _AppShellState extends State<AppShell> {
         final isLargeDesktop = constraints.maxWidth >= 1200;
         
         // Only show global sidebar if on a very large screen and not on dashboard
-        final bool showSidebar = isLargeDesktop && widget.navItems != null && widget.currentIndex != 0;
+        final bool shouldHideBars = widget.hideBarsIndices?.contains(widget.currentIndex) ?? false;
 
         return PopScope(
           canPop: widget.currentIndex == 0,
@@ -61,7 +63,7 @@ class _AppShellState extends State<AppShell> {
           child: Scaffold(
             body: Row(
               children: [
-                if (showSidebar)
+                if (isLargeDesktop && widget.navItems != null && widget.currentIndex != 0 && !shouldHideBars)
                   MouseRegion(
                     onEnter: (_) => setState(() => _isSidebarCollapsed = false),
                     onExit: (_) => setState(() => _isSidebarCollapsed = true),
@@ -106,7 +108,7 @@ class _AppShellState extends State<AppShell> {
                 Expanded(
                   child: Column(
                     children: [
-                      if (widget.currentIndex != 0)
+                      if (widget.currentIndex != 0 && !shouldHideBars)
                         SafeArea(
                           bottom: false,
                           child: UniversalTopBar(
@@ -132,7 +134,7 @@ class _AppShellState extends State<AppShell> {
             ),
             floatingActionButton: widget.floatingActionButton,
             // Hide bottom navigation bar completely in landscape for a premium look
-            bottomNavigationBar: (!isLandscape && widget.navItems != null && widget.currentIndex != 0)
+            bottomNavigationBar: (!isLandscape && widget.navItems != null && widget.currentIndex != 0 && !shouldHideBars)
                 ? BottomNavigationBar(
                     currentIndex: widget.currentIndex,
                     onTap: widget.onIndexChanged,

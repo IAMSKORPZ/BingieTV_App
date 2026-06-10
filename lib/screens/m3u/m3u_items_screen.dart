@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'package:another_iptv_player/l10n/localization_extension.dart';
 import 'package:another_iptv_player/models/m3u_item.dart';
 import 'package:another_iptv_player/screens/m3u/m3u_player_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../controllers/m3u_home_controller.dart';
 import '../../models/content_type.dart';
 import '../../models/playlist_content_model.dart';
 import '../../utils/navigate_by_content_type.dart';
@@ -16,48 +20,15 @@ class M3uItemsScreen extends StatefulWidget {
 }
 
 class _M3uItemsScreenState extends State<M3uItemsScreen> {
-  List<M3uItem> filteredItems = [];
-  String searchQuery = '';
-  final TextEditingController _searchController = TextEditingController();
-  bool isSearching = false;
-  final ScrollController _chipScrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    filteredItems = widget.m3uItems;
-  }
+  int _selectedCategoryIndex = 0;
+  final ScrollController _categoryScrollController = ScrollController();
+  final ScrollController _channelScrollController = ScrollController();
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _chipScrollController.dispose();
+    _categoryScrollController.dispose();
+    _channelScrollController.dispose();
     super.dispose();
-  }
-
-  void _filterItems(String query) {
-    setState(() {
-      searchQuery = query;
-      if (query.isEmpty) {
-        filteredItems = widget.m3uItems;
-      } else {
-        filteredItems = widget.m3uItems.where((item) {
-          final name = item.name?.toLowerCase() ?? '';
-          final group = item.groupTitle?.toLowerCase() ?? '';
-          final searchLower = query.toLowerCase();
-          return name.contains(searchLower) || group.contains(searchLower);
-        }).toList();
-      }
-    });
-  }
-
-  void _filterByGroup(String group) {
-    setState(() {
-      filteredItems = widget.m3uItems
-          .where((item) => item.groupTitle == group)
-          .toList();
-      searchQuery = group;
-    });
   }
 
   List<String> _getUniqueGroups() {
@@ -67,264 +38,117 @@ class _M3uItemsScreenState extends State<M3uItemsScreen> {
         .toSet()
         .toList();
     groups.sort();
-    return groups.toList();
+    return ['ALL CHANNELS', ...groups];
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 700;
+    final controller = context.watch<M3UHomeController>();
+    final groups = _getUniqueGroups();
+    final selectedGroup = groups[_selectedCategoryIndex];
+    
+    final filteredItems = selectedGroup == 'ALL CHANNELS'
+        ? widget.m3uItems
+        : widget.m3uItems.where((item) => item.groupTitle == selectedGroup).toList();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: isSearching
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: context.loc.search,
-                  border: InputBorder.none,
-                ),
-                onChanged: _filterItems,
-              )
-            : SelectableText(
-                context.loc.iptv_channels_count(filteredItems.length),
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-        actions: [
-          IconButton(
-            icon: Icon(isSearching ? Icons.close : Icons.search),
-            onPressed: () {
-              setState(() {
-                isSearching = !isSearching;
-                if (!isSearching) {
-                  _searchController.clear();
-                  _filterItems('');
-                }
-              });
-            },
-          ),
-        ],
-      ),
-      body: Column(
+    return Container(
+      decoration: const BoxDecoration(color: Color(0xFF050816)),
+      child: Stack(
         children: [
-          if (!isSearching && _getUniqueGroups().isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: SizedBox(
-                height: 50,
-                child: isDesktop
-                    ? Scrollbar(
-                        controller: _chipScrollController,
-                        thumbVisibility: true,
-                        child: ListView.builder(
-                          controller: _chipScrollController,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: _getUniqueGroups().length + 1,
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/background.png',
+              fit: BoxFit.cover,
+              color: Colors.black.withValues(alpha: 0.5),
+              colorBlendMode: BlendMode.darken,
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                // 1. TOP BAR
+                _BrowserTopBar(
+                  onBack: () => controller.onNavigationTap(0),
+                  onSearch: () {},
+                  onProfile: () => controller.onNavigationTap(2),
+                ),
+
+                // 2. MAIN CONTENT
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // LEFT PANEL: Categories
+                      Container(
+                        width: 300,
+                        padding: const EdgeInsets.fromLTRB(24, 0, 0, 24),
+                        child: ListView.separated(
+                          controller: _categoryScrollController,
+                          itemCount: groups.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 10),
                           itemBuilder: (context, index) {
-                            if (index == 0) {
-                              return _buildFilterChip(
-                                context.loc.see_all,
-                                null,
-                              );
-                            }
-                            final group = _getUniqueGroups()[index - 1];
-                            return _buildFilterChip(group, group);
+                            return _CategoryCard(
+                              title: groups[index].toUpperCase(),
+                              isSelected: _selectedCategoryIndex == index,
+                              onTap: () {
+                                setState(() {
+                                  _selectedCategoryIndex = index;
+                                  if (_channelScrollController.hasClients) _channelScrollController.jumpTo(0);
+                                });
+                              },
+                            );
                           },
                         ),
-                      )
-                    : ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _getUniqueGroups().length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return _buildFilterChip(context.loc.see_all, null);
-                          }
-                          final group = _getUniqueGroups()[index - 1];
-                          return _buildFilterChip(group, group);
-                        },
                       ),
-              ),
-            ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: filteredItems.length,
-              itemBuilder: (context, index) {
-                final channel = filteredItems[index];
 
-                return Container(
-                  height: 80,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withValues(alpha: 0.1),
-                        spreadRadius: 1,
-                        blurRadius: 2,
-                        offset: const Offset(0, 1),
+                      // RIGHT PANEL: Channel Grid
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                          child: filteredItems.isEmpty
+                              ? _EmptyChannelsState()
+                              : GridView.builder(
+                                  controller: _channelScrollController,
+                                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: 220,
+                                    childAspectRatio: 1.1,
+                                    crossAxisSpacing: 16,
+                                    mainAxisSpacing: 16,
+                                  ),
+                                  itemCount: filteredItems.length,
+                                  itemBuilder: (context, index) {
+                                    final m3uItem = filteredItems[index];
+                                    final channel = ContentItem(
+                                      m3uItem.url,
+                                      m3uItem.name ?? '',
+                                      m3uItem.tvgLogo ?? '',
+                                      m3uItem.contentType,
+                                      m3uItem: m3uItem,
+                                    );
+                                    return _ChannelGridCard(
+                                      channel: channel,
+                                      onTap: () => _onChannelTap(context, m3uItem),
+                                    );
+                                  },
+                                ),
+                        ),
                       ),
                     ],
                   ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () => _onChannelTap(context, channel),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          _buildSimpleLogo(channel),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  channel.name ?? context.loc.unknown_channel,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (channel.groupTitle != null) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    channel.groupTitle!,
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 12,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getContentTypeColor(
-                                channel,
-                              ).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              _getContentTypeText(channel),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: _getContentTypeColor(channel),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
+                ),
+
+                // 3. BOTTOM STATUS BAR
+                _BottomStatusBar(
+                  username: 'M3U USER',
+                  expiryDate: 'LIFETIME',
+                  version: '0.0.1',
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
-  }
-
-  Widget _buildFilterChip(String label, String? groupFilter) {
-    final isSelected =
-        (groupFilter == null && searchQuery.isEmpty) ||
-        (groupFilter != null && searchQuery == groupFilter);
-
-    return Container(
-      margin: const EdgeInsets.only(left: 8),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (selected) {
-          if (groupFilter == null) {
-            _filterItems('');
-          } else {
-            _filterByGroup(groupFilter);
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buildSimpleLogo(M3uItem channel) {
-    if (channel.tvgLogo != null && channel.tvgLogo!.isNotEmpty) {
-      return Container(
-        width: 50,
-        height: 35,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
-          color: Colors.grey[100],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: Image.network(
-            channel.tvgLogo!,
-            width: 50,
-            height: 35,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) =>
-                _buildPlaceholderIcon(),
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return _buildPlaceholderIcon();
-            },
-          ),
-        ),
-      );
-    }
-    return _buildPlaceholderIcon();
-  }
-
-  Widget _buildPlaceholderIcon() {
-    return Container(
-      width: 50,
-      height: 35,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
-        color: Colors.grey[200],
-      ),
-      child: Icon(Icons.tv, color: Colors.grey[500], size: 20),
-    );
-  }
-
-  Color _getContentTypeColor(M3uItem channel) {
-    switch (channel.contentType) {
-      case ContentType.liveStream:
-        return Colors.red;
-      case ContentType.vod:
-        return Colors.blue;
-      case ContentType.series:
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _getContentTypeText(M3uItem channel) {
-    switch (channel.contentType) {
-      case ContentType.liveStream:
-        return context.loc.live_content;
-      case ContentType.vod:
-        return context.loc.movie_content;
-      case ContentType.series:
-        return context.loc.series_content;
-      default:
-        return context.loc.media_content;
-    }
   }
 
   void _onChannelTap(BuildContext context, M3uItem m3uItem) {
@@ -357,5 +181,393 @@ class _M3uItemsScreenState extends State<M3uItemsScreen> {
         ),
       );
     }
+  }
+}
+
+class _BottomStatusBar extends StatelessWidget {
+  final String username;
+  final String expiryDate;
+  final String version;
+
+  const _BottomStatusBar({
+    required this.username,
+    required this.expiryDate,
+    required this.version,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      color: Colors.black.withValues(alpha: 0.5),
+      child: Row(
+        children: [
+          const Icon(Icons.workspace_premium_rounded, color: Color(0xFF00B7FF), size: 16),
+          const SizedBox(width: 8),
+          Text(
+            'EXPIRATION: $expiryDate',
+            style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
+          Text(
+            'v$version',
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.1), fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
+          const Icon(Icons.person_rounded, color: Color(0xFFC12CFF), size: 16),
+          const SizedBox(width: 8),
+          Text(
+            'LOGGED IN: $username'.toUpperCase(),
+            style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BrowserTopBar extends StatelessWidget {
+  final VoidCallback onBack;
+  final VoidCallback onSearch;
+  final VoidCallback onProfile;
+
+  const _BrowserTopBar({
+    required this.onBack,
+    required this.onSearch,
+    required this.onProfile,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Row(
+        children: [
+          _HeaderButton(icon: Icons.arrow_back_rounded, onTap: onBack),
+          const SizedBox(width: 20),
+          Image.asset('assets/images/App_Logo.png', height: 45),
+          const Spacer(),
+          _BrowserClock(),
+          const Spacer(),
+          _HeaderButton(icon: Icons.search_rounded, onTap: onSearch),
+          const SizedBox(width: 12),
+          _HeaderButton(icon: Icons.person_rounded, onTap: onProfile),
+          const SizedBox(width: 12),
+          _HeaderButton(icon: Icons.more_vert_rounded, onTap: () => _showMoreMenu(context)),
+        ],
+      ),
+    );
+  }
+
+  void _showMoreMenu(BuildContext context) {
+    final controller = context.read<M3UHomeController>();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F1423).withValues(alpha: 0.95),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _MenuButton(icon: Icons.movie_rounded, label: 'MOVIES', color: Colors.orange, onTap: () { Navigator.pop(context); controller.onNavigationTap(1); }),
+                _MenuButton(icon: Icons.tv_rounded, label: 'SERIES', color: Colors.cyan, onTap: () { Navigator.pop(context); controller.onNavigationTap(1); }),
+                _MenuButton(icon: Icons.campaign_rounded, label: 'ALERTS', color: Colors.purple, onTap: () { Navigator.pop(context); }),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _MenuButton(icon: Icons.sync_rounded, label: 'REFRESH', color: Colors.blue, onTap: () { Navigator.pop(context); controller.onNavigationTap(0); }),
+                _MenuButton(icon: Icons.settings_rounded, label: 'SETTINGS', color: Colors.grey, onTap: () { Navigator.pop(context); controller.onNavigationTap(2); }),
+                _MenuButton(icon: Icons.info_rounded, label: 'ABOUT', color: Colors.white, onTap: () { Navigator.pop(context); }),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuButton extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  const _MenuButton({required this.icon, required this.label, required this.color, required this.onTap});
+
+  @override
+  State<_MenuButton> createState() => _MenuButtonState();
+}
+
+class _MenuButtonState extends State<_MenuButton> {
+  bool _isFocused = false;
+  @override
+  Widget build(BuildContext context) {
+    return FocusableActionDetector(
+      onFocusChange: (v) => setState(() => _isFocused = v),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: _isFocused ? 1.1 : 1.0,
+          duration: const Duration(milliseconds: 200),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: widget.color.withValues(alpha: _isFocused ? 0.3 : 0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: widget.color.withValues(alpha: 0.4), width: 2),
+                ),
+                child: Icon(widget.icon, color: widget.color, size: 32),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                widget.label,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BrowserClock extends StatefulWidget {
+  @override
+  State<_BrowserClock> createState() => _BrowserClockState();
+}
+
+class _BrowserClockState extends State<_BrowserClock> {
+  late Timer _timer;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) setState(() => _now = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          DateFormat('hh:mm a').format(_now),
+          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.2),
+        ),
+        Text(
+          DateFormat('MMM d, yyyy').format(_now).toUpperCase(),
+          style: const TextStyle(color: Color(0xFF00B7FF), fontSize: 11, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+}
+
+class _HeaderButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _HeaderButton({required this.icon, required this.onTap});
+
+  @override
+  State<_HeaderButton> createState() => _HeaderButtonState();
+}
+
+class _HeaderButtonState extends State<_HeaderButton> {
+  bool _isFocused = false;
+  @override
+  Widget build(BuildContext context) {
+    return FocusableActionDetector(
+      onFocusChange: (v) => setState(() => _isFocused = v),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: _isFocused ? Colors.white : Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _isFocused ? Colors.white : Colors.white.withValues(alpha: 0.1)),
+          ),
+          child: Icon(widget.icon, color: _isFocused ? Colors.black : Colors.white, size: 20),
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryCard extends StatefulWidget {
+  final String title;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _CategoryCard({
+    required this.title,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  State<_CategoryCard> createState() => _CategoryCardState();
+}
+
+class _CategoryCardState extends State<_CategoryCard> {
+  bool _isFocused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final active = widget.isSelected || _isFocused;
+    return FocusableActionDetector(
+      onFocusChange: (v) => setState(() => _isFocused = v),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: _isFocused ? 1.03 : 1.0,
+          duration: const Duration(milliseconds: 200),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              color: active ? const Color(0xFFC12CFF).withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.03),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: active ? const Color(0xFFC12CFF) : Colors.white.withValues(alpha: 0.05),
+                width: active ? 2 : 1,
+              ),
+              boxShadow: active ? [
+                BoxShadow(color: const Color(0xFFC12CFF).withValues(alpha: 0.2), blurRadius: 15),
+              ] : [],
+            ),
+            child: Text(
+              widget.title,
+              style: TextStyle(
+                color: active ? Colors.white : Colors.white38,
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChannelGridCard extends StatefulWidget {
+  final ContentItem channel;
+  final VoidCallback onTap;
+
+  const _ChannelGridCard({
+    required this.channel,
+    required this.onTap,
+  });
+
+  @override
+  State<_ChannelGridCard> createState() => _ChannelGridCardState();
+}
+
+class _ChannelGridCardState extends State<_ChannelGridCard> {
+  bool _isFocused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusableActionDetector(
+      onFocusChange: (v) => setState(() => _isFocused = v),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: _isFocused ? 1.05 : 1.0,
+          duration: const Duration(milliseconds: 200),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F1423).withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: _isFocused ? const Color(0xFF00B7FF) : Colors.white.withValues(alpha: 0.05),
+                width: _isFocused ? 2.5 : 1,
+              ),
+              boxShadow: _isFocused ? [
+                BoxShadow(color: const Color(0xFF00B7FF).withValues(alpha: 0.3), blurRadius: 20),
+              ] : [],
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.black26,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: widget.channel.imagePath.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              widget.channel.imagePath,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.live_tv_rounded, color: Colors.white10, size: 40),
+                            ),
+                          )
+                        : const Icon(Icons.live_tv_rounded, color: Colors.white10, size: 40),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+                  child: Text(
+                    widget.channel.name,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyChannelsState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.tv_off_rounded, size: 80, color: Colors.white.withValues(alpha: 0.1)),
+          const SizedBox(height: 24),
+          const Text(
+            'NO CHANNELS FOUND',
+            style: TextStyle(color: Colors.white38, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.5),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -8,6 +8,7 @@ import 'package:another_iptv_player/models/playlist_model.dart';
 import 'package:another_iptv_player/repositories/m3u_repository.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../services/app_state.dart';
+import '../../shared/widgets/app_shell.dart';
 import '../home/bingie_dashboard_home.dart';
 
 class M3UHomeScreen extends StatefulWidget {
@@ -56,30 +57,35 @@ class _M3UHomeScreenState extends State<M3UHomeScreen> {
 
           return Scaffold(
             backgroundColor: const Color(0xFF050812),
-            body: SafeArea(
-              child: IndexedStack(
-                index: controller.currentIndex,
-                children: [
-                  BingieDashboardHome(
-                    onLiveTv: () => controller.onNavigationTap(1),
-                    onMovies: () => controller.onNavigationTap(1),
-                    onSeries: () => controller.onNavigationTap(1),
-                    onAnnouncements: () {},
-                    onUpdate: () => controller.onNavigationTap(0),
-                    onSettings: () => controller.onNavigationTap(2),
-                    onSearch: () {},
-                    onProfile: () => controller.onNavigationTap(2),
-                    onAbout: () {},
-                    username: 'M3U User',
-                    expiryDate: 'Lifetime',
-                    version: _version,
-                  ),
-                  M3uItemsScreen(m3uItems: controller.m3uItems!),
-                  M3uPlaylistSettingsScreen(playlist: widget.playlist),
-                ],
-              ),
+            body: AppShell(
+              currentIndex: controller.currentIndex,
+              onIndexChanged: controller.onNavigationTap,
+              navItems: [
+                (icon: Icons.home_rounded, label: context.loc.home),
+                (icon: Icons.all_inbox_rounded, label: context.loc.all),
+                (icon: Icons.settings_rounded, label: context.loc.settings),
+              ],
+              hideBarsIndices: const [1], // Hide for M3uItemsScreen
+              pages: [
+                BingieDashboardHome(
+                  liveCategories: controller.liveCategories ?? [],
+                  onLiveTv: () => controller.onNavigationTap(1),
+                  onMovies: () => controller.onNavigationTap(1),
+                  onSeries: () => controller.onNavigationTap(1),
+                  onAnnouncements: () {},
+                  onUpdate: () => controller.onNavigationTap(0),
+                  onSettings: () => controller.onNavigationTap(2),
+                  onSearch: () {},
+                  onProfile: () => controller.onNavigationTap(2),
+                  onAbout: () {},
+                  username: 'M3U User',
+                  expiryDate: 'Lifetime',
+                  version: _version,
+                ),
+                M3uItemsScreen(m3uItems: controller.m3uItems!),
+                M3uPlaylistSettingsScreen(playlist: widget.playlist),
+              ],
             ),
-            bottomNavigationBar: controller.currentIndex == 0 ? null : _buildBottomNavigationBar(context, controller),
           );
         },
       ),
@@ -98,22 +104,6 @@ class _M3UHomeScreenState extends State<M3UHomeScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  BottomNavigationBar _buildBottomNavigationBar(
-    BuildContext context,
-    M3UHomeController controller,
-  ) {
-    return BottomNavigationBar(
-      currentIndex: controller.currentIndex,
-      onTap: controller.onNavigationTap,
-      type: BottomNavigationBarType.fixed,
-      items: [
-        BottomNavigationBarItem(icon: const Icon(Icons.home), label: context.loc.home),
-        BottomNavigationBarItem(icon: const Icon(Icons.all_inbox), label: context.loc.all),
-        BottomNavigationBarItem(icon: const Icon(Icons.settings), label: context.loc.settings),
-      ],
     );
   }
 }

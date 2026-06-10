@@ -130,8 +130,10 @@ class _XtreamCodeHomeScreenState extends State<XtreamCodeHomeScreen> {
             onSearchTap: () => _navigateToSearch(ContentType.liveStream),
             onRefreshTap: () => controller.refreshAllData(context),
             onSettingsTap: () => controller.onNavigationTap(5),
+            hideBarsIndices: const [2], // Hide for XtreamLiveScreen
             pages: [
               BingieDashboardHome(
+                liveCategories: controller.liveCategories ?? [],
                 onLiveTv: () => controller.onNavigationTap(2),
                 onMovies: () => controller.onNavigationTap(3),
                 onSeries: () => controller.onNavigationTap(4),

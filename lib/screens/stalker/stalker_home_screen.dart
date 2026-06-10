@@ -40,6 +40,7 @@ class _StalkerHomeScreenState extends State<StalkerHomeScreen> {
       backgroundColor: const Color(0xFF050812),
       body: SafeArea(
         child: BingieDashboardHome(
+          liveCategories: const [],
           onLiveTv: () {},
           onMovies: () {},
           onSeries: () {},

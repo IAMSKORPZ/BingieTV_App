@@ -9,6 +9,7 @@ import 'widgets/home_bottom_button.dart';
 import 'home_theme.dart';
 
 class BingieDashboardHome extends StatefulWidget {
+  final List<dynamic> liveCategories;
   final VoidCallback onLiveTv;
   final VoidCallback onMovies;
   final VoidCallback onSeries;
@@ -24,6 +25,7 @@ class BingieDashboardHome extends StatefulWidget {
 
   const BingieDashboardHome({
     super.key,
+    required this.liveCategories,
     required this.onLiveTv,
     required this.onMovies,
     required this.onSeries,

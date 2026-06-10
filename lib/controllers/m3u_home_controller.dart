@@ -89,7 +89,7 @@ class M3UHomeController extends ChangeNotifier {
       case 5:
         return context.loc.settings;
       default:
-        return 'BingieTV';
+        return 'Watchio IPTV';
     }
   }
 

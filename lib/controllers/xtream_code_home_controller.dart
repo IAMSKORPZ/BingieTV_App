@@ -94,9 +94,9 @@ class XtreamCodeHomeController extends ChangeNotifier {
         case 3: return context.loc.movies;
         case 4: return context.loc.series_plural;
         case 5: return context.loc.settings;
-        default: return 'BingieTV';
+        default: return 'Watchio IPTV';
       }
-    } catch (_) { return 'BingieTV'; }
+    } catch (_) { return 'Watchio IPTV'; }
   }
 
   Future<void> _loadCategories(bool all) async {

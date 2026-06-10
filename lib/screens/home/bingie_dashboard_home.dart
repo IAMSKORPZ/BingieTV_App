@@ -5,9 +5,10 @@ import '../../services/config_service.dart';
 import 'widgets/home_tile.dart';
 import 'widgets/home_header.dart';
 import 'widgets/home_footer.dart';
+import 'widgets/home_bottom_button.dart';
 import 'home_theme.dart';
 
-class BingieDashboardHome extends StatelessWidget {
+class BingieDashboardHome extends StatefulWidget {
   final VoidCallback onLiveTv;
   final VoidCallback onMovies;
   final VoidCallback onSeries;
@@ -38,185 +39,202 @@ class BingieDashboardHome extends StatelessWidget {
   });
 
   @override
+  State<BingieDashboardHome> createState() => _BingieDashboardHomeState();
+}
+
+class _BingieDashboardHomeState extends State<BingieDashboardHome> with SingleTickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeIn,
+    );
+    _fadeController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Reinforce fullscreen mode
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final config = context.watch<ConfigService>().config;
-        final double width = constraints.maxWidth;
-        final double height = constraints.maxHeight;
-        
-        // Unified scaling logic for a premium look
-        final double horizontalPadding = width * 0.05; // Slightly increased for better aspect ratio
-        final double verticalPadding = height * 0.01; // Reduced to give more height to tiles
-        final double gap = width * 0.012; // Tighter gaps for a cleaner look
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final config = context.watch<ConfigService>().config;
+          final double width = constraints.maxWidth;
+          final double height = constraints.maxHeight;
+          
+          final double horizontalPadding = width * 0.05;
+          final double verticalPadding = height * 0.01;
+          final double gap = width * 0.012;
 
-        final homeBg = config.backgrounds.home;
+          final homeBg = config.backgrounds.home;
 
-        return Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            color: HomeTheme.background,
-            image: DecorationImage(
-              image: (homeBg.isNotEmpty)
-                  ? NetworkImage(homeBg)
-                  : const AssetImage('assets/images/background.png') as ImageProvider,
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Container(
+          return Container(
+            width: width,
+            height: height,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  HomeTheme.background.withValues(alpha: 0.4),
-                  HomeTheme.background.withValues(alpha: 0.8),
-                  HomeTheme.background,
-                ],
-                stops: const [0.0, 0.6, 1.0],
+              color: const Color(0xFF050812),
+              image: DecorationImage(
+                image: (homeBg.isNotEmpty)
+                    ? NetworkImage(homeBg)
+                    : const AssetImage('assets/images/background.png') as ImageProvider,
+                fit: BoxFit.cover,
               ),
             ),
-            child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding,
-              vertical: verticalPadding,
-            ),
-            child: Column(
-              children: [
-                // 1. Header (Fixed height slot)
-                HomeHeader(
-                  onSearch: onSearch,
-                  onProfile: onProfile,
-                  onAbout: onAbout,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF050812).withValues(alpha: 0.4),
+                    const Color(0xFF050812).withValues(alpha: 0.8),
+                    const Color(0xFF050812),
+                  ],
+                  stops: const [0.0, 0.6, 1.0],
                 ),
-                
-                const Spacer(flex: 1), // Top breathing room
-                
-                // 2. Main Dashboard (Fills 75-80% of available space)
-                Expanded(
-                  flex: 12, // Large flex to dominate height
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // LEFT SIDE: Large LIVE TV (30%)
-                      Expanded(
-                        flex: 30,
-                        child: HomeTile(
-                          title: 'LIVE TV',
-                          subtitle: 'Watch Live TV Channels',
-                          icon: Icons.live_tv_rounded,
-                          colors: HomeTheme.liveTvColors,
-                          onTap: onLiveTv,
-                          large: true,
-                          autofocus: true,
-                        ),
-                      ),
-                      
-                      SizedBox(width: gap),
-                      
-                      // RIGHT SIDE: (70%)
-                      Expanded(
-                        flex: 70,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Upper Right: Movies & Series
-                            Expanded(
-                              flex: 70,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Expanded(
-                                    child: HomeTile(
-                                      title: 'MOVIES',
-                                      subtitle: 'Browse and watch movies',
-                                      icon: Icons.play_circle_outline_rounded,
-                                      colors: HomeTheme.moviesColors,
-                                      onTap: onMovies,
-                                    ),
-                                  ),
-                                  SizedBox(width: gap),
-                                  Expanded(
-                                    child: HomeTile(
-                                      title: 'SERIES',
-                                      subtitle: 'Discover and binge series',
-                                      icon: Icons.movie_creation_outlined,
-                                      colors: HomeTheme.seriesColors,
-                                      onTap: onSeries,
-                                    ),
-                                  ),
-                                ],
-                              ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: verticalPadding,
+                ),
+                child: Column(
+                  children: [
+                    HomeHeader(
+                      onSearch: widget.onSearch,
+                      onProfile: widget.onProfile,
+                      onAbout: widget.onAbout,
+                    ),
+                    
+                    const Spacer(flex: 1),
+                    
+                    Expanded(
+                      flex: 12,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            flex: 30,
+                            child: HomeTile(
+                              title: 'LIVE TV',
+                              subtitle: 'Watch Live TV Channels',
+                              icon: Icons.live_tv_rounded,
+                              colors: HomeTheme.liveTvColors,
+                              onTap: widget.onLiveTv,
+                              large: true,
+                              autofocus: true,
                             ),
-                            
-                            SizedBox(height: gap),
-                            
-                            // Lower Right: Announcements, Update, Settings (Static buttons with no descriptions)
-                            Expanded(
-                              flex: 30,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Expanded(
-                                    child: HomeTile(
-                                      title: 'ANNOUNCEMENTS',
-                                      subtitle: '',
-                                      icon: Icons.campaign_outlined,
-                                      colors: HomeTheme.darkTileColors,
-                                      iconColor: HomeTheme.iconAnnouncements,
-                                      onTap: onAnnouncements,
-                                    ),
+                          ),
+                          
+                          SizedBox(width: gap),
+                          
+                          Expanded(
+                            flex: 70,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(
+                                  flex: 70,
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      Expanded(
+                                        child: HomeTile(
+                                          title: 'MOVIES',
+                                          subtitle: 'Browse and watch movies',
+                                          icon: Icons.play_circle_filled_rounded,
+                                          colors: HomeTheme.moviesColors,
+                                          onTap: widget.onMovies,
+                                        ),
+                                      ),
+                                      SizedBox(width: gap),
+                                      Expanded(
+                                        child: HomeTile(
+                                          title: 'SERIES',
+                                          subtitle: 'Discover and binge series',
+                                          icon: Icons.movie_creation_rounded,
+                                          colors: HomeTheme.seriesColors,
+                                          onTap: widget.onSeries,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(width: gap),
-                                  Expanded(
-                                    child: HomeTile(
-                                      title: 'UPDATE',
-                                      subtitle: '',
-                                      icon: Icons.sync_rounded,
-                                      colors: HomeTheme.darkTileColors,
-                                      iconColor: HomeTheme.iconUpdate,
-                                      onTap: onUpdate,
-                                    ),
+                                ),
+                                
+                                SizedBox(height: gap),
+                                
+                                Expanded(
+                                  flex: 30,
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      Expanded(
+                                        child: HomeBottomButton(
+                                          label: 'ANNOUNCEMENTS',
+                                          icon: Icons.campaign_rounded,
+                                          color: HomeTheme.iconAnnouncements,
+                                          onTap: widget.onAnnouncements,
+                                        ),
+                                      ),
+                                      SizedBox(width: gap),
+                                      Expanded(
+                                        child: HomeBottomButton(
+                                          label: 'UPDATE',
+                                          icon: Icons.sync_rounded,
+                                          color: HomeTheme.iconUpdate,
+                                          onTap: widget.onUpdate,
+                                        ),
+                                      ),
+                                      SizedBox(width: gap),
+                                      Expanded(
+                                        child: HomeBottomButton(
+                                          label: 'SETTINGS',
+                                          icon: Icons.settings_rounded,
+                                          color: HomeTheme.iconSettings,
+                                          onTap: widget.onSettings,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(width: gap),
-                                  Expanded(
-                                    child: HomeTile(
-                                      title: 'SETTINGS',
-                                      subtitle: '',
-                                      icon: Icons.settings_outlined,
-                                      colors: HomeTheme.darkTileColors,
-                                      iconColor: HomeTheme.iconSettings,
-                                      onTap: onSettings,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    
+                    const Spacer(flex: 1),
+                    
+                    HomeFooter(
+                      username: widget.username,
+                      expiryDate: widget.expiryDate,
+                      version: widget.version,
+                    ),
+                  ],
                 ),
-                
-                const Spacer(flex: 1), // Bottom breathing room (pushes footer to edge)
-                
-                // 3. Footer (Pinned to bottom)
-                HomeFooter(
-                  username: username,
-                  expiryDate: expiryDate,
-                  version: version,
-                ),
-              ],
+              ),
             ),
-          ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

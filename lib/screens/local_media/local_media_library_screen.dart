@@ -127,17 +127,16 @@ class _LocalMediaLibraryScreenState extends State<LocalMediaLibraryScreen> {
     if (['mp4', 'mkv', 'mov', 'avi', 'webm'].contains(ext)) {
       contentType = ContentType.vod;
     } else if (['mp3', 'flac', 'wav', 'aac', 'ogg'].contains(ext)) {
-      contentType = ContentType.vod; // Using vod as placeholder for player compatibility
+      contentType = ContentType.vod; 
     } else {
-      // Photos or others
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Opening $fileName')));
       return;
     }
 
     final contentItem = ContentItem(
-      file.path, // ID as path
+      file.path,
       fileName,
-      '', // No image
+      '',
       contentType,
     );
 
@@ -199,61 +198,61 @@ class _LocalMediaLibraryScreenState extends State<LocalMediaLibraryScreen> {
               child: SafeArea(
                 child: Row(
                   children: [
-                    // Left Panel
+                    // Fixed Left Panel
                     if (!isMobile)
                       Expanded(
                         flex: 3,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const SizedBox(height: 20),
-                              Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFFC12CFF).withValues(alpha: 0.1),
-                                      blurRadius: 35,
-                                      spreadRadius: 12,
-                                    ),
-                                    BoxShadow(
-                                      color: const Color(0xFF00B7FF).withValues(alpha: 0.08),
-                                      blurRadius: 30,
-                                      spreadRadius: 6,
-                                    ),
-                                  ],
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFFC12CFF).withValues(alpha: 0.1),
+                                        blurRadius: 35,
+                                        spreadRadius: 12,
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0xFF00B7FF).withValues(alpha: 0.08),
+                                        blurRadius: 30,
+                                        spreadRadius: 6,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Image.asset(
+                                    'assets/images/logo.png',
+                                    width: logoWidth,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) => 
+                                      Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoWidth * 0.4),
+                                  ),
                                 ),
-                                child: Image.asset(
-                                  'assets/images/logo.png',
-                                  width: logoWidth,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) => 
-                                    Icon(Icons.play_arrow_rounded, color: const Color(0xFF00B7FF), size: logoWidth * 0.4),
+                                const SizedBox(height: 20),
+                                _SideButton(
+                                  icon: Icons.storage_rounded,
+                                  label: 'SCAN STORAGE',
+                                  height: 60,
+                                  onTap: _scanStorage,
                                 ),
-                              ),
-                              const SizedBox(height: 35),
-                              _SideButton(
-                                icon: Icons.storage_rounded,
-                                label: 'SCAN STORAGE',
-                                height: 60,
-                                onTap: _scanStorage,
-                              ),
-                              const SizedBox(height: 14),
-                              _SideButton(
-                                icon: Icons.refresh_rounded,
-                                label: 'REFRESH LIBRARY',
-                                height: 60,
-                                onTap: _scanStorage,
-                              ),
-                              const SizedBox(height: 30),
-                            ],
+                                const SizedBox(height: 16),
+                                _SideButton(
+                                  icon: Icons.refresh_rounded,
+                                  label: 'REFRESH LIBRARY',
+                                  height: 60,
+                                  onTap: _scanStorage,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     
-                    // Right Content
+                    // Scrollable Right Panel
                     Expanded(
                       flex: 7,
                       child: Padding(
@@ -261,6 +260,7 @@ class _LocalMediaLibraryScreenState extends State<LocalMediaLibraryScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Header Row (Fixed at top of right panel)
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -278,90 +278,118 @@ class _LocalMediaLibraryScreenState extends State<LocalMediaLibraryScreen> {
                             ),
                             const SizedBox(height: 24),
                             
-                            // Category Cards
-                            SizedBox(
-                              height: isMobile ? 110 : 170,
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: _CategoryCard(
-                                      title: 'VIDEOS',
-                                      subtitle: 'Movies, TV Shows, Home Videos',
-                                      icon: Icons.video_library_rounded,
-                                      gradient: const [Color(0xFF00B7FF), Color(0xFF0066FF)],
-                                      onTap: () => _openFilePicker(FileType.video),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: _CategoryCard(
-                                      title: 'MUSIC',
-                                      subtitle: 'Albums, Artists, Playlists',
-                                      icon: Icons.music_note_rounded,
-                                      gradient: const [Color(0xFFC12CFF), Color(0xFF8A00FF)],
-                                      onTap: () => _openFilePicker(FileType.audio),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: _CategoryCard(
-                                      title: 'PHOTOS',
-                                      subtitle: 'Pictures, Screenshots, Camera',
-                                      icon: Icons.image_rounded,
-                                      gradient: const [Color(0xFFFF2D55), Color(0xFFFF3B30)],
-                                      onTap: () => _openFilePicker(FileType.image),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: _CategoryCard(
-                                      title: 'FOLDERS',
-                                      subtitle: 'Browse Device Storage',
-                                      icon: Icons.folder_rounded,
-                                      gradient: const [Color(0xFF4CD964), Color(0xFF28CD41)],
-                                      onTap: () => _openFilePicker(FileType.any),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            
-                            const SizedBox(height: 32),
-                            Text(
-                              'RECENTLY ADDED',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            
-                            // Recently Added Horizontal List
+                            // Scrollable content area
                             Expanded(
-                              child: _isScanning 
-                                ? const Center(child: CircularProgressIndicator(color: Color(0xFF00B7FF)))
-                                : _recentMedia.isEmpty 
-                                  ? const Center(child: Text('No media found', style: TextStyle(color: Colors.white38)))
-                                  : ListView.separated(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: _recentMedia.length,
-                                      separatorBuilder: (_, __) => const SizedBox(width: 16),
-                                      itemBuilder: (context, index) {
-                                        final file = _recentMedia[index];
-                                        return _RecentMediaCard(
-                                          file: file,
-                                          onTap: () => _playFile(file),
-                                        );
-                                      },
-                                    ),
+                              child: SingleChildScrollView(
+                                physics: const BouncingScrollPhysics(),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (_isScanning)
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 60),
+                                        child: Center(
+                                          child: Column(
+                                            children: [
+                                              const CircularProgressIndicator(color: Color(0xFF00B7FF)),
+                                              const SizedBox(height: 24),
+                                              const Text(
+                                                'SCANNING FOR MEDIA...',
+                                                style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                    else if (_recentMedia.isEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 40),
+                                        child: _EmptyLibraryPlaceholder(onScan: _scanStorage),
+                                      )
+                                    else ...[
+                                      // Category Cards
+                                      SizedBox(
+                                        height: isMobile ? 110 : 170,
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: _CategoryCard(
+                                                title: 'VIDEOS',
+                                                subtitle: 'Movies, TV Shows, Home Videos',
+                                                icon: Icons.video_library_rounded,
+                                                gradient: const [Color(0xFF00B7FF), Color(0xFF0066FF)],
+                                                onTap: () => _openFilePicker(FileType.video),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: _CategoryCard(
+                                                title: 'MUSIC',
+                                                subtitle: 'Albums, Artists, Playlists',
+                                                icon: Icons.music_note_rounded,
+                                                gradient: const [Color(0xFFC12CFF), Color(0xFF8A00FF)],
+                                                onTap: () => _openFilePicker(FileType.audio),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: _CategoryCard(
+                                                title: 'PHOTOS',
+                                                subtitle: 'Pictures, Screenshots, Camera',
+                                                icon: Icons.image_rounded,
+                                                gradient: const [Color(0xFFFF2D55), Color(0xFFFF3B30)],
+                                                onTap: () => _openFilePicker(FileType.image),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: _CategoryCard(
+                                                title: 'FOLDERS',
+                                                subtitle: 'Browse Device Storage',
+                                                icon: Icons.folder_rounded,
+                                                gradient: const [Color(0xFF4CD964), Color(0xFF28CD41)],
+                                                onTap: () => _openFilePicker(FileType.any),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 32),
+                                      const Text(
+                                        'RECENTLY ADDED',
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 1.0,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      SizedBox(
+                                        height: 210,
+                                        child: ListView.separated(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: _recentMedia.length,
+                                          separatorBuilder: (_, __) => const SizedBox(width: 16),
+                                          itemBuilder: (context, index) {
+                                            final file = _recentMedia[index];
+                                            return _RecentMediaCard(
+                                              file: file,
+                                              onTap: () => _playFile(file),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(height: 32),
+                                    ],
+                                    
+                                    // Storage Panel (Stays at bottom of scroll content)
+                                    _StoragePanel(used: _usedStorage, total: _totalStorage),
+                                    const SizedBox(height: 24),
+                                  ],
+                                ),
+                              ),
                             ),
-                            
-                            const SizedBox(height: 24),
-                            
-                            // Storage Panel
-                            _StoragePanel(used: _usedStorage, total: _totalStorage),
                           ],
                         ),
                       ),
@@ -372,6 +400,52 @@ class _LocalMediaLibraryScreenState extends State<LocalMediaLibraryScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _EmptyLibraryPlaceholder extends StatelessWidget {
+  final VoidCallback onScan;
+  const _EmptyLibraryPlaceholder({required this.onScan});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F1423).withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF00B7FF).withValues(alpha: 0.2)),
+            ),
+            child: Icon(Icons.auto_awesome_motion_rounded, size: 64, color: const Color(0xFF00B7FF).withValues(alpha: 0.4)),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'No Media Found',
+            style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 1.0),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Scan your device storage to build your media library.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white38, fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: 220,
+            child: _SideButton(
+              icon: Icons.search_rounded,
+              label: 'SCAN STORAGE',
+              height: 54,
+              onTap: onScan,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -734,7 +808,7 @@ class _SideButtonState extends State<_SideButton> {
               color: _isActive ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: _isActive ? const Color(0xFF00B7FF) : Colors.white.withValues(alpha: 0.1),
+                color: _isActive ? const Color(0xFF00B7FF) : Colors.white10,
                 width: _isActive ? 3.0 : 1,
               ),
               boxShadow: _isActive ? [
@@ -750,20 +824,25 @@ class _SideButtonState extends State<_SideButton> {
                 )
               ] : [],
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Icon(widget.icon, color: _isActive ? const Color(0xFF00B7FF) : Colors.white70, size: 28),
-                const SizedBox(width: 16),
-                Text(
-                  widget.label,
-                  style: TextStyle(
-                    color: _isActive ? Colors.white : Colors.white70,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
+                Icon(widget.icon, color: _isActive ? const Color(0xFF00B7FF) : Colors.white70, size: 24),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      widget.label,
+                      style: TextStyle(
+                        color: _isActive ? Colors.white : Colors.white70,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
                   ),
                 ),
               ],

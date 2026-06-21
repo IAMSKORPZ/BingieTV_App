@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:another_iptv_player/models/stalker_provider_config.dart';
 import 'package:another_iptv_player/services/secure_storage_service.dart';
+import 'package:another_iptv_player/services/network_proxy_service.dart';
 import 'package:http/http.dart' as http;
 
 class StalkerAuthService {
@@ -39,7 +40,8 @@ class StalkerAuthService {
       'action': 'handshake',
       'JsHttpRequest': '1-xml',
     });
-    final response = await client.get(uri, headers: _headers(config, macAddress));
+    final requestUri = NetworkProxyService.wrapUri(uri);
+    final response = await client.get(requestUri, headers: _headers(config, macAddress));
     if (response.statusCode >= 400) {
       throw StalkerAuthException('Handshake failed: HTTP ${response.statusCode}');
     }
@@ -60,8 +62,9 @@ class StalkerAuthService {
       'action': 'get_profile',
       'JsHttpRequest': '1-xml',
     });
+    final requestUri = NetworkProxyService.wrapUri(uri);
     final response = await client.get(
-      uri,
+      requestUri,
       headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode >= 400) {

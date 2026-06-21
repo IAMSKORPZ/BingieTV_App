@@ -1,5 +1,6 @@
-import 'dart:io';
+import 'dart:io' as io;
 
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:path_provider/path_provider.dart';
 
 class CachePolicy {
@@ -18,13 +19,14 @@ class CachePolicyService {
   const CachePolicyService({this.policy = const CachePolicy()});
 
   Future<int> cleanupTemporaryCache() async {
+    if (kIsWeb) return 0;
     final dir = await getTemporaryDirectory();
     if (!await dir.exists()) return 0;
 
     final files = await dir
         .list(recursive: true, followLinks: false)
-        .where((entity) => entity is File)
-        .cast<File>()
+        .where((entity) => entity is io.File)
+        .cast<io.File>()
         .toList();
 
     var removed = 0;
@@ -66,7 +68,7 @@ class CachePolicyService {
 }
 
 class _CacheFile {
-  final File file;
+  final io.File file;
   final int size;
   final DateTime modified;
 

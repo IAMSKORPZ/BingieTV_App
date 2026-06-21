@@ -10,6 +10,8 @@ import 'package:another_iptv_player/models/import_session_model.dart';
 import 'package:another_iptv_player/services/import_recovery_service.dart';
 import 'package:another_iptv_player/repositories/search_repository.dart';
 import 'package:another_iptv_player/services/streaming_json_array_decoder.dart';
+import 'package:another_iptv_player/services/network_proxy_service.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
@@ -46,7 +48,7 @@ class XtreamStreamingImportService {
       action: 'get_live_streams',
       clearExisting: () => database.deleteLiveStreamsByPlaylistId(playlistId),
       writeJson: (items) {
-        final rows = items.map((json) => LiveStream.fromJson(json, playlistId)).toList();
+        final rows = items.map<LiveStream>((json) => LiveStream.fromJson(json, playlistId)).toList();
         return database.insertLiveStreams(rows);
       },
       onProgress: onProgress,
@@ -66,7 +68,7 @@ class XtreamStreamingImportService {
       action: 'get_vod_streams',
       clearExisting: () => database.deleteVodStreamsByPlaylistId(playlistId),
       writeJson: (items) {
-        final rows = items.map((json) => VodStream.fromJson(json, playlistId)).toList();
+        final rows = items.map<VodStream>((json) => VodStream.fromJson(json, playlistId)).toList();
         return database.insertVodStreams(rows);
       },
       onProgress: onProgress,
@@ -86,7 +88,7 @@ class XtreamStreamingImportService {
       action: 'get_series',
       clearExisting: () => database.deleteSeriesStreamsByPlaylistId(playlistId),
       writeJson: (items) {
-        final rows = items.map((json) => SeriesStream.fromJson(json, playlistId)).toList();
+        final rows = items.map<SeriesStream>((json) => SeriesStream.fromJson(json, playlistId)).toList();
         return database.insertSeriesStreams(rows);
       },
       onProgress: onProgress,
@@ -117,7 +119,10 @@ class XtreamStreamingImportService {
       ..['_t'] = DateTime.now().millisecondsSinceEpoch.toString();
     final uri = Uri.parse('${config.baseUrl}/player_api.php')
         .replace(queryParameters: params);
-    final request = http.Request('GET', uri)
+    
+    final requestUri = NetworkProxyService.wrapUri(uri);
+
+    final request = http.Request('GET', requestUri)
       ..headers['Content-Type'] = 'application/json';
     final response = await client.send(request).timeout(const Duration(minutes: 2));
     if (response.statusCode < 200 || response.statusCode >= 300) {

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:another_iptv_player/models/api_configuration_model.dart';
 import 'package:another_iptv_player/models/provider_model.dart';
@@ -187,7 +187,7 @@ class SharedPreferencesProviderRepository implements ProviderRepository {
           );
         }
       } else if (provider.type == IptvProviderType.m3uUrl) {
-        final client = HttpClient();
+        final client = io.HttpClient();
         final request = await client
             .getUrl(Uri.parse(provider.playlistUrl!))
             .timeout(const Duration(seconds: 8));
@@ -309,12 +309,12 @@ class SharedPreferencesProviderRepository implements ProviderRepository {
         if (path == null || path.trim().isEmpty) {
           throw ProviderValidationException('Local file path is required.');
         }
-        final file = File(path);
+        final file = io.File(path);
         if (!file.existsSync()) {
           throw ProviderValidationException('M3U file does not exist.');
         }
         try {
-          file.openSync(mode: FileMode.read).closeSync();
+          file.openSync(mode: io.FileMode.read).closeSync();
         } catch (_) {
           throw ProviderValidationException('M3U file is not readable.');
         }

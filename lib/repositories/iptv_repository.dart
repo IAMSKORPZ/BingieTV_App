@@ -10,9 +10,12 @@ import 'package:another_iptv_player/models/series_response.dart';
 import 'package:another_iptv_player/models/vod_streams.dart';
 import 'package:another_iptv_player/models/series.dart';
 import 'package:another_iptv_player/utils/type_convertions.dart';
+
+
 import '../models/import_progress_model.dart';
 import '../models/category_type.dart';
 import '../services/xtream_streaming_import_service.dart';
+import '../services/network_proxy_service.dart';
 import 'package:another_iptv_player/services/service_locator.dart';
 
 class IptvRepository {
@@ -76,7 +79,9 @@ class IptvRepository {
       '${_config.baseUrl}/$endpoint',
     ).replace(queryParameters: params);
 
-    return await http.get(uri, headers: {'Content-Type': 'application/json'});
+    final requestUri = NetworkProxyService.wrapUri(uri);
+
+    return await http.get(requestUri, headers: {'Content-Type': 'application/json'});
   }
 
   Future<ApiResponse?> getPlayerInfo({bool forceRefresh = false}) async {
@@ -135,7 +140,7 @@ class IptvRepository {
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
         var liveStreams = jsonData
-            .map((json) => LiveStream.fromJson(json, _playlistId))
+            .map<LiveStream>((json) => LiveStream.fromJson(json, _playlistId))
             .toList();
 
         await _database.deleteLiveStreamsByPlaylistId(_playlistId);
@@ -225,7 +230,7 @@ class IptvRepository {
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
         var vodStreams = jsonData
-            .map((json) => VodStream.fromJson(json, _playlistId))
+            .map<VodStream>((json) => VodStream.fromJson(json, _playlistId))
             .toList();
 
         await _database.deleteVodStreamsByPlaylistId(_playlistId);
@@ -295,7 +300,7 @@ class IptvRepository {
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
         var series = jsonData
-            .map((json) => SeriesStream.fromJson(json, _playlistId))
+            .map<SeriesStream>((json) => SeriesStream.fromJson(json, _playlistId))
             .toList();
 
         await _database.deleteSeriesStreamsByPlaylistId(_playlistId);
@@ -421,7 +426,7 @@ class IptvRepository {
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
         final categories = jsonData
-            .map((json) => Category.fromJson(json, _playlistId, type))
+            .map<Category>((json) => Category.fromJson(json, _playlistId, type))
             .toList();
 
         await _database.deleteCategoriesByTypeAndPlaylist(_playlistId, type);

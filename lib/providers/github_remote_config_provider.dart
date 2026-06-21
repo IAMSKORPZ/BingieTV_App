@@ -6,6 +6,7 @@ import 'package:another_iptv_player/models/maintenance_model.dart';
 import 'package:another_iptv_player/models/theme_model.dart';
 import 'package:another_iptv_player/models/update_info_model.dart';
 import 'package:another_iptv_player/providers/remote_config_provider.dart';
+import 'package:another_iptv_player/services/network_proxy_service.dart';
 import 'package:http/http.dart' as http;
 
 class GitHubRemoteConfigProvider implements RemoteConfigProvider {
@@ -79,7 +80,7 @@ class GitHubRemoteConfigProvider implements RemoteConfigProvider {
       return const {};
     }
 
-    final response = await _client.get(uri).timeout(const Duration(seconds: 8));
+    final response = await _client.get(NetworkProxyService.wrapUri(uri)).timeout(const Duration(seconds: 8));
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw RemoteConfigFetchException('HTTP ${response.statusCode}');
     }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:another_iptv_player/models/stalker_provider_config.dart';
+import 'package:another_iptv_player/services/network_proxy_service.dart';
 import 'package:http/http.dart' as http;
 
 class StalkerApiService {
@@ -47,8 +48,11 @@ class StalkerApiService {
     required String token,
     required Map<String, String> params,
   }) async {
+    final uri = _portalUri(config.portalUrl, params);
+    final requestUri = NetworkProxyService.wrapUri(uri);
+    
     final response = await client.get(
-      _portalUri(config.portalUrl, params),
+      requestUri,
       headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode >= 400) {

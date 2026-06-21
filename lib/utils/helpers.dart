@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Category;
 
 bool get isDesktop {
   return defaultTargetPlatform == TargetPlatform.windows ||

@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:another_iptv_player/models/update_info_model.dart';
 import 'package:another_iptv_player/services/github_release_service.dart';
 import 'package:http/http.dart' as http;
@@ -115,6 +116,7 @@ class UpdateService {
   }
 
   Future<String> downloadInstaller(GitHubRelease release) async {
+    if (kIsWeb) throw UnsupportedError('Installer download not supported on web');
     final url = release.downloadUrl;
     if (url == null || url.isEmpty) {
       throw const UpdateException('No installer asset found.');
@@ -130,7 +132,7 @@ class UpdateService {
     final name = p.basename(uri.path).isEmpty
         ? 'BingieTV-${release.version}'
         : p.basename(uri.path);
-    final file = File(p.join(dir.path, name));
+    final file = io.File(p.join(dir.path, name));
     await file.writeAsBytes(response.bodyBytes);
     return file.path;
   }

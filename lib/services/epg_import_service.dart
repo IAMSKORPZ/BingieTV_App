@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:another_iptv_player/models/import_progress_model.dart';
 import 'package:another_iptv_player/services/epg_storage_service.dart';
+import 'package:another_iptv_player/services/network_proxy_service.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:http/http.dart' as http;
 
 class EpgImportService {
@@ -23,7 +25,9 @@ class EpgImportService {
     ImportProgressCallback? onProgress,
     ImportCancellationToken? cancellationToken,
   }) async {
-    final response = await http.Client().send(http.Request('GET', Uri.parse(url)));
+    final uri = Uri.parse(url);
+    final requestUri = NetworkProxyService.wrapUri(uri);
+    final response = await http.Client().send(http.Request('GET', requestUri));
     if (response.statusCode >= 400) {
       throw Exception('EPG import failed: HTTP ${response.statusCode}');
     }
@@ -41,9 +45,10 @@ class EpgImportService {
     ImportProgressCallback? onProgress,
     ImportCancellationToken? cancellationToken,
   }) {
+    if (kIsWeb) throw UnsupportedError('File import not supported on web');
     return _importLines(
       playlistId: playlistId,
-      lines: File(filePath)
+      lines: io.File(filePath)
           .openRead()
           .transform(utf8.decoder)
           .transform(const LineSplitter()),

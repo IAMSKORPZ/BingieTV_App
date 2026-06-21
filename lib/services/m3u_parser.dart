@@ -1,5 +1,5 @@
 import 'dart:convert' show utf8;
-import 'dart:io' show File, HttpClient;
+import 'dart:io' as io;
 import 'package:another_iptv_player/models/content_type.dart';
 import 'package:uuid/uuid.dart';
 import '../models/m3u_item.dart';
@@ -15,7 +15,7 @@ class M3uParser {
     String filePath,
   ) async {
     try {
-      final file = File(filePath);
+      final file = io.File(filePath);
       final content = await file.readAsString(encoding: utf8);
       return parseM3u(playlistId, content);
     } catch (e) {
@@ -30,7 +30,7 @@ class M3uParser {
 
   static Future<List<M3uItem>> parseUrl(String playlistId, String url) async {
     try {
-      final client = HttpClient();
+      final client = io.HttpClient();
       final request = await client.getUrl(Uri.parse(url));
       final response = await request.close();
 

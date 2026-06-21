@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
+
+import 'package:flutter/foundation.dart' hide Category;
+import 'package:http/http.dart' as http;
 
 import 'package:another_iptv_player/database/database.dart'
     hide M3uEpisodes, M3uSeries;
@@ -14,6 +17,7 @@ import 'package:another_iptv_player/models/m3u_item.dart';
 import 'package:another_iptv_player/models/m3u_series.dart';
 import 'package:another_iptv_player/services/import_recovery_service.dart';
 import 'package:another_iptv_player/services/m3u_parser.dart';
+import 'package:another_iptv_player/services/network_proxy_service.dart';
 import 'package:another_iptv_player/repositories/search_repository.dart';
 import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
@@ -41,7 +45,8 @@ class StreamingM3uImportService {
     ImportProgressCallback? onProgress,
     ImportCancellationToken? cancellationToken,
   }) async {
-    final file = File(filePath);
+    if (kIsWeb) throw UnsupportedError('File import not supported on web');
+    final file = io.File(filePath);
     final totalBytes = await file.length();
     final lines = file
         .openRead()
@@ -62,25 +67,33 @@ class StreamingM3uImportService {
     ImportProgressCallback? onProgress,
     ImportCancellationToken? cancellationToken,
   }) async {
-    final client = HttpClient();
+    final client = http.Client();
     try {
-      final request = await client.getUrl(Uri.parse(url));
-      final response = await request.close();
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw Exception('HTTP ${response.statusCode}: M3U URL unavailable');
+      final uri = Uri.parse(url);
+      final requestUri = NetworkProxyService.wrapUri(uri);
+
+      final request = http.Request('GET', requestUri);
+      final streamedResponse = await client.send(request);
+      
+      if (streamedResponse.statusCode < 200 || streamedResponse.statusCode >= 300) {
+        throw Exception('HTTP ${streamedResponse.statusCode}: M3U URL unavailable');
       }
-      final lines = response
+
+      final lines = streamedResponse.stream
           .transform(utf8.decoder)
           .transform(const LineSplitter());
+
       return _importLines(
         playlistId: playlistId,
         lines: lines,
-        totalItems: response.contentLength > 0 ? response.contentLength : null,
+        totalItems: streamedResponse.contentLength != null && streamedResponse.contentLength! > 0 
+            ? streamedResponse.contentLength 
+            : null,
         onProgress: onProgress,
         cancellationToken: cancellationToken,
       );
     } finally {
-      client.close(force: true);
+      client.close();
     }
   }
 
@@ -225,7 +238,7 @@ class StreamingM3uImportService {
     String playlistId,
     Map<CategoryWithContentType, String> categories,
   ) async {
-    final rows = categories.entries.map((entry) {
+    final rows = categories.entries.map<Category>((entry) {
       return Category(
         categoryId: entry.value,
         categoryName: entry.key.categoryName,
